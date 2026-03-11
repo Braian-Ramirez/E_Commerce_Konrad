@@ -1,0 +1,208 @@
+Hojas disponibles: ['Taller Scrum 3', 'PERT Proyecto', 'VSM Proyecto Final', 'Cronograma', 'Desarrollo']
+
+=== HOJA: Taller Scrum 3 ===
+Filas: 23 | Columnas: 21
+
+ |  |  | Base | MVP | Actor | Base |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+ | F1 | Registro vendedores  | 1 | 1 | Sistema | 1 | Sprint 1 |  |  |  |  |  |  |  |  |  |  |  |  | 
+ | F2 | Consulta vida créditicia | 3 | 1 | Sistema | 3 |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+ | F3 | Ingreso a la interfaz de usuario  | 1 | 1 | Director Comercial | 1 |  | Sprint 2 |  |  |  |  |  |  |  |  |  |  |  | 
+ | F4 | Conulta vida crediticia  y judicial del solicitante | 1 | 1 | Director Comercial | 1 |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+ | F5 | consulta y validación de solicitudes  | 1 | 1 | Director Comercial | 1 |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+ | F6 | Obtención de información del cliente | 1 | 1 | Sistema | 1 |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+ | F7 | Realizar pago de suscripción  | 5 | 2 | Vendedor | 5 |  |  | Sprint 3 | Sprint 4 |  |  |  |  |  |  |  |  |  | 
+ | F8 | Validación estado del vendedor  | 1 | 2 | Sistema | 1 |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+ | F9 | Actualización de producto  | 8 | 2 | Vendedor | 8 |  |  |  |  | Sprint 5 | Sprint 6 |  |  |  |  |  |  |  | 
+ | F10 | Ingreso a la interfaz de usuario  | 1 | 3 | Comprador | 1 |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+ | F11 | Busqueda y validación de productos | 5 | 3 | Comprador | 5 |  |  |  |  |  |  | Sprint 7 |  |  |  |  |  |  | 
+ | F12 | Realización de pago | 5 | 3 | Comprador | 5 |  |  |  |  |  |  |  | Sprint 8 | Sprint 9 |  |  |  |  | 
+ | F13 | Creación de tablas de control  | 8 | 4 | Sistema | 8 |  |  |  |  |  |  |  |  |  | Sprint 10 | Sprint 11 |  |  | 
+ | F14 | Identificación de tendencias y envio de promociones  | 13 | 4 | Sistema | 13 |  |  |  |  |  |  |  |  |  |  |  | Sprint 12 y 13 | Sprint 14 | 
+ | F15 | Gestionar la parametrización, auditoria y reporte de logs  | 3 | 4 | Administrador | 3 |  |  |  |  |  |  |  |  |  |  |  |  |  | Sprint 15
+
+=== HOJA: PERT Proyecto ===
+Filas: 16 | Columnas: 12
+
+ | Fase | Tarea | Tiempo Pesimista | Tiempo Esperado | Tiempo Optimista | Total (TP+4TE+TO)/6 |  | Cantidad de personas |  | 2 | 
+ | Analisis | Analisis de requerimientos | 6 | 4 | 2 | =+(D3+(4*E3)+F3)/6 |  | Dedicación horas x semana |  | 40 | 
+ |  | Documentación inicial | 4 | 2 | 1 | =+(D4+(4*E4)+F4)/6 |  | Sprint en semanas |  | 3 | 
+ | Diseño | Diseño infraestructura | 6 | 4 | 3 | =+(D5+(4*E5)+F5)/6 |  | Factor de productividad |  | =5.6/8 | 
+ |  | Modelación BD | 5 | 5 | 5 | =+(D6+(4*E6)+F6)/6 |  | Capacidad total x sprint |  | =+K2*K3*K4*K5 | 
+ |  | Prototipado UI/UX | 4 | 3 | 1 | =+(D7+(4*E7)+F7)/6 |  | PHU en horas |  | =G16 | Puntos de Historia de Usuario
+ | Construcción | Creación BD | 5 | 4 | 2 | =+(D8+(4*E8)+F8)/6 |  | PHUs por sprint |  | =K6/K7 | Puntos de Historia de Usuario por sprint
+ |  | Desarrollo BackEnd | 18 | 12 | 8 | =+(D9+(4*E9)+F9)/6 |  |  |  |  | 
+ |  | Desarrollo FrontEnd | 18 | 12 | 8 | =+(D10+(4*E10)+F10)/6 |  |  |  |  | 
+ |  | Implementación de servicios | 10 | 8 | 5 | =+(D11+(4*E11)+F11)/6 |  |  |  |  | 
+ | Pruebas | Pruebas | 8 | 4 | 3 | =+(D12+(4*E12)+F12)/6 |  |  |  |  | 
+ | Lanzamiento | Entrega Demo | 3 | 2 | 1 | =+(D13+(4*E13)+F13)/6 |  |  |  |  | 
+ |  | Manual de usuario | 3 | 2 | 1 | =+(D14+(4*E14)+F14)/6 |  |  |  |  | 
+ |  | Despliegue | 3 | 2 | 1 | =+(D15+(4*E15)+F15)/6 |  |  |  |  | 
+ | Tiempo de ejecución |  |  |  |  | =SUM(G3:G15) |  |  |  |  | 
+
+=== HOJA: VSM Proyecto Final ===
+Filas: 70 | Columnas: 11
+
+REQUERIMIENTOS |  |  |  |  | SPRINTS |  |  |  |  | 
+ ID | Requerimiento | Actor | Base | MVP | Sprint 0 | Sprint 1 | Sprint 2 | Sprint 3 | Sprint 4 | Sprint 5
+MÓDULO: REGISTRO Y SOLICITUD DE VENDEDORES |  |  |  |  |  |  |  |  |  | 
+F1 | Registro de solicitud con datos personales (nombres, apellidos, ID, correo, país, ciudad, teléfono) | Solicitante | 1 | 1 |   |   |   |   |   |  
+F2 | Validación de formato de datos del formulario de solicitud | Sistema | 1 | 1 |   |  |   |   |   |  
+F3 | Detección de tipo de persona (Natural / Jurídica) y exigencia de documentos según tipo | Sistema | 1 | 1 |   |  |   |   |   |  
+F4 | Carga de documentos adjuntos (cédula, RUT, cámara de comercio, formatos de aceptación) | Solicitante | 1 | 1 |   |  |   |   |   |  
+F5 | Generación de número de radicado y registro de solicitud en estado PENDIENTE | Sistema | 1 | 1 |   |  |   |   |   |  
+F6 | Consulta de estado de solicitud por número de radicado o número de identificación | Solicitante | 1 | 1 |   |  |   |   |   |  
+MÓDULO: DIRECTOR COMERCIAL — APROBACIÓN |  |  |  |  |  |  |  |  |  | 
+F7 | Consulta de solicitudes PENDIENTES con filtros: número de ID, estado, rango de fechas | Director Comercial | 2 | 2 |   |   |   |   |   |  
+F8 | Visualización de detalle de solicitud con información completa del solicitante | Director Comercial | 2 | 2 |   |  |   |   |   |  
+F9 | Consulta automática de calificación crediticia en Datacrédito (Mock REST) | Sistema | 2 | 2 |   |  |   |   |   |  
+F10 | Consulta automática de calificación crediticia en CIFIN (Mock archivo plano) | Sistema | 2 | 2 |   |  |   |   |   |  
+F11 | Consulta automática de antecedentes judiciales en Policía Nacional (Mock) | Sistema | 2 | 2 |   |  |   |   |   |  
+F12 | Registro de resultado de solicitud: APROBADA, RECHAZADA o DEVUELTA con reglas de negocio | Director Comercial | 2 | 2 |   |  |   |   |   |  
+F13 | Envío de correo certificado con estampado cronológico al solicitante según resultado | Sistema | 2 | 2 |   |  |   |   |   |  
+MÓDULO: SUSCRIPCIÓN Y PAGOS |  |  |  |  |  |  |  |  |  | 
+F14 | Selección de plan de suscripción: mensual, semestral o anual con resumen de compra | Vendedor | 2 | 3 |   |   |   |   |   |  
+F15 | Pago de suscripción mediante pago en línea con pasarela bancaria (Mock) | Vendedor | 2 | 3 |   |   |  |   |   |  
+F16 | Pago de suscripción con tarjeta de crédito (Mock) | Vendedor | 2 | 3 |   |   |  |   |   |  
+F17 | Pago de suscripción por consignación: impresión de recibo y lectura automática de archivo plano del banco (Mock) | Vendedor | 2 | 3 |   |   |  |   |   |  
+F18 | Activación automática de solicitud a estado ACTIVA al confirmar pago | Sistema | 2 | 3 |   |   |  |   |   |  
+F19 | Cambio automático a estado EN MORA al vencer suscripción con notificación por correo | Sistema | 2 | 3 |   |   |  |   |   |  
+F20 | Cambio a estado CANCELADA si pasa 1 mes en EN MORA sin renovar | Sistema | 3 | 4 |   |   |  |   |   |  
+MÓDULO: GESTIÓN DE PRODUCTOS |  |  |  |  |  |  |  |  |  | 
+F21 | Publicación de producto con atributos completos: nombre, categoría, subcategoría, marca, color, talla, peso, cantidad, valor | Vendedor | 2 | 3 |   |   |   |   |   |  
+F22 | Carga de imágenes del producto (múltiples, con imagen principal) | Vendedor | 2 | 3 |   |   |  |   |   |  
+F23 | Edición y eliminación de productos publicados | Vendedor | 3 | 3 |   |   |   |   |   |  
+MÓDULO: COMPRADORES Y BÚSQUEDA |  |  |  |  |  |  |  |  |  | 
+F24 | Registro de comprador con datos personales, dirección, teléfono, Twitter e Instagram | Comprador | 1 | 2 |   |   |   |   |   |  
+F25 | Envío de credenciales de acceso al comprador por correo electrónico | Sistema | 1 | 2 |   |   |   |  |   |  
+F26 | Búsqueda de productos por nombre, categoría, subcategoría, rango de precios y palabras en características | Comprador | 2 | 3 |   |   |   |  |   |  
+F27 | Visualización de resultados: imagen principal, precio, características, categoría | Comprador | 2 | 3 |   |   |   |  |   |  
+F28 | Vista de detalle de producto: galería, características, reputación del vendedor, comentarios y preguntas | Comprador | 2 | 3 |   |   |   |  |   |  
+F29 | Registro de preguntas sobre un producto y respuesta del vendedor | Comprador | 3 | 3 |   |   |   |  |   |  
+F30 | Registro de comentarios sobre un producto | Comprador | 3 | 3 |   |   |   |  |   |  
+MÓDULO: CARRITO Y COMPRAS |  |  |  |  |  |  |  |  |  | 
+F31 | Agregar productos al carrito con visualización de cantidad y total en tiempo real | Comprador | 2 | 3 |   |   |   |   |   |  
+F32 | Selección de tipo de entrega: recogida en punto o domicilio a dirección registrada | Comprador | 2 | 3 |   |   |   |   |  |  
+F33 | Cálculo de total: subtotal + comisión por categoría + IVA configurable + costo de envío por ciudad/peso | Sistema | 2 | 3 |   |   |   |   |  |  
+F34 | Pago del carrito mediante pago en línea, tarjeta de crédito o consignación (Mock) | Comprador | 2 | 3 |   |   |   |   |  |  
+F35 | Calificación del vendedor (1–10) con comentario después de una compra efectiva | Comprador | 3 | 4 |   |   |   |   |  |  
+F36 | Cancelación automática de vendedor con 10 calificaciones < 3 o promedio < 5 | Sistema | 3 | 4 |   |   |   |   |  |  
+MÓDULO: ADMINISTRACIÓN Y BAM |  |  |  |  |  |  |  |  |  | 
+F37 | Gestión de parametrización: IVA, comisiones por categoría, tarifas de envío, valores de suscripción | Administrador | 2 | 3 |   |   |   |   |   |  
+F38 | Consulta y monitoreo de auditoría: acción, usuario, entidad, fecha y hora de cada operación CRUD | Administrador | 2 | 3 |   |   |   |   |   | 
+F39 | Consulta de logs de error centralizados con nivel, servicio, mensaje y stack trace | Administrador | 2 | 3 |   |   |   |   |   | 
+F40 | Tablero de control BAM: producto más vendido, categoría con más consultas, suscripciones por semestre | Director Comercial | 3 | 4 |   |   |   |   |   | 
+F41 | Identificación automática de tendencias en redes sociales y productos más consultados | Sistema | 3 | 4 |   |   |   |   |   | 
+F42 | Envío automático de correos con promociones y productos destacados a compradores registrados | Sistema | 3 | 4 |   |   |   |   |   | 
+F43 | Exposición de servicios de KPIs hacia sistema de BI externo mediante SOAP (Apache CXF) | Sistema | 4 | 5 |   |   |   |   |   | 
+REQUERIMIENTOS NO FUNCIONALES TRANSVERSALES |  |  |  |  |  |  |  |  |  | 
+NF1 | Módulo de autenticación y autorización con roles (Vendedor, Comprador, Director, Administrador) — Keycloak | Sistema | 1 | 1 |   |   |   |   |   |  
+NF2 | Toda comunicación asegurada con protocolo HTTPS y certificado SSL/TLS activo | Sistema | 1 | 1 |  |   |   |   |   |  
+NF3 | Contraseña mínimo 8 caracteres con mayúscula, minúscula y número — validada en frontend y backend | Sistema | 1 | 1 |  |   |   |   |   |  
+NF4 | Contraseña almacenada encriptada con bcrypt (salt rounds ≥ 12) | Sistema | 1 | 1 |  |   |   |   |   |  
+NF5 | Correos certificados con firma digital y estampado cronológico (JavaMail + S/MIME) | Sistema | 2 | 2 |   |   |   |   |   |  
+NF6 | Diseño responsivo para dispositivos móviles desde 320px de ancho — TailwindCSS | Sistema | 2 | 2 |   |   |   |   |   |  
+NF7 | CMS para cambio de imagen corporativa sin necesidad de experto en diseño | Administrador | 3 | 3 |   |   |   |  |   |  
+NF8 | Registro de auditoría de cada acción CRUD con acción, usuario, fecha y hora | Sistema | 2 | 2 |   |   |   |   |   |  
+NF9 | Log centralizado de errores con stack trace en ELK Stack (Elasticsearch + Logstash + Kibana) | Sistema | 2 | 2 |   |   |   |   |   |  
+NF10 | Backup automático diario de base de datos con retención de 30 días en MinIO | Sistema | 3 | 3 |   |   |   |   |   |  
+NF11 | Acceso a datos abstraído con patrón Repositorio para permitir cambio de motor de base de datos | Sistema | 3 | 3 |   |   |   |   |  |  
+NF12 | Sistema preparado para computación distribuida: Docker + Kubernetes, escalado horizontal | Sistema | 3 | 4 |   |   |   |   |   |  
+NF13 | Alta disponibilidad 99.7% — balanceo de carga, health checks y centro de datos alterno (DR) | Sistema | 4 | 5 |   |   |   |   |   | 
+NF14 | Pruebas de carga: soporte de 200.000 usuarios concurrentes y 1.000 TPS — JMeter | Sistema | 4 | 5 |   |   |   |   |   | 
+NF15 | Stack tecnológico 100% open source sin licenciamiento comercial | Sistema | 1 | 1 |   |   |   |   |   |  
+Viviana Marcela García Valderrama  &  Braian Felipe Ramírez Ortiz  |  Arquitectura de Software  |  Konrad Lorenz  |  2026 |  |  |  |  |  |  |  |  |  | 
+Base: prioridad en build base | MVP: prioridad en MVP | Sprint 0 | Sprint 1 | Sprint 2 | Sprint 3 | Sprint 4 | Sprint 5 |  |  | 
+
+=== HOJA: Cronograma ===
+Filas: 74 | Columnas: 18
+
+CRONOGRAMA DE DESARROLLO — SISTEMA E-COMMERCE KONRAD |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+Viviana García Valderrama  &  Braian Ramírez Ortiz  |  12 Semanas  |  6 Sprints |  |  |  |  |  | Metodología: Scrum Adaptado  |  Duración de Sprint: 2 semanas  |  Equipo: 2 personas |  |  |  |  |  |  |  |  |  |  | 
+  |  |  |  |  |  | Sprint 0 |  | Sprint 1 |  | Sprint 2 |  | Sprint 3 |  | Sprint 4 |  | Sprint 5 | 
+ID | Actividad / Tarea | Responsable | Sprint | Sem.
+Inicio | Sem.
+Fin | S1 | S2 | S3 | S4 | S5 | S6 | S7 | S8 | S9 | S10 | S11 | S12
+SPRINT 0 — INFRAESTRUCTURA BASE Y CONFIGURACIÓN |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+S0-1 | Configuración repositorio Git, estructura microservicios y CI básico | Viviana | Sprint 0 | 1 | 2 | █ |   |   |   |   |   |   |   |   |   |   |  
+S0-2 | Configuración de HTTPS / SSL y protocolo seguro en API Gateway | Viviana | Sprint 0 | 1 | 1 |   |   |   |   |   |   |   |   |   |   |   |  
+S0-3 | Implementación de autenticación y autorización con Keycloak (roles) | Viviana | Sprint 0 | 1 | 2 | █ |   |   |   |   |   |   |   |   |   |   |  
+S0-4 | Implementación de los 5 mocks: Datacrédito, CIFIN, Policía, Pasarela, Banco | Braian | Sprint 0 | 1 | 2 | █ |   |   |   |   |   |   |   |   |   |   |  
+S0-5 | Encriptación de contraseñas con bcrypt y validación de patrón | Braian | Sprint 0 | 2 | 2 |   |   |   |   |   |   |   |   |   |   |   |  
+S0-6 | Definición del stack tecnológico y verificación de dependencias open source | Ambos | Sprint 0 | 1 | 1 |   |   |   |   |   |   |   |   |   |   |   |  
+SPRINT 1 — REGISTRO Y APROBACIÓN DE VENDEDORES |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+F1 | Formulario de registro de solicitud con datos personales y documentos | Viviana | Sprint 1 | 3 | 4 |   |   | █ |   |   |   |   |   |   |   |   |  
+F2 | Validación de formato de datos y detección Natural / Jurídica | Viviana | Sprint 1 | 3 | 3 |   |   |   |   |   |   |   |   |   |   |   |  
+F3 | Carga de documentos adjuntos al sistema de archivos (MinIO) | Viviana | Sprint 1 | 3 | 4 |   |   | █ |   |   |   |   |   |   |   |   |  
+F4 | Generación de número de radicado — estado PENDIENTE | Viviana | Sprint 1 | 4 | 4 |   |   |   |   |   |   |   |   |   |   |   |  
+F5 | Consulta de estado de solicitud por número o identificación | Viviana | Sprint 1 | 4 | 4 |   |   |   |   |   |   |   |   |   |   |   |  
+F6 | Panel Director: consulta de solicitudes con filtros | Braian | Sprint 1 | 3 | 3 |   |   |   |   |   |   |   |   |   |   |   |  
+F7 | Detalle de solicitud + consulta automática Datacrédito, CIFIN y Policía (Mocks) | Braian | Sprint 1 | 3 | 4 |   |   | █ |   |   |   |   |   |   |   |   |  
+F8 | Registro de resultado: APROBADA / RECHAZADA / DEVUELTA con reglas de negocio | Braian | Sprint 1 | 4 | 4 |   |   |   |   |   |   |   |   |   |   |   |  
+NF1 | Correos certificados con estampado cronológico para notificaciones | Braian | Sprint 1 | 4 | 4 |   |   |   |   |   |   |   |   |   |   |   |  
+NF2 | Registro de auditoría CRUD (acción, usuario, fecha, hora) | Viviana | Sprint 1 | 3 | 4 |   |   | █ |   |   |   |   |   |   |   |   |  
+SPRINT 2 — SUSCRIPCIONES, PAGOS Y PUBLICACIÓN DE PRODUCTOS |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+F9 | Selección de plan de suscripción (mensual / semestral / anual) | Viviana | Sprint 2 | 5 | 5 |   |   |   |   |   |   |   |   |   |   |   |  
+F10 | Pago en línea con pasarela bancaria (Mock) — Strategy Pattern | Viviana | Sprint 2 | 5 | 6 |   |   |   |   | █ |   |   |   |   |   |   |  
+F11 | Pago con tarjeta de crédito (Mock) — Strategy Pattern | Viviana | Sprint 2 | 5 | 5 |   |   |   |   |   |   |   |   |   |   |   |  
+F12 | Pago por consignación: recibo imprimible + lectura archivo plano banco (Mock) | Braian | Sprint 2 | 5 | 6 |   |   |   |   | █ |   |   |   |   |   |   |  
+F13 | Activación automática a estado ACTIVA al confirmar pago | Braian | Sprint 2 | 6 | 6 |   |   |   |   |   |   |   |   |   |   |   |  
+F14 | Job automático: cambio a EN MORA al vencer suscripción + correo de aviso | Braian | Sprint 2 | 6 | 6 |   |   |   |   |   |   |   |   |   |   |   |  
+F15 | Cambio a CANCELADA si pasa 1 mes en mora sin renovar | Braian | Sprint 2 | 6 | 6 |   |   |   |   |   |   |   |   |   |   |   |  
+F16 | Publicación de producto con atributos completos e imágenes en MinIO | Viviana | Sprint 2 | 5 | 6 |   |   |   |   | █ |   |   |   |   |   |   |  
+NF3 | Log centralizado de errores con stack trace (ELK Stack) | Braian | Sprint 2 | 5 | 5 |   |   |   |   |   |   |   |   |   |   |   |  
+SPRINT 3 — COMPRADORES, CATÁLOGO Y BÚSQUEDA |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+F17 | Registro de comprador con datos personales y redes sociales | Viviana | Sprint 3 | 7 | 7 |   |   |   |   |   |   |   |   |   |   |   |  
+F18 | Envío de credenciales de acceso al comprador por correo | Viviana | Sprint 3 | 7 | 7 |   |   |   |   |   |   |   |   |   |   |   |  
+F19 | Búsqueda de productos por nombre, categoría, precio y características | Braian | Sprint 3 | 7 | 8 |   |   |   |   |   |   | █ |   |   |   |   |  
+F20 | Visualización de resultados: imagen, precio, características, categoría | Braian | Sprint 3 | 7 | 7 |   |   |   |   |   |   |   |   |   |   |   |  
+F21 | Detalle de producto: galería, calificación vendedor, comentarios, preguntas | Viviana | Sprint 3 | 7 | 8 |   |   |   |   |   |   | █ |   |   |   |   |  
+F22 | Registro de preguntas sobre producto y respuesta del vendedor | Viviana | Sprint 3 | 8 | 8 |   |   |   |   |   |   |   |   |   |   |   |  
+F23 | Registro de comentarios sobre producto | Viviana | Sprint 3 | 8 | 8 |   |   |   |   |   |   |   |   |   |   |   |  
+F24 | Edición y eliminación de productos publicados | Braian | Sprint 3 | 8 | 8 |   |   |   |   |   |   |   |   |   |   |   |  
+NF4 | Diseño responsivo para dispositivos móviles desde 320px — TailwindCSS | Braian | Sprint 3 | 7 | 8 |   |   |   |   |   |   | █ |   |   |   |   |  
+NF5 | CMS para cambio de imagen corporativa sin experto en diseño | Viviana | Sprint 3 | 8 | 8 |   |   |   |   |   |   |   |   |   |   |   |  
+SPRINT 4 — CARRITO, COMPRAS Y CALIFICACIONES |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+F25 | Carrito de compras con contador y total en tiempo real | Viviana | Sprint 4 | 9 | 9 |   |   |   |   |   |   |   |   |   |   |   |  
+F26 | Selección de tipo de entrega: recogida o domicilio | Viviana | Sprint 4 | 9 | 9 |   |   |   |   |   |   |   |   |   |   |   |  
+F27 | Cálculo total: subtotal + comisión por categoría + IVA + envío | Viviana | Sprint 4 | 9 | 10 |   |   |   |   |   |   |   |   | █ |   |   |  
+F28 | Pago del carrito: 3 métodos de pago (Mocks reutilizados del Sprint 2) | Braian | Sprint 4 | 9 | 10 |   |   |   |   |   |   |   |   | █ |   |   |  
+F29 | Calificación del vendedor (1–10) con comentario tras compra efectiva | Braian | Sprint 4 | 10 | 10 |   |   |   |   |   |   |   |   |   |   |   |  
+F30 | Cancelación automática vendedor: 10 calificaciones < 3 o promedio < 5 | Braian | Sprint 4 | 10 | 10 |   |   |   |   |   |   |   |   |   |   |   |  
+NF6 | Backup automático diario de base de datos (retención 30 días — MinIO) | Viviana | Sprint 4 | 9 | 9 |   |   |   |   |   |   |   |   |   |   |   |  
+NF7 | Patrón Repositorio para abstracción de motor de base de datos | Braian | Sprint 4 | 9 | 10 |   |   |   |   |   |   |   |   | █ |   |   |  
+SPRINT 5 — BAM, ADMINISTRACIÓN, PRUEBAS Y CIERRE |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+F31 | Gestión de parametrización: IVA, comisiones, tarifas de envío, suscripciones | Viviana | Sprint 5 | 11 | 11 |   |   |   |   |   |   |   |   |   |   |   |  
+F32 | Consulta de auditoría con filtros y visualización de logs de error | Braian | Sprint 5 | 11 | 11 |   |   |   |   |   |   |   |   |   |   |   |  
+F33 | Tablero BAM: producto más vendido, categorías, suscripciones por semestre | Viviana | Sprint 5 | 11 | 12 |   |   |   |   |   |   |   |   |   |   | █ |  
+F34 | Automatización de tendencias y envío de promociones por correo | Braian | Sprint 5 | 11 | 12 |   |   |   |   |   |   |   |   |   |   | █ |  
+F35 | Exposición de servicios SOAP para BI externo (Apache CXF + WSDL) | Braian | Sprint 5 | 12 | 12 |   |   |   |   |   |   |   |   |   |   |   |  
+NF8 | Pruebas de carga JMeter: 200k usuarios concurrentes / 1000 TPS | Viviana | Sprint 5 | 12 | 12 |   |   |   |   |   |   |   |   |   |   |   |  
+NF9 | Pruebas de seguridad OWASP ZAP (HTTPS, roles, encriptación) | Braian | Sprint 5 | 12 | 12 |   |   |   |   |   |   |   |   |   |   |   |  
+ | Preparación y ensayo de presentación ejecutiva al cliente (profesor) | Ambos | Sprint 5 | 11 | 12 |   |   |   |   |   |   |   |   |   |   | █ |  
+ENTREGABLES DOCUMENTALES (TRANSVERSALES) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+D1 | Diagrama de Casos de Uso | Viviana | Sprint 0 | 1 | 2 | █ |   |   |   |   |   |   |   |   |   |   |  
+D2 | Especificación CU e Historias de Usuario | Viviana | Sprint 1 | 3 | 4 |   |   | █ |   |   |   |   |   |   |   |   |  
+D3 | Especificación de Requerimientos No Funcionales | Braian | Sprint 0 | 1 | 2 | █ |   |   |   |   |   |   |   |   |   |   |  
+D4 | Documento de Arquitectura de Software | Ambos | Sprint 0 | 2 | 3 |   | █ |   |   |   |   |   |   |   |   |   |  
+D5 | Modelo Entidad-Relación / Relacional | Braian | Sprint 1 | 3 | 4 |   |   | █ |   |   |   |   |   |   |   |   |  
+D6 | Prototipos UI/UX (wireframes Figma) | Viviana | Sprint 2 | 5 | 6 |   |   |   |   | █ |   |   |   |   |   |   |  
+D7 | Plan de Pruebas | Braian | Sprint 2 | 5 | 6 |   |   |   |   | █ |   |   |   |   |   |   |  
+D8 | Presentación ejecutiva final | Ambos | Sprint 5 | 11 | 12 |   |   |   |   |   |   |   |   |   |   | █ |  
+ | LEYENDA |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+ |  |  | Viviana García |  | Braian Ramírez |  | Ambos |  | Sprint 0 |  | Sprint 1 |  |  |  |  |  | 
+ |  |  | Sprint 2 |  | Sprint 3 |  | Sprint 4 |  | Sprint 5 |  | Entregable Documental |  |  |  |  |  | 
+
+=== HOJA: Desarrollo ===
+Filas: 12 | Columnas: 6
+
+ |  | Grupos | Quien tiene acceso? | Vistas | Fechas
+ | 1 | Dani/Tati | Todos | Iniciar Sesion | 2025-04-02 00:00:00
+ | 2 | Brayan/Vivi | Todos | Registrar usuario (En general) | 2025-04-02 00:00:00
+ | 3 | Andres | Todos | Dashboard principal | 2025-04-02 00:00:00
+ | 4 | Brayan/Vivi | cliente | Registrar PQRS | 2025-04-02 00:00:00
+ | 5 | Dani/Tati | Gestor PQR | Consulta de listado de PQRS (exportar reporte de pqrs) | 
+ |  | Dani/Tati | cliente | Consulta de listado de PQRS  | 
+ |  | Dani/Tati | Todos | Ver PQRS | 
+ | 6 | Brayan/Vivi | Admin | Administrar los Usuarios, Perfiles, 
+Opciones y Permisos del sistema | 
+ | 7 | Dani/Tati | Todos | Pagina principal | 2025-04-02 00:00:00

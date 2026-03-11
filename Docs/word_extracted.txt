@@ -1,0 +1,279 @@
+=== PÁRRAFOS Y TEXTO ===
+
+[Normal] Avance proyecto: Implementación sistema de E-commerce
+[Normal] Viviana Marcela García Valderrama
+[Normal] Braian Felipe Ramírez Ortiz
+[Normal] Fundación Universitaria Konrad Lorenz
+[Normal] Facultad de Matemáticas e Ingeniería
+[Normal] Arquitectura de Software
+[Normal] Bogotá D.C. marzo de 2026
+[Title] Cronograma del proyecto
+[Normal] El proyecto se desarrolla en un período estimado de 12 semanas, distribuidas en las siguientes fases y actividades:
+[Title] Diagrama de Casos de Uso
+[Normal] El sistema E-Commerce Konrad identifica los siguientes actores principales y casos de uso asociados:
+[Normal]  Actores del Sistema
+[Normal] Casos de Uso Identificados
+[Normal] Los casos de uso se agrupan por módulo funcional:
+[Normal] Módulo de Registro y Aprobación de Vendedores
+[Normal] CU-01: Registrar solicitud de vendedor
+[Normal] CU-02: Consultar solicitudes pendientes (director comercial)
+[Normal] CU-03: Revisar detalle de solicitud
+[Normal] CU-04: Consultar calificación crediticia en Datacrédito (Mock)
+[Normal] CU-05: Consultar calificación crediticia en CIFIN (Mock)
+[Normal] CU-06: Consultar antecedentes judiciales Policía (Mock)
+[Normal] CU-07: Aprobar solicitud de vendedor
+[Normal] CU-08: Rechazar solicitud de vendedor
+[Normal] CU-09: Devolver solicitud de vendedor
+[Normal] CU-10: Consultar estado de solicitud (Solicitante)
+[Normal] Módulo de Suscripción y Pagos
+[Normal] CU-11: Seleccionar plan de suscripción (mensual / semestral / anual)
+[Normal] CU-12: Pagar suscripción en línea (Mock pasarela)
+[Normal] CU-13: Pagar suscripción con tarjeta de crédito (Mock)
+[Normal] CU-14: Pagar suscripción por consignación (Mock banco)
+[Normal] CU-15: Renovar suscripción
+[Normal] Módulo de Gestión de Productos
+[Normal] CU-16: Publicar producto
+[Normal] CU-17: Editar producto
+[Normal] CU-18: Eliminar producto
+[Normal] Módulo de Compras
+[Normal] CU-19: Registrar comprador
+[Normal] CU-20: Buscar productos
+[Normal] CU-21: Ver detalle de producto
+[Normal] CU-22: Agregar producto al carrito
+[Normal] CU-23: Realizar pago de compra
+[Normal] CU-24: Calificar vendedor
+[Normal] CU-25: Registrar comentario o pregunta sobre producto
+[Normal] Módulo de Administración y BAM
+[Normal] CU-26: Gestionar parametrización del sistema
+[Normal] CU-27: Consultar auditoría
+[Normal] CU-28: Consultar logs de error
+[Normal] CU-29: Visualizar tablero de control (KPIs)
+[Normal] CU-30: Enviar promociones y tendencias automáticas
+[Title] Especificación de Casos de Uso e Historias de Usuario
+[Normal] A continuación, se detallan los casos de uso más representativos del sistema. Los demás seguirán la misma estructura.
+[Normal] CU-01: Registrar solicitud de vendedor
+[Normal] CU-07: Aprobar solicitud de vendedor
+[Normal] Historias de Usuario Representativas
+[Title] Especificación de Requerimientos No Funcionales
+[Title] Documento de Arquitectura de Software
+[Normal] Visión General de la Arquitectura
+[Normal] La arquitectura del sistema E-Commerce Konrad se basa en un enfoque de Microservicios con comunicación mediante API Gateway, siguiendo principios de Domain-Driven Design (DDD). Esta decisión responde a los requerimientos de alta disponibilidad, escalabilidad a 200.000 usuarios concurrentes, computación distribuida y facilidad de mantenimiento independiente de cada módulo.
+[Normal] Patrones y Estilos Arquitectónicos Seleccionados
+[Normal] Microservicios — Patrón Principal
+[Normal] Justificación: Cada dominio funcional (vendedores, compradores, pagos, catálogo, notificaciones, auditoría) se implementa como un servicio independiente con su propia base de datos. Esto permite escalar, desplegar y mantener cada módulo de forma autónoma, lo cual es crítico para soportar 1.000 TPS en el módulo de pagos sin afectar el módulo de catálogo.
+[Normal] Servicios identificados: Auth Service, Vendor Service, Buyer Service, Product Service, Order Service, Payment Service, Notification Service, Audit Service, BAM Service, File Processor Service
+[Normal] API Gateway — Patrón de Acceso Unificado
+[Normal] Justificación: Actúa como punto de entrada único para todos los clientes (web, mobile). Gestiona autenticación, enrutamiento, rate limiting, SSL termination y logging. Se propone el uso de Kong o AWS API Gateway (open source friendly).
+[Normal] Event-Driven Architecture (EDA) — Patrón de Integración Asíncrona
+[Normal] Justificación: Requerimientos como el procesamiento de archivos planos de CIFIN y del banco (consignaciones), el envío de correos, la detección de tendencias y el cambio de estado de suscripciones son procesos asincrónicos. Se usa Apache Kafka o RabbitMQ como broker de eventos para desacoplar estos procesos.
+[Normal] Ejemplo: cuando el banco deja el archivo de consignaciones, el File Processor Service publica un evento 'ConsignacionDetectada', el Payment Service lo consume y actualiza el estado de la orden.
+[Normal] Repository Pattern — Patrón de Acceso a Datos
+[Normal] Justificación: Requerimiento RNF-14 exige que el sistema esté preparado para cambiar el motor de base de datos. El patrón Repositorio abstrae la lógica de persistencia del dominio, permitiendo sustituir PostgreSQL por otro motor sin afectar la lógica de negocio.
+[Normal] Adapter Pattern — Integración con Sistemas Externos (Mocks)
+[Normal] Justificación: Los sistemas externos (Datacrédito REST, CIFIN archivo plano, Policía portal web, pasarela de pagos, banco) tienen interfaces heterogéneas. El patrón Adapter (también llamado Wrapper) permite encapsular cada integración en un módulo intercambiable. En el proyecto se implementarán como Mocks que simulan las respuestas de cada servicio externo, lo que facilita las pruebas sin depender de infraestructura real.
+[Normal] DatacreditoAdapter → Mock REST que retorna: Baja / Alta / Advertencia
+[Normal] CifinAdapter → Mock que lee archivo plano y retorna: Baja / Alta / Advertencia
+[Normal] PoliceAdapter → Mock que retorna: Requerido / No requerido
+[Normal] PaymentGatewayAdapter → Mock que simula pago en línea y tarjeta de crédito
+[Normal] BankFileAdapter → Mock que genera archivo plano de consignaciones diarias
+[Normal] CQRS (Command Query Responsibility Segregation) — Patrón para Reportes y BAM
+[Normal] Justificación: El tablero de control (BAM) con KPIs y la consulta de auditoría requieren lecturas de alto rendimiento que no deben competir con las escrituras transaccionales. CQRS separa los modelos de escritura y lectura, optimizando cada uno de forma independiente.
+[Normal] Facade Pattern — Simplificación de Subsistemas Complejos
+[Normal] Justificación: El proceso de revisión de una solicitud de vendedor involucra múltiples subsistemas (Datacrédito, CIFIN, Policía). El patrón Facade expone una interfaz unificada 'EvaluarSolicitud' que internamente orquesta las tres consultas y retorna un resultado consolidado al Director Comercial.
+[Normal] Observer Pattern — Notificaciones y Automatización
+[Normal] Justificación: Cambios de estado en solicitudes, vencimientos de suscripción, calificaciones bajas de vendedores y detección de tendencias activan notificaciones automáticas por correo. El patrón Observer desacopla la lógica de negocio del mecanismo de notificación.
+[Normal] Strategy Pattern — Módulo de Pagos
+[Normal] Justificación: El sistema acepta tres formas de pago (en línea, tarjeta de crédito, consignación). El patrón Strategy permite encapsular cada algoritmo de pago en una clase independiente e intercambiarla en tiempo de ejecución según la elección del usuario.
+[Normal] Stack Tecnológico (Open Source / Sin Licenciamiento)
+[Normal] Descripción de los Microservicios
+[Normal] Descripción de los Mocks (Simuladores de Sistemas Externos)
+[Normal] Dado que los sistemas externos (CIFIN, Datacrédito, Policía, Pasarela de Pagos y Banco) serán simulados, se implementarán como servicios stub que exponen la misma interfaz que el sistema real:
+[Title] Prototipos de Pantallas
+[Normal] Los prototipos se desarrollarán como wireframes de media fidelidad que ilustran el flujo principal de las pantallas más críticas del sistema. A continuación, se describen las pantallas prototipadas:
+[Normal] P-01: Página de inicio — Buscador de productos, categorías destacadas, banner corporativo
+[Normal] P-02: Formulario de registro de vendedor — Campos personales, tipo de persona, carga de documentos
+[Normal] P-03: Consulta de estado de solicitud — Búsqueda por número o identificación
+[Normal] P-04: Panel del director comercial — Listado de solicitudes con filtros, detalle de solicitud con resultado crediticio
+[Normal] P-05: Selección de plan de suscripción — Comparativa mensual/semestral/anual con botones de pago
+[Normal] P-06: Catálogo de productos — Grid con imagen, precio, categoría y características principales
+[Normal] P-07: Detalle de producto — Galería, descripción, calificación de vendedor, preguntas y comentarios
+[Normal] P-08: Carrito de compras — Resumen de productos, cálculo de IVA, comisión y envío, opciones de pago
+[Normal] P-09: Tablero BAM — Gráficas de KPIs, producto más vendido, tendencias de suscripción
+[Normal] P-10: Panel de Administrador — Gestión de parámetros, consulta de auditoría, visualización de logs
+[Title] Modelo Entidad-Relación
+[Normal] El modelo de datos contempla las siguientes entidades principales agrupadas por dominio funcional:
+[Normal] Dominio de Usuarios y Solicitudes
+[Normal]  Dominio de Catálogo y Compras
+[Normal] Dominio de Auditoría y Configuración
+[Title] Plan de Pruebas
+[Normal] Tipos de Pruebas
+[Normal] Pruebas Unitarias: Cada microservicio tiene cobertura de pruebas unitarias sobre la lógica de negocio (mínimo 80% de cobertura). Herramienta: Jest (Node.js) / JUnit (Spring Boot).
+[Normal] Pruebas de Integración: Validación de la comunicación entre microservicios y los mocks de sistemas externos. Herramienta: Postman / Newman.
+[Normal] Pruebas de Sistema: Validación end-to-end de los flujos completos del negocio.
+[Normal] Pruebas de Carga: Validación del RNF-06 (200.000 usuarios concurrentes, 1.000 TPS). Herramienta: Apache JMeter.
+[Normal] Pruebas de Seguridad: Verificación de HTTPS, encriptación de contraseñas, control de acceso por roles. Herramienta: OWASP ZAP.
+[Normal]  Casos de Prueba Funcionales
+[Normal]  Criterios de Aceptación Generales
+[Normal] Todos los flujos funcionales del diagrama de casos de uso deben pasar sus pruebas de sistema.
+[Normal] La cobertura de pruebas unitarias debe ser superior al 80% en todos los microservicios.
+[Normal] Las pruebas de seguridad no deben revelar vulnerabilidades críticas (OWASP Top 10).
+[Normal] Las pruebas de carga deben confirmar la capacidad de 200.000 usuarios concurrentes.
+[Normal] Todos los mocks deben estar correctamente documentados y ser intercambiables con la implementación real mediante configuración.
+
+=== TABLAS ===
+
+--- Tabla 1 (10 filas x 5 columnas) ---
+Semana | Actividad | Responsable | Entregable | Estado
+1–2 | Levantamiento de requerimientos, lectura del enunciado, identificación de actores y casos de uso | Ambos | Diagrama CU + RNFs | Planeado
+3 | Especificación detallada de Casos de Uso e Historias de Usuario | Viviana | Doc. CU / HU | Planeado
+4 | Diseño de arquitectura: patrones, estilos, componentes, integraciones | Braian | Documento Arq. | Planeado
+5 | Diseño del modelo de datos (Entidad-Relación / Relacional) | Ambos | Modelo ER | Planeado
+6 | Prototipado de interfaces (wireframes) de los módulos principales | Viviana | Prototipos UI | Planeado
+7 | Definición del plan de pruebas funcionales y no funcionales | Braian | Plan de Pruebas | Planeado
+8–10 | Implementación de módulos core: registro, autenticación, catálogo, carrito, pagos (con mocks para CIFIN, Datacrédito, Policía) | Ambos | Código fuente | Planeado
+11 | Integración de componentes, pruebas de sistema, ajustes | Ambos | Sistema integrado | Planeado
+12 | Preparación de presentación ejecutiva, ensayo y sustentación final | Ambos | Presentación | Planeado
+
+--- Tabla 2 (11 filas x 2 columnas) ---
+Actor | Descripción
+Solicitante/Vendedor | Persona natural o jurídica que desea registrarse para ofrecer productos en la plataforma
+Comprador | Usuario registrado que busca, consulta y adquiere productos
+Director Comercial | Empleado de Comercial Konrad que aprueba, rechaza o devuelve solicitudes de vendedores
+Administrador | Gestiona parametrización, auditoría y logs del sistema
+Sistema CIFIN (Mock) | Servicio externo simulado que provee calificación crediticia mediante archivo plano mensual
+Sistema Datacrédito (Mock) | Servicio REST externo simulado que retorna calificación crediticia en tiempo real
+Policía Nacional (Mock) | Portal externo simulado de consulta de antecedentes judiciales
+Pasarela de Pagos (Mock) | Intermediario simulado para pagos en línea y tarjeta de crédito
+Banco (Mock) | Entidad simulada que genera archivos planos de consignaciones diarias
+Servidor de Correo | Servicio SMTP para notificaciones certificadas al sistema
+
+--- Tabla 3 (7 filas x 2 columnas) ---
+ID | CU-01
+Nombre | Registrar solicitud de vendedor
+Actor Principal | Solicitante (persona natural o jurídica)
+Precondición | El solicitante accede a la página de E-Commerce Konrad sin autenticación previa
+Flujo Principal | 1. El sistema presenta el formulario de registro. 2. El solicitante ingresa: nombres, apellidos, número de identificación, correo, país, ciudad, teléfono. 3. El sistema valida el formato de los datos. 4. El sistema determina si es persona natural o jurídica y solicita los documentos requeridos. 5. El solicitante adjunta los documentos (cédula, RUT, cámara de comercio si aplica, formatos de aceptación). 6. El sistema valida documentos y registra la solicitud en estado PENDIENTE. 7. El sistema muestra el número de solicitud generado.
+Flujo Alternativo | 3a. Si los datos tienen formato inválido, el sistema indica el error y solicita corrección.
+Postcondición | Solicitud registrada en estado PENDIENTE. Solicitante recibe el número de radicado.
+
+--- Tabla 4 (6 filas x 2 columnas) ---
+ID | CU-07
+Nombre | Aprobar solicitud de vendedor
+Actor Principal | Director Comercial
+Precondición | El Director ha consultado y revisado la solicitud. Las calificaciones crediticias son ALTA en CIFIN y Datacrédito. No tiene requerimiento judicial.
+Flujo Principal | 1. El Director registra resultado APROBADA. 2. El sistema actualiza el estado de la solicitud. 3. El sistema genera credenciales de acceso. 4. El sistema envía correo certificado con credenciales al solicitante.
+Postcondición | Solicitud en estado APROBADA. Vendedor puede ingresar a la plataforma y seleccionar plan de suscripción.
+
+--- Tabla 5 (9 filas x 4 columnas) ---
+ID | Como... | Quiero... | Para...
+HU-01 | Solicitante | Registrar mi información y documentos en la plataforma | Solicitar ser vendedor en Comercial Konrad
+HU-02 | Director Comercial | Ver el estado crediticio y judicial de un solicitante | Tomar una decisión objetiva sobre su solicitud
+HU-03 | Vendedor aprobado | Pagar mi suscripción mensual, semestral o anual | Activar mi cuenta y empezar a publicar productos
+HU-04 | Comprador | Buscar productos por nombre, categoría o precio | Encontrar lo que necesito fácilmente
+HU-05 | Comprador | Agregar varios productos al carrito y pagar de una vez | Hacer mis compras de manera eficiente
+HU-06 | Comprador | Calificar al vendedor después de una compra | Ayudar a otros compradores a tomar mejores decisiones
+HU-07 | Administrador | Consultar los logs de error y la auditoría del sistema | Identificar y corregir fallos y comportamientos anómalos
+HU-08 | Director Comercial | Ver un tablero con KPIs del negocio | Tomar decisiones estratégicas basadas en datos
+
+--- Tabla 6 (20 filas x 4 columnas) ---
+ID | Categoría | Descripción | Criterio de Aceptación
+RNF-01 | Seguridad | Módulo de autenticación y autorización con roles y permisos | Solo usuarios autenticados acceden a funcionalidades según su rol
+RNF-02 | Seguridad | Toda comunicación debe usar HTTPS | Certificado SSL/TLS activo. Ninguna petición viaja en texto plano
+RNF-03 | Seguridad | Contraseña mínimo 8 caracteres con mayúscula, minúscula y número | Sistema rechaza contraseñas que no cumplan el patrón
+RNF-04 | Seguridad | Contraseña almacenada encriptada (bcrypt o similar) | No existen contraseñas en texto plano en la base de datos
+RNF-05 | Seguridad | Correos certificados con estampado cronológico | Todos los correos del sistema tienen firma digital y timestamp
+RNF-06 | Desempeño | Soporte de 200.000 usuarios concurrentes y 1.000 TPS de compras | Pruebas de carga confirman la capacidad sin degradación
+RNF-07 | Desempeño | Computación distribuida | El sistema escala horizontalmente; ningún componente es SPOF
+RNF-08 | Disponibilidad | Alta disponibilidad del 99,7% | El sistema no supera 26,3 horas de downtime anuales
+RNF-09 | Disponibilidad | Centro de datos alterno para recuperación ante desastres | RTO < 4 horas, RPO < 1 hora
+RNF-10 | Interfaz | CMS para cambiar imagen corporativa sin experto en diseño | El equipo de marketing puede cambiar logos, colores y banners
+RNF-11 | Interfaz | Diseño responsivo para dispositivos móviles | La plataforma es usable en pantallas desde 320px de ancho
+RNF-12 | Almacenamiento | Crecimiento del 200% en documentos y datos | La infraestructura de almacenamiento es escalable (cloud storage)
+RNF-13 | Almacenamiento | Backup diario de base de datos | Existe una copia de seguridad automática con retención de 30 días
+RNF-14 | Almacenamiento | Sistema preparado para cambio de motor de base de datos | El acceso a datos está abstraído mediante un ORM o patrón repositorio
+RNF-15 | Mantenimiento | Auditoría de cada acción CRUD (acción, usuario, fecha, hora) | Existe un registro auditable de todas las operaciones del sistema
+RNF-16 | Mantenimiento | Log de errores centralizado | Todos los errores quedan registrados con stack trace y contexto
+RNF-17 | Tecnología | Software libre, sin licenciamiento | Ningún componente del sistema requiere licencia comercial
+RNF-18 | Tecnología | Últimas versiones estables y con soporte | Todas las dependencias tienen versiones LTS activas
+RNF-19 | Integración | Servicios hacia BI expuestos en SOAP | Existe un endpoint SOAP documentado y consumible por el sistema de BI
+
+--- Tabla 7 (14 filas x 3 columnas) ---
+Capa | Tecnología | Justificación
+Frontend | React.js + TailwindCSS | Framework popular, LTS activo, responsivo, open source
+Backend (Microservicios) | Node.js / Spring Boot (Java) | Alta performance, ecosistema amplio, open source, versiones LTS
+API Gateway | Kong (open source) | Gestión centralizada, plugins de auth, rate limiting, logging
+Base de Datos Principal | SQL | RDBMS robusto, open source, soporte activo
+Base de Datos Caché | Redis | Cache de sesiones, datos frecuentes, open source
+Message Broker | Apache Kafka | Procesamiento de eventos asíncronos, alta throughput, open source
+Almacenamiento Archivos | MinIO (compatible S3) | Object storage open source, escalable, compatible con AWS S3
+Autenticación | Keycloak | IAM open source, OAuth2, OpenID Connect, gestión de roles
+Correo Certificado | JavaMail + SMIME / Apache James | Firma digital y estampado cronológico, open source
+Monitoreo | Prometheus + Grafana | Métricas en tiempo real, dashboards, open source
+Log Centralizado | ELK Stack (Elasticsearch, Logstash, Kibana) | Centralización y búsqueda de logs, open source
+Contenerización | Docker + Kubernetes | Orquestación de microservicios, escalabilidad horizontal
+SOAP (BI) | Apache CXF | Framework SOAP open source, integración con BI externo
+
+--- Tabla 8 (11 filas x 3 columnas) ---
+Servicio | Responsabilidad | Integraciones
+Auth Service | Autenticación, autorización, gestión de usuarios, roles y permisos. Encriptación de contraseñas con bcrypt. | Keycloak, todos los servicios
+Vendor Service | Registro y gestión del ciclo de vida de solicitudes de vendedores. Orquesta la evaluación crediticia y judicial. | DatacreditoAdapter (Mock), CifinAdapter (Mock), PoliceAdapter (Mock), Notification Service
+Buyer Service | Registro y gestión de compradores. | Auth Service, Notification Service
+Product Service | Catálogo de productos, gestión de categorías, subcategorías, imágenes y características. | MinIO (imágenes), Audit Service
+Order Service | Carrito de compras, cálculo de totales (comisiones, IVA, envío), gestión de órdenes. | Product Service, Payment Service, Notification Service
+Payment Service | Procesamiento de pagos en sus 3 modalidades. Aplica patrón Strategy para cada forma de pago. | PaymentGatewayAdapter (Mock), BankFileAdapter (Mock), Kafka
+Notification Service | Envío de correos certificados con estampado cronológico para todos los eventos del sistema. | SMTP, JavaMail + SMIME
+Audit Service | Registro de todas las acciones CRUD con usuario, acción, fecha y hora. | Todos los servicios via Kafka
+File Processor Service | Lectura y procesamiento de archivos planos de CIFIN y banco (consignaciones). | CIFIN FileSystem (Mock), Bank FileSystem (Mock), Kafka
+BAM Service | Tablero de control con KPIs. Detección de tendencias. Exposición de servicios SOAP para BI. | PostgreSQL (read replica), Apache CXF, Notification Service
+
+--- Tabla 9 (6 filas x 4 columnas) ---
+Sistema | Tipo de Interfaz Real | Interfaz del Mock | Respuestas Simuladas
+Datacrédito | REST API | REST API local (Express.js) | Alta / Baja / Advertencia (aleatoria o configurable)
+CIFIN | Archivo plano mensual en FileSystem remoto | Archivo CSV local generado por script | Alta / Baja / Advertencia por número de cédula
+Policía Nacional | Portal web con consulta manual | REST API local que simula la respuesta | Requerido / No requerido
+Pasarela de Pagos | API REST del intermediario bancario | REST API local con número de aprobación generado | Aprobado / Rechazado con número de transacción
+Banco (consignaciones) | Archivo plano diario en FileSystem del banco | Archivo CSV local generado al final del día simulado | Lista de identificaciones que consignaron con monto
+
+--- Tabla 10 (7 filas x 4 columnas) ---
+Entidad | Atributos Principales | Atributos Principales | Relaciones
+Solicitud | Solicitud | id, numero_solicitud, estado (PENDIENTE/APROBADA/RECHAZADA/DEVUELTA/ACTIVA/EN MORA/CANCELADA), fecha_creacion, resultado_crediticio, resultado_judicial | Tiene uno o varios Documentos adjuntos. Genera un Vendedor cuando es APROBADA.
+Persona | Persona | id, nombres, apellidos, numero_identificacion, tipo_persona (NATURAL/JURIDICA), correo, pais, ciudad, telefono | Una Persona tiene una o más Solicitudes.
+Documento | Documento | id, tipo (CEDULA/RUT/CAMARA_COMERCIO/ACEPTACION_RIESGO/ACEPTACION_DATOS), url_archivo, fecha_carga | Pertenece a una Solicitud.
+Vendedor | Vendedor | id, persona_id, estado_suscripcion, fecha_vencimiento, calificacion_promedio | Tiene Productos. Tiene Suscripciones.
+Comprador | Comprador | id, persona_id, twitter, instagram, direccion | Tiene Órdenes. Tiene Calificaciones.
+Suscripcion | Suscripcion | id, vendedor_id, tipo (MENSUAL/SEMESTRAL/ANUAL), valor, fecha_inicio, fecha_fin, estado_pago | Pertenece a un Vendedor. Genera un Pago.
+
+--- Tabla 11 (11 filas x 3 columnas) ---
+Entidad | Atributos Principales | Relaciones
+Producto | id, nombre, categoria_id, subcategoria_id, marca, es_original, color, tamano, peso, talla, es_nuevo, cantidad, valor, vendedor_id | Pertenece a una Categoría. Tiene múltiples Imágenes. Pertenece a un Vendedor.
+Categoria | id, nombre, porcentaje_comision, aplica_iva | Tiene Subcategorías y Productos.
+Subcategoria | id, nombre, categoria_id | Pertenece a una Categoría.
+ImagenProducto | id, producto_id, url, es_principal | Pertenece a un Producto.
+Orden | id, comprador_id, fecha, estado, total, costo_envio, total_iva, total_comision, tipo_entrega (RECOGE/DOMICILIO) | Tiene múltiples DetalleOrden. Tiene un Pago.
+DetalleOrden | id, orden_id, producto_id, cantidad, valor_unitario | Pertenece a una Orden y a un Producto.
+Pago | id, tipo (EN_LINEA/TARJETA/CONSIGNACION), estado, numero_aprobacion, fecha, monto | Pertenece a una Orden o Suscripción.
+Calificacion | id, comprador_id, vendedor_id, orden_id, valor (1-10), comentario, fecha | Pertenece a un Comprador, Vendedor y Orden.
+Pregunta | id, comprador_id, producto_id, texto, fecha, respuesta, fecha_respuesta | Pertenece a un Comprador y un Producto.
+Comentario | id, comprador_id, producto_id, texto, fecha | Pertenece a un Comprador y un Producto.
+
+--- Tabla 12 (5 filas x 3 columnas) ---
+Entidad | Atributos Principales | Relaciones
+AuditLog | id, accion (CREATE/UPDATE/DELETE/READ), usuario_id, entidad_afectada, fecha, hora, detalle_json | Referencia a cualquier entidad del sistema.
+ErrorLog | id, servicio, mensaje_error, stack_trace, fecha, hora, nivel (ERROR/WARN/INFO) | Centralizado en ELK Stack.
+Parametro | id, nombre, valor, descripcion, categoria | Tabla de configuración para IVA, tarifas de envío por ciudad/peso, porcentajes de comisión y suscripciones.
+Ciudad | id, nombre, pais, tarifa_envio_base | Usada para calcular costo de domicilio.
+
+--- Tabla 13 (13 filas x 5 columnas) ---
+ID | Caso de Prueba | Condición de Entrada | Resultado Esperado | Tipo
+CP-01 | Registro de vendedor con datos válidos | Todos los campos completos, documentos adjuntos correctos | Solicitud creada en estado PENDIENTE con número asignado | Sistema
+CP-02 | Registro de vendedor con correo inválido | Correo sin formato válido | El sistema rechaza el formulario con mensaje de error | Unitaria
+CP-03 | Aprobación de solicitud con calificación Alta en ambas entidades y sin requerimiento judicial | Mock Datacrédito: Alta, Mock CIFIN: Alta, Mock Policía: No requerido | Solicitud APROBADA, correo enviado con credenciales | Integración
+CP-04 | Rechazo de solicitud con calificación Baja | Mock Datacrédito: Baja | Solicitud RECHAZADA, correo enviado con motivo de rechazo | Integración
+CP-05 | Pago de suscripción por consignación | Archivo plano del banco incluye el número de identificación del vendedor | Suscripción activada, solicitud en estado ACTIVA | Sistema
+CP-06 | Búsqueda de producto por nombre | Nombre parcial del producto ingresado | Lista de productos que contienen el término buscado | Sistema
+CP-07 | Cálculo de total de compra con IVA, comisión y domicilio | Producto con IVA, categoría con comisión 5%, entrega a domicilio ciudad configurada | Total = subtotal + IVA + comisión + tarifa envío | Unitaria
+CP-08 | Calificación de vendedor baja (10 calificaciones < 3) | 10 calificaciones con valor 1 registradas | Estado del vendedor pasa a CANCELADA automáticamente | Sistema
+CP-09 | Intento de acceso sin autenticación a módulo de Director Comercial | Request sin token de autenticación | Respuesta HTTP 401 Unauthorized | Seguridad
+CP-10 | Contraseña sin cumplir requisitos de complejidad | Contraseña: '12345678' (sin mayúscula ni minúscula) | El sistema rechaza con mensaje de política de contraseñas | Unitaria
+CP-11 | Prueba de carga: 1000 TPS en módulo de compras | 1000 peticiones de compra simultáneas con JMeter | Tiempo de respuesta < 2s, sin errores en el 99% de las transacciones | Carga
+CP-12 | Registro de auditoría al crear un producto | Vendedor activo publica un nuevo producto | Registro en AuditLog con acción CREATE, usuario, fecha y hora | Sistema
