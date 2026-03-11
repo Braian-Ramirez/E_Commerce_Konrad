@@ -1,1 +1,11 @@
-/env
+# Entornos virtuales
+env/
+venv/
+.env
+
+# Base de datos SQLite
+db.sqlite3
+
+# Archivos de entorno y secretos
+*.pyc
+__pycache__/
