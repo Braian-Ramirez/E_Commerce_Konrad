@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'notifications',
     'audit',
     'bam',
+    'external_mocks',
 ]
 
 MIDDLEWARE = [
