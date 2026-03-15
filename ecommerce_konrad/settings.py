@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'audit',
     'bam',
     'external_mocks',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
