@@ -31,7 +31,14 @@ class PagoOrden(models.Model):
 
 
 class Suscripcion(models.Model):
+    TIPO_CHOICES = [
+        ('MENSUAL', 'Mensual'),
+        ('SEMESTRAL', 'Semestral'),
+        ('ANUAL', 'Anual'),
+    ]
+
     vendedor = models.ForeignKey(Vendedor, on_delete=models.CASCADE, related_name='historial_suscripciones')
+    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES, default='MENSUAL')
     monto_pagado = models.DecimalField(max_digits=12, decimal_places=2)
     fecha_inicio = models.DateField()
     fecha_fin = models.DateField()

@@ -34,7 +34,7 @@ class Producto(models.Model):
         ('USADO', 'Usado'),
     ]
 
-    ORIGINALIDAD_CHOICES = [
+    AUTENTICIDAD_CHOICES = [
         ('ORIGINAL', 'Original'),
         ('GENERICO', 'Generico'),
     ]
@@ -47,7 +47,7 @@ class Producto(models.Model):
     # Atributos
     nombre = models.CharField(max_length=200)
     marca = models.CharField(max_length=100)
-    originalidad = models.CharField(max_length=20, choices=ORIGINALIDAD_CHOICES, default='ORIGINAL')
+    autenticidad = models.CharField(max_length=20, choices=AUTENTICIDAD_CHOICES, default='ORIGINAL')
     color = models.CharField(max_length=50)
     tamano = models.CharField(max_length=50,blank=True, null=True)
     peso = models.DecimalField(max_digits=10, decimal_places=2, help_text="Peso en kg")
@@ -103,5 +103,19 @@ class ComentarioProducto(models.Model):
     class Meta:
         verbose_name = "Comentario de Producto"
         verbose_name_plural = "Comentarios de Productos"
+
+# Tabla de Costos de Envío
+class CostoDomicilio(models.Model):
+    ciudad = models.CharField(max_length=100)
+    peso_min = models.DecimalField(max_digits=10, decimal_places=2, help_text="En kg")
+    peso_max = models.DecimalField(max_digits=10, decimal_places=2, help_text="En kg")
+    costo = models.DecimalField(max_digits=12, decimal_places=2)
+
+    def __str__(self):
+        return f"Envío a {self.ciudad} ({self.peso_min}-{self.peso_max}kg)"
+
+    class Meta:
+        verbose_name = "Costo de Domicilio"
+        verbose_name_plural = "Costos de Domicilio"
 
 # Create your models here.

@@ -22,8 +22,8 @@ class RegistroAuditoria(models.Model):
     class Meta:
         verbose_name = "Registro de Auditoría"
         verbose_name_plural = "Registros de Auditoría"
-        # Opcional: Proteger para que por accidente nadie edite una auditoria desde el panel admin
 
+# Modelo Log de Errores Técnicos
 class LogError(models.Model):
     fecha = models.DateTimeField(auto_now_add=True)
     modulo = models.CharField(max_length=50) # Ej: Pago, Producto
@@ -37,16 +37,3 @@ class LogError(models.Model):
     class Meta:
         verbose_name = "Log de Error"
         verbose_name_plural = "Logs de Errores"
-
-# Modelo  
-class LogError(models.Model):
-    fecha = models.DateTimeField(auto_now_add=True)
-    modulo = models.CharField(max_length=50) # Ej: Pago, Producto
-    mensaje_error = models.TextField()
-    stacktrace = models.TextField(blank=True, null=True) # El error técnico detallado
-    usuario_afectado = models.CharField(max_length=100, blank=True, null=True)
-
-    class Meta:
-        verbose_name = "Log de Error"
-
-
