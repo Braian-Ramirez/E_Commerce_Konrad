@@ -79,4 +79,29 @@ class ImagenProducto(models.Model):
         verbose_name = "Imagen de Producto"
         verbose_name_plural = "Imágenes de Productos"
 
+# Interacción: Preguntas
+class PreguntaProducto(models.Model):
+    producto = models.ForeignKey(Producto, on_delete=models.CASCADE, related_name='preguntas')
+    comprador = models.ForeignKey('vendors.Persona', on_delete=models.CASCADE)
+    pregunta = models.TextField()
+    respuesta = models.TextField(blank=True, null=True)
+    fecha_pregunta = models.DateTimeField(auto_now_add=True)
+    fecha_respuesta = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        verbose_name = "Pregunta de Producto"
+        verbose_name_plural = "Preguntas de Productos"
+
+# Interacción: Comentarios de Compradores
+class ComentarioProducto(models.Model):
+    producto = models.ForeignKey(Producto, on_delete=models.CASCADE, related_name='comentarios')
+    comprador = models.ForeignKey('vendors.Persona', on_delete=models.CASCADE)
+    calificacion = models.IntegerField(choices=[(i, f"{i} Estrellas") for i in range(1, 6)])
+    comentario = models.TextField()
+    fecha = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Comentario de Producto"
+        verbose_name_plural = "Comentarios de Productos"
+
 # Create your models here.

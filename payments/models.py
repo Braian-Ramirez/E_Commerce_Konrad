@@ -1,5 +1,6 @@
 from django.db import models
 from orders.models import Orden
+from vendors.models import Vendedor
 
 # Modelo Pagos
 class PagoOrden(models.Model):
@@ -27,3 +28,34 @@ class PagoOrden(models.Model):
     class Meta:
         verbose_name = "Pago de Orden"
         verbose_name_plural = "Pagos de Órdenes"
+
+
+class Suscripcion(models.Model):
+    vendedor = models.ForeignKey(Vendedor, on_delete=models.CASCADE, related_name='historial_suscripciones')
+    monto_pagado = models.DecimalField(max_digits=12, decimal_places=2)
+    fecha_inicio = models.DateField()
+    fecha_fin = models.DateField()
+    activo = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"Suscripción {self.vendedor} (Hasta {self.fecha_fin})"
+
+    class Meta:
+        verbose_name = "Suscripción"
+        verbose_name_plural = "Suscripciones"
+
+class ConsignacionBancaria(models.Model):
+    vendedor = models.ForeignKey(Vendedor, on_delete=models.CASCADE)
+    pago_orden = models.OneToOneField('PagoOrden', on_delete=models.SET_NULL, null=True, blank=True, related_name='consignacion')
+    referencia = models.CharField(max_length=100, unique=True)
+    comprobante_img = models.ImageField(upload_to='consignaciones/', null=True, blank=True)
+    validada = models.BooleanField(default=False)
+    fecha_subida = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Consignación {self.referencia} - {self.vendedor}"
+
+    class Meta:
+        verbose_name = "Consignación Bancaria"
+        verbose_name_plural = "Consignaciones Bancarias"
+

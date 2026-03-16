@@ -2,27 +2,26 @@ from django.http import JsonResponse
 import random
 import uuid
 
-# Vistas Centrales de Riesgo (CIFIN/Datacrédito)
-def mock_centrales_riesgo(request, identificacion):
-    """
-    Simula una consulta a CIFIN/Datacrédito.
-    Devuelve un score aleatorio y un veredicto.
-    """
-    # Generamos un puntaje de crédito aleatorio entre 300 y 850
+# Vista CIFIN (TransUnion)
+def mock_cifin(request, identificacion):
     score = random.randint(300, 850)
-    
-    if score >= 700:
-        resultado = 'ALTA'
-    elif score >= 500:
-        resultado = 'ADVERTENCIA'
-    else:
-        resultado = 'BAJA'
-
+    resultado = 'ALTA' if score >= 650 else ('ADVERTENCIA' if score >= 450 else 'BAJA')
     return JsonResponse({
         "documento": identificacion,
-        "score_crediticio": score,
+        "score_cifin": score,
         "calificacion": resultado,
-        "entidad_simulada": "Mock Datacrédito"
+        "entidad_simulada": "CIFIN (TransUnion)"
+    })
+
+# Vista Datacrédito (Experian)
+def mock_datacredito(request, identificacion):
+    score = random.randint(350, 900)
+    resultado = 'ALTA' if score >= 700 else ('ADVERTENCIA' if score >= 500 else 'BAJA')
+    return JsonResponse({
+        "documento": identificacion,
+        "score_datacredito": score,
+        "calificacion": resultado,
+        "entidad_simulada": "Datacrédito (Experian)"
     })
 
 # Vistas Antecedentes Judiciales (Policía/Procuraduría)

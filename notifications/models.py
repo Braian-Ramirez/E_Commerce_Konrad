@@ -22,3 +22,19 @@ class Notificacion(models.Model):
         verbose_name = "Notificación"
         verbose_name_plural = "Notificaciones"
         ordering = ['-fecha_creacion']  # Muestra las más nuevas primero
+
+# Registro de Correos Certificados (RNF)
+class CorreoEnviado(models.Model):
+    destinatario = models.ForeignKey(Persona, on_delete=models.CASCADE, related_name='correos_recibidos')
+    asunto = models.CharField(max_length=255)
+    cuerpo = models.TextField()
+    fecha_envio = models.DateTimeField(auto_now_add=True)
+    # Estampado cronológico (timestamp de servidor para validez legal)
+    timestamp_hash = models.CharField(max_length=255, blank=True, null=True, help_text="Hash de validez legal")
+
+    def __str__(self):
+        return f"Correo a {self.destinatario.email} - {self.fecha_envio}"
+
+    class Meta:
+        verbose_name = "Correo Enviado"
+        verbose_name_plural = "Correos Enviados"

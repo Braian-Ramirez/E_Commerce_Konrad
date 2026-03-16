@@ -2,8 +2,11 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    # Ej: http://127.0.0.1:8000/mocks/cifin/123456789/
-    path('cifin/<str:identificacion>/', views.mock_centrales_riesgo, name='mock_cifin'),
+    # Ej: http://127.0.0.1:8000/mocks/cifin/12345/
+    path('cifin/<str:identificacion>/', views.mock_cifin, name='mock_cifin'),
+
+    # Ej: http://127.0.0.1:8000/mocks/datacredito/12345/
+    path('datacredito/<str:identificacion>/', views.mock_datacredito, name='mock_datacredito'),
     
     # Ej: http://127.0.0.1:8000/mocks/policia/123456789/
     path('policia/<str:identificacion>/', views.mock_antecedentes_judiciales, name='mock_policia'),

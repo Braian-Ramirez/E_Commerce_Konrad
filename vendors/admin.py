@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Persona, Solicitud, Documento, Vendedor
+from .models import Persona, Solicitud, Documento, Vendedor, ConsultaCrediticia_Local
 
 class PersonaAdmin(admin.ModelAdmin):
     # Campos que verás en la lista principal

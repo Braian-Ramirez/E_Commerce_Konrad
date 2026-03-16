@@ -121,6 +121,45 @@ class Vendedor(models.Model):
     class Meta:
         verbose_name = "Vendedor"
         verbose_name_plural = "Vendedores"
+        
+# Modelo ConsultaCrediticia_Local        
+class ConsultaCrediticia_Local(models.Model):
+    # Ahora ligado a la Solicitud para trazabilidad del proceso
+    solicitud = models.OneToOneField(Solicitud, on_delete=models.CASCADE, related_name='credit_data', null=True)
+    
+    # Datos CIFIN (TransUnion)
+    score_cifin = models.IntegerField(null=True, blank=True)
+    dictamen_cifin = models.CharField(max_length=20, null=True, blank=True)
+    
+    # Datos Datacredito (Experian)
+    score_datacredito = models.IntegerField(null=True, blank=True)
+    dictamen_datacredito = models.CharField(max_length=20, null=True, blank=True)
+    
+    fecha_consulta = models.DateTimeField(auto_now_add=True)
+    observaciones = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"Crédito Solicitud: {self.solicitud.numero_solicitud}"
+
+    class Meta:
+        verbose_name = "Consulta Crediticia Local"
+        verbose_name_plural = "Consultas Crediticias Locales"
+
+# Modelo para Calificaciones Individuales del Vendedor
+class CalificacionVendedor(models.Model):
+    vendedor = models.ForeignKey(Vendedor, on_delete=models.CASCADE, related_name='calificaciones')
+    comprador = models.ForeignKey(Persona, on_delete=models.SET_NULL, null=True, related_name='calificaciones_realizadas')
+    estrellas = models.IntegerField(choices=[(i, f"{i} Estrellas") for i in range(1, 6)])
+    comentario = models.TextField(blank=True, null=True)
+    fecha = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.estrellas}* para {self.vendedor}"
+
+    class Meta:
+        verbose_name = "Calificación de Vendedor"
+        verbose_name_plural = "Calificaciones de Vendedores"
+
 
 
 
