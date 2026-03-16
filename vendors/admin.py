@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Persona, Solicitud, Documento, Vendedor, ConsultaCrediticia_Local
+from .models import Persona, Solicitud, Documento, Vendedor, ConsultaCrediticia_Local, CalificacionVendedor
 
 class PersonaAdmin(admin.ModelAdmin):
     # Campos que verás en la lista principal
@@ -20,3 +20,10 @@ admin.site.register(Persona, PersonaAdmin)
 admin.site.register(Solicitud)
 admin.site.register(Documento)
 admin.site.register(Vendedor)
+
+class ConsultaCrediticiaAdmin(admin.ModelAdmin):
+    list_display = ('solicitud', 'score_cifin', 'score_datacredito', 'fecha_consulta')
+    readonly_fields = ('fecha_consulta',)
+
+admin.site.register(ConsultaCrediticia_Local, ConsultaCrediticiaAdmin)
+admin.site.register(CalificacionVendedor)
