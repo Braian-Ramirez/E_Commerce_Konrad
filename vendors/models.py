@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 # Modelo Persona 
 class Persona(models.Model):
@@ -6,12 +7,16 @@ class Persona(models.Model):
         ('NATURAL', 'Persona Natural'),
         ('JURIDICA', 'Persona Juridica'),
     ]
+    # Conexión con el sistema de autenticación de Django (maneja passwords y login)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='persona_profile', null=True, blank=True)
+    
     nombre = models.CharField(max_length=100)
     apellido = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
     numero_identificacion = models.CharField(max_length=20, unique=True)
     telefono = models.CharField(max_length=20)
-    tipo_persona = models.CharField(max_length=10, choices= TIPO_PERSONA_CHOICES, default= 'NATURAL')
+    # Hacemos opcional tipo_persona para los Compradores
+    tipo_persona = models.CharField(max_length=10, choices=TIPO_PERSONA_CHOICES, null=True, blank=True)
     pais = models.CharField(max_length=100)
     ciudad = models.CharField(max_length=100)
 

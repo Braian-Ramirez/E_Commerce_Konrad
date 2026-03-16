@@ -9,6 +9,8 @@ class Comprador(models.Model):
     )
     puntos_recompensa = models.IntegerField(default=0, help_text="Puntos ganados por compras")
     direccion_envio_principal = models.TextField(blank=True, null=True)
+    twitter = models.CharField(max_length=100, blank=True, null=True)
+    instagram = models.CharField(max_length=100, blank=True, null=True)
 
     def __str__(self):
         return f"Comprador: {self.persona.nombre} {self.persona.apellido}"
