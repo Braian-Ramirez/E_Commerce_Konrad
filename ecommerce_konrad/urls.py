@@ -19,6 +19,11 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    # API Endpoints
+    path('api/v1/products/', include('products.urls')), #urls de productos
+    path('api/v1/vendors/', include('vendors.urls')), #urls de vendedores
+    path('api/v1/orders/', include('orders.urls')), #urls de órdenes
+
     # Conectamos nuestras URLs falsas:
     path('mocks/', include('external_mocks.urls')),
 ]
