@@ -25,6 +25,7 @@ urlpatterns = [
     path('api/v1/orders/', include('orders.urls')), #urls de órdenes
     path('api/v1/payments/', include('payments.urls')), #urls de pagos
     path('api/v1/notifications/', include('notifications.urls')), #urls de notificaciones
+    path('api/v1/buyers/', include('buyers.urls')), #urls de compradores
     
     # Conectamos nuestras URLs falsas:
     path('mocks/', include('external_mocks.urls')),
