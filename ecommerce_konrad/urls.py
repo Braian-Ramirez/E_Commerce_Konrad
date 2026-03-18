@@ -16,6 +16,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -26,6 +30,8 @@ urlpatterns = [
     path('api/v1/payments/', include('payments.urls')), #urls de pagos
     path('api/v1/notifications/', include('notifications.urls')), #urls de notificaciones
     path('api/v1/buyers/', include('buyers.urls')), #urls de compradores
+    path('api/v1/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'), #Ruta login
+    path('api/v1/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'), #Ruta refresh token
     
     # Conectamos nuestras URLs falsas:
     path('mocks/', include('external_mocks.urls')),

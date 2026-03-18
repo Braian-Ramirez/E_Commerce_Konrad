@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'bam',
     'external_mocks',
     'rest_framework',
+    'rest_framework_simplejwt',
 ]
 
 MIDDLEWARE = [
@@ -126,3 +127,15 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# CONFIGURACIÓN DE SEGURIDAD PARA LA API (DRF)
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    # Por defecto, todas las respuestas requieren estar autenticado
+    # (Esto lo podemos cambiar ruta por ruta después)
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    )
+}
