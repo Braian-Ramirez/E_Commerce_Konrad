@@ -48,6 +48,7 @@ class Producto(models.Model):
     # Atributos
     nombre = models.CharField(max_length=200)
     marca = models.CharField(max_length=100)
+    descripcion = models.TextField(default='',help_text="Descripción detallada del producto")
     autenticidad = models.CharField(max_length=20, choices=AUTENTICIDAD_CHOICES, default='ORIGINAL')
     color = models.CharField(max_length=50)
     tamano = models.CharField(max_length=50,blank=True, null=True)

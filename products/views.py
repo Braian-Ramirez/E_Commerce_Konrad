@@ -1,6 +1,6 @@
 from rest_framework import viewsets
-from .models import Categoria, Producto, CostoDomicilio, ComentarioProducto, CalificacionProducto
-from .serializers import CategoriaSerializer, ProductoSerializer, CostoDomicilioSerializer, ComentarioProductoSerializer, CalificacionProductoSerializer
+from .models import Categoria, Producto, CostoDomicilio, ComentarioProducto
+from .serializers import CategoriaSerializer, ProductoSerializer, CostoDomicilioSerializer, ComentarioProductoSerializer
 
 # Vista categoria
 class CategoriaViewSet(viewsets.ModelViewSet):
@@ -22,7 +22,3 @@ class ComentarioProductoViewSet(viewsets.ModelViewSet):
     queryset = ComentarioProducto.objects.all()
     serializer_class = ComentarioProductoSerializer
 
-# Vista calificacion producto
-class CalificacionProductoViewSet(viewsets.ModelViewSet):
-    queryset = CalificacionProducto.objects.all()
-    serializer_class = CalificacionProductoSerializer  

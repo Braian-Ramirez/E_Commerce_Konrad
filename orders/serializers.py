@@ -1,9 +1,9 @@
 from rest_framework import serializers
-from .models import Orden, DetalleOrden
+from .models import Orden, DetalleOrden, CalificacionProducto
 
 # 1. Primero el Detalle (porque la Orden lo usará)
 class DetalleOrdenSerializer(serializers.ModelSerializer):
-    producto_nombre = serializers.ReadOnlyField(source='producto.nombre') # <--- Tip: ver el nombre del producto, no solo el ID
+    producto_nombre = serializers.ReadOnlyField(source='producto.nombre')
     
     class Meta:
         model = DetalleOrden
@@ -11,7 +11,6 @@ class DetalleOrdenSerializer(serializers.ModelSerializer):
 
 # 2. Luego la Orden
 class OrdenSerializer(serializers.ModelSerializer):
-    # Esto es lo que "anida" los productos dentro de la orden:
     detalles = DetalleOrdenSerializer(many=True, read_only=True)
     comprador_nombre = serializers.ReadOnlyField(source='comprador.nombre')
     
@@ -22,3 +21,10 @@ class OrdenSerializer(serializers.ModelSerializer):
             'tipo_entrega', 'costo_envio', 'total_iva', 
             'total_comision', 'total_final', 'detalles' 
         ]
+
+# 3. Calificación de Producto (vinculada a una Orden)
+class CalificacionProductoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CalificacionProducto
+        fields = '__all__'
+        read_only_fields = ['fecha']

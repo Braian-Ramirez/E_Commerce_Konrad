@@ -48,3 +48,20 @@ class DetalleOrden(models.Model):
     class Meta:
         verbose_name = "Detalle de orden"
         verbose_name_plural = "Detalles de orden"
+
+# Calificación de Producto (solo si hay una orden PAGADA)
+class CalificacionProducto(models.Model):
+    producto = models.ForeignKey(Producto, on_delete=models.CASCADE, related_name='calificaciones')
+    orden = models.ForeignKey(Orden, on_delete=models.CASCADE, related_name='calificaciones')
+    comprador = models.ForeignKey(Persona, on_delete=models.SET_NULL, null=True, related_name='calificaciones_producto')
+    puntuacion = models.IntegerField(choices=[(i, f"{i}/10") for i in range(1, 11)])
+    fecha = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        # Un comprador solo puede calificar un producto UNA VEZ por orden
+        unique_together = [['producto', 'orden', 'comprador']]
+        verbose_name = "Calificación de Producto"
+        verbose_name_plural = "Calificaciones de Productos"
+
+    def __str__(self):
+        return f"{self.puntuacion}/10 para {self.producto.nombre} (Orden #{self.orden.id})"
