@@ -1,5 +1,6 @@
 from django.db import models
 from vendors.models import Vendedor
+
 # Modelo Categoria
 class Categoria(models.Model):
     nombre = models.CharField(max_length=100, unique=True)
@@ -96,7 +97,6 @@ class PreguntaProducto(models.Model):
 class ComentarioProducto(models.Model):
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE, related_name='comentarios')
     comprador = models.ForeignKey('vendors.Persona', on_delete=models.CASCADE)
-    calificacion = models.IntegerField(choices=[(i, f"{i} Estrellas") for i in range(1, 6)])
     comentario = models.TextField()
     fecha = models.DateTimeField(auto_now_add=True)
 
@@ -118,4 +118,3 @@ class CostoDomicilio(models.Model):
         verbose_name = "Costo de Domicilio"
         verbose_name_plural = "Costos de Domicilio"
 
-# Create your models here.

@@ -149,7 +149,7 @@ class ConsultaCrediticia_Local(models.Model):
 class CalificacionVendedor(models.Model):
     vendedor = models.ForeignKey(Vendedor, on_delete=models.CASCADE, related_name='calificaciones')
     comprador = models.ForeignKey(Persona, on_delete=models.SET_NULL, null=True, related_name='calificaciones_realizadas')
-    estrellas = models.IntegerField(choices=[(i, f"{i} Estrellas") for i in range(1, 6)])
+    estrellas = models.IntegerField(choices=[(i, f"{i} Estrellas") for i in range(1, 11)])
     comentario = models.TextField(blank=True, null=True)
     fecha = models.DateTimeField(auto_now_add=True)
 

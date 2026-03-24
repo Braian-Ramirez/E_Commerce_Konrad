@@ -1,14 +1,14 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Persona, Vendedor, Solicitud, ConsultaCrediticia_Local
+from .models import Persona, Vendedor, Solicitud, ConsultaCrediticia_Local, CalificacionVendedor
 
-#Serializador User
+# Serializador User
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'email']
 
-#Serializador Persona
+# Serializador Persona
 class PersonaSerializer(serializers.ModelSerializer):
     user_details = UserSerializer(source='user', read_only=True)
     
@@ -20,7 +20,7 @@ class PersonaSerializer(serializers.ModelSerializer):
             'tipo_persona', 'pais', 'ciudad'
         ]
 
-#Serializador Vendedor
+# Serializador Vendedor
 class VendedorSerializer(serializers.ModelSerializer):
     persona_details = PersonaSerializer(source='persona', read_only=True)
     
@@ -31,8 +31,15 @@ class VendedorSerializer(serializers.ModelSerializer):
             'fecha_vencimiento', 'calificacion_promedio'
         ]
 
-#Serializador Solicitud
+# Serializador Solicitud
 class SolicitudSerializer(serializers.ModelSerializer):
     class Meta:
         model = Solicitud
         fields = '__all__'
+
+# Serializador CalificacionVendedor
+class CalificacionVendedorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CalificacionVendedor
+        fields = '__all__'
+        read_only_fields = ['fecha']
