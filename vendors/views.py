@@ -2,7 +2,7 @@ from rest_framework import viewsets
 from django.db.models import Avg
 from .models import Persona, Vendedor, Solicitud, CalificacionVendedor
 from .serializers import PersonaSerializer, VendedorSerializer, SolicitudSerializer, CalificacionVendedorSerializer
-from ecommerce_konrad.permissions import IsAdminOrPostOnly
+from ecommerce_konrad.permissions import IsDirectorComercialOrPostOnly
 
 # Vista Persona
 class PersonaViewSet(viewsets.ModelViewSet):
@@ -17,7 +17,7 @@ class VendedorViewSet(viewsets.ModelViewSet):
 # Vista Solicitud
 class SolicitudViewSet(viewsets.ModelViewSet):
     serializer_class = SolicitudSerializer
-    permission_classes = [IsAdminOrPostOnly]
+    permission_classes = [IsDirectorComercialOrPostOnly]
 
     def get_queryset(self):
         user = self.request.user

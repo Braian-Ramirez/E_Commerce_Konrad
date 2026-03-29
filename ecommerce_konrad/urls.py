@@ -33,6 +33,7 @@ urlpatterns = [
     path('api/v1/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'), #Ruta login
     path('api/v1/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'), #Ruta refresh token
     path('api/v1/bam/', include('bam.urls')), #urls de bam
+    path('api/v1/directors/', include('directors.urls')), #urls de directores
     
     # Conectamos nuestras URLs falsas:
     path('mocks/', include('external_mocks.urls')),

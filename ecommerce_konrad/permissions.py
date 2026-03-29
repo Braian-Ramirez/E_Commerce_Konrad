@@ -1,5 +1,6 @@
 from rest_framework import permissions
 
+# clase vendedor propietario permisos de lectura
 class IsVendorOwnerOrReadOnly(permissions.BasePermission):
     """
     Permite acceso de solo lectura a cualquiera (si está autenticado según config global).
@@ -22,6 +23,7 @@ class IsVendorOwnerOrReadOnly(permissions.BasePermission):
         # obj debe tener un atributo 'vendedor'
         return obj.vendedor == persona.vendedor_profile
 
+# clase administrador permisos de lectura
 class IsAdminOrReadOnly(permissions.BasePermission):
     """
     Solo los administradores pueden hacer cambios (POST, PUT, PATCH, DELETE).
@@ -31,12 +33,28 @@ class IsAdminOrReadOnly(permissions.BasePermission):
             return True
         return bool(request.user and request.user.is_staff)
 
-class IsAdminOrPostOnly(permissions.BasePermission):
+# clase director comercial permisos de lectura y escritura
+class IsDirectorComercialOrPostOnly(permissions.BasePermission):
     """
     Para Solicitudes: Todos pueden crear (POST) o ver (GET).
     Pero solo los administradores pueden hacer PUT, PATCH, DELETE.
     """
     def has_permission(self, request, view):
+        # Permisos de creación son permitidos
         if request.method in permissions.SAFE_METHODS or request.method == 'POST':
             return True
-        return bool(request.user and request.user.is_staff)
+        # Permisos de modificación se exige que sea director comercial o admin     
+        es_driector = hasattr(request.user, 'director_comercial_profile')
+
+        es_admin = bool(request.user and request.user.is_staff)
+
+        return es_driector or es_admin
+
+# clase identificar director comercial
+class IsDirectorComercial(permissions.BasePermission):
+    """
+    Permiso exclusivo para el rol de Director Comercial
+    """
+    def has_permission(self, request, view):
+        return bool(request.user.is_authenticated and 
+        hasattr(request.user, 'director_comercial_profile'))
