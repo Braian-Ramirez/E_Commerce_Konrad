@@ -5,7 +5,7 @@ from .views import PersonaViewSet, VendedorViewSet, SolicitudViewSet, Calificaci
 router = DefaultRouter()
 router.register(r'personas', PersonaViewSet)
 router.register(r'vendedores', VendedorViewSet)
-router.register(r'solicitudes', SolicitudViewSet)
+router.register(r'solicitudes', SolicitudViewSet, basename='solicitudes')
 router.register(r'calificaciones', CalificacionVendedorViewSet)
 
 urlpatterns = [

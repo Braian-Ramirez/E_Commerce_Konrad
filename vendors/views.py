@@ -2,6 +2,7 @@ from rest_framework import viewsets
 from django.db.models import Avg
 from .models import Persona, Vendedor, Solicitud, CalificacionVendedor
 from .serializers import PersonaSerializer, VendedorSerializer, SolicitudSerializer, CalificacionVendedorSerializer
+from ecommerce_konrad.permissions import IsAdminOrPostOnly
 
 # Vista Persona
 class PersonaViewSet(viewsets.ModelViewSet):
@@ -15,8 +16,25 @@ class VendedorViewSet(viewsets.ModelViewSet):
 
 # Vista Solicitud
 class SolicitudViewSet(viewsets.ModelViewSet):
-    queryset = Solicitud.objects.all()
     serializer_class = SolicitudSerializer
+    permission_classes = [IsAdminOrPostOnly]
+
+    def get_queryset(self):
+        user = self.request.user
+        if not user.is_authenticated:
+            return Solicitud.objects.none()
+        if user.is_staff or user.is_superuser:
+            return Solicitud.objects.all()
+        if hasattr(user, 'persona_profile'):
+            return Solicitud.objects.filter(persona=user.persona_profile)
+        return Solicitud.objects.none()
+
+    def perform_create(self, serializer):
+        user = self.request.user
+        if hasattr(user, 'persona_profile'):
+            serializer.save(persona=user.persona_profile)
+        else:
+            serializer.save()
 
 # Vista CalificacionVendedor
 class CalificacionVendedorViewSet(viewsets.ModelViewSet):
