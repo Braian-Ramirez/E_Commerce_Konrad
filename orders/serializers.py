@@ -9,6 +9,29 @@ class DetalleOrdenSerializer(serializers.ModelSerializer):
         model = DetalleOrden
         fields = ['id', 'producto', 'producto_nombre', 'cantidad', 'valor_unitario']
 
+    def validate(self, attrs):
+        # Obtener datos del carrito
+        producto = attrs.get('producto') or self.instance.producto
+        cantidad_pedida = attrs.get('cantidad') or self.instance.cantidad
+
+        # Validación para cantidades negativas o cero
+        if cantidad_pedida <= 0:
+            raise serializers.ValidationError({
+                "cantidad": f"cantidad invalida solo puede seleccionar cantidades mayores a cero"
+            })
+
+        # Validación para cantidades mayores al stock    
+        if producto.cantidad < cantidad_pedida:
+            raise serializers.ValidationError({
+                "cantidad": f"No hay suficiente stock. Stock actual: {producto.cantidad}"
+            })     
+
+        # Validación estado de la orden
+        orden = attrs.get('orden') or self.instance.orden
+        if orden.estado != 'CARRITO':
+            raise serializers.ValidationError("No puede modificar un producto de una orden que ya no se encuentra en su carrito")
+        return attrs
+
 # 2. Luego la Orden
 class OrdenSerializer(serializers.ModelSerializer):
     detalles = DetalleOrdenSerializer(many=True, read_only=True)
