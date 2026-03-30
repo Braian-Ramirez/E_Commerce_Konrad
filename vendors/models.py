@@ -7,21 +7,31 @@ class Persona(models.Model):
         ('NATURAL', 'Persona Natural'),
         ('JURIDICA', 'Persona Juridica'),
     ]
+
+    TIPO_DOCUMENTO_CHOICES = [
+        ('CC', 'Cédula de Ciudadanía'),
+        ('CE', 'Cédula de Extranjería'),
+        ('NIT', 'NIT'),
+        ('PA', 'Pasaporte'),
+    ]
+
     # Conexión con el sistema de autenticación de Django (maneja passwords y login)
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='persona_profile', null=True, blank=True)
     
     nombre = models.CharField(max_length=100)
     apellido = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
+    tipo_documento = models.CharField(max_length=10, choices=TIPO_DOCUMENTO_CHOICES, default='CC')
     numero_identificacion = models.CharField(max_length=20, unique=True)
     telefono = models.CharField(max_length=20)
+    direccion = models.CharField(max_length=255,null=True, blank=True)
     # Hacemos opcional tipo_persona para los Compradores
     tipo_persona = models.CharField(max_length=10, choices=TIPO_PERSONA_CHOICES, null=True, blank=True)
     pais = models.CharField(max_length=100)
     ciudad = models.CharField(max_length=100)
 
     def __str__(self):
-        return f"{self.nombre} {self.apellido} ({self.numero_identificacion})"
+        return f"{self.nombre} {self.apellido} ({self.tipo_documento}:{self.numero_identificacion})"
 
     class Meta:
         verbose_name = "Persona"
