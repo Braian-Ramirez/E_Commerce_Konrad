@@ -4,6 +4,8 @@ from django.core.mail import send_mail
 from django.conf import settings
 from vendors.models import Solicitud
 
+# [PATRÓN DE DISEÑO: OBSERVER]
+# El decorador @receiver es el Observador que espera la señal del Sujeto (Solicitud).
 @receiver(post_save, sender=Solicitud)
 def enviar_notificacion_solicitud(sender, instance, created, **kwargs):
     if not created:

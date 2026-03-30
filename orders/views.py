@@ -74,6 +74,9 @@ class OrdenViewSet(viewsets.ModelViewSet):
         costo_envio = 0
 
         # Si el usuario NO eligió "Recoger" en el local...
+        # [PATRÓN DE DISEÑO: STRATEGY]
+        # Seleccionamos dinámicamente el cálculo del envío basándonos 
+        # en la estrategia elegida por el comprador (DOMICILIO vs RECOGER).
         if orden.tipo_entrega == 'DOMICILIO':
             # El comprador hereda los datos de Persona (donde está su ciudad)
             ciudad_comprador = orden.comprador.ciudad

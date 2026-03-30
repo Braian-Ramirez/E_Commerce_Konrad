@@ -20,6 +20,9 @@ class ImagenProductoSerializer(serializers.ModelSerializer):
         fields = ['id', 'imagen', 'es_principal']
 
 # Serializador Producto
+# [PATRÓN DE DISEÑO: FACTORY]
+# Los Serializers automatizan la creación (Factoría) de representaciones 
+# JSON seguras a partir de objetos complejos de la base de datos.
 class ProductoSerializer(serializers.ModelSerializer):
     # Esto traerá las imágenes asociadas al producto en el mismo JSON
     imagenes = ImagenProductoSerializer(many=True, read_only=True)

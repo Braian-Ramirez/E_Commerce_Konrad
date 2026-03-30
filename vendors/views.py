@@ -29,6 +29,10 @@ class SolicitudViewSet(viewsets.ModelViewSet):
             return Solicitud.objects.filter(persona=user.persona_profile)
         return Solicitud.objects.none()
 
+# [PATRÓN DE DISEÑO: ADAPTER]
+# Esta lógica sirve como ADAPTADOR para los servicios externos 
+# (Datacrédito y CIFIN). Convertimos los datos crudos del tercero 
+# (mock_data) en un estado interno de nuestra Solicitud (APROBADA/RECHAZADA).
     def perform_create(self, serializer):
         user = self.request.user
         if hasattr(user, 'persona_profile'):
@@ -46,7 +50,7 @@ class CalificacionVendedorViewSet(viewsets.ModelViewSet):
         # 1. Guardar la nueva calificación en BD
         calificacion = serializer.save()
 
-        # 2. Identificar a quién calificaron (minúscula para variables)
+        # 2. Identificar a quién calificaron
         vendedor = calificacion.vendedor
 
         # 3. Calcular nuevo promedio usando todo el historial

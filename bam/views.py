@@ -8,7 +8,14 @@ from orders.models import DetalleOrden
 from payments.models import Suscripcion
 from .models import LogVisitaProducto
 
+# [PATRÓN ARQUITECTÓNICO: CQRS - Segregación de Responsabilidades de Consulta]
+# Este módulo (App BAM) separa el modelo de lectura (Queries) del modelo 
+# de escritura de la aplicación principal para agilizar el Tablero de Control.
+
 # Vista KPI Producto Mas Vendido
+# [CQRS: Implementación del Read-Model]
+# Esta vista procesa agregaciones pesadas en la base de datos sin 
+# bloquear la tabla de Ventas para los demás usuarios.
 class KpiProductoMasVendidoView(APIView):
     """
     KPI 1: Producto con mayor número de ventas en el último mes.
@@ -61,7 +68,8 @@ class KpiCategoriaMasConsultadaView(APIView):
             "total_visitas": categoria['total_visitas']
         })
 
-# Vista KPI suscripciones por semestre 
+# Vista KPI suscripciones por semestre
+# [CQRS: Análisis de Tendencias de Negocio] 
 class KpiSuscripcionesPorSemestreView(APIView):
     """
     KPI 3: Comportamiento de suscripciones agrupado por semestres.

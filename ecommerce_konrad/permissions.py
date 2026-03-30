@@ -1,6 +1,8 @@
 from rest_framework import permissions
 
 # clase vendedor propietario permisos de lectura
+# [PATRÓN DE DISEÑO: PROXY]
+# Actúa como un intermediario que controla el acceso al objeto real (obj).
 class IsVendorOwnerOrReadOnly(permissions.BasePermission):
     """
     Permite acceso de solo lectura a cualquiera (si está autenticado según config global).
