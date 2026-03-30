@@ -1,0 +1,460 @@
+:root {
+  --primary: #6366f1;
+  /* Indigo moderno */
+  --primary-hover: #4f46e5;
+  --secondary: #ec4899;
+  /* Rosa vibrante para contrastes */
+  --bg-dark: #0f172a;
+  /* Fondo ultra oscuro */
+  --bg-card: rgba(30, 41, 59, 0.7);
+  /* Background para tarjetas glassmorphism */
+  --text-light: #f8fafc;
+  --text-muted: #94a3b8;
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background-color: var(--bg-dark);
+  color: var(--text-light);
+  min-height: 100vh;
+  /* Gradiente base sutil de fondo */
+  background-image:
+    radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 20%),
+    radial-gradient(circle at 90% 80%, rgba(236, 72, 153, 0.15) 0%, transparent 20%);
+  background-attachment: fixed;
+  overflow-x: hidden;
+}
+
+/* =========================================
+   NAVBAR & GLASSMORPHISM
+   ========================================= */
+.glass-effect {
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.navbar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  height: 80px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 5%;
+  z-index: 1000;
+}
+
+.nav-brand h1 {
+  font-size: 1.8rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.nav-brand span {
+  color: var(--primary);
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
+  border-radius: 100px;
+  padding: 5px 20px;
+  width: 40%;
+  transition: all 0.3s ease;
+}
+
+.search-bar:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.search-bar input {
+  background: transparent;
+  border: none;
+  color: white;
+  width: 100%;
+  padding: 10px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1rem;
+  outline: none;
+}
+
+.search-bar input::placeholder {
+  color: var(--text-muted);
+}
+
+.search-bar button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  opacity: 0.7;
+  transition: 0.3s;
+}
+
+.search-bar button:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.nav-item {
+  color: var(--text-light);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: color 0.3s ease;
+}
+
+.nav-item:hover {
+  color: var(--primary);
+}
+
+/* --- MAGIA DEL TEXTO COLAPSABLE DEL NAVBAR --- */
+.tooltip-btn {
+  display: flex;
+  align-items: center;
+  gap: 0px;
+  /* Separación inicial oculta */
+}
+
+.tooltip-btn .icon {
+  font-size: 1.3rem;
+}
+
+.tooltip-btn .hover-text {
+  max-width: 0;
+  /* Texto oculto al inicio */
+  opacity: 0;
+  /* 100% Transparente */
+  overflow: hidden;
+  white-space: nowrap;
+  /* Evita que el texto se rompa en dos líneas al contraerse */
+  font-size: 0.95rem;
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  /* Curva de animación premium */
+}
+
+/* El efecto Acordeón: cuando pones el ratón sobre el .nav-item */
+.tooltip-btn:hover {
+  gap: 8px;
+  /* Abre un pequeño espacio entre ícono y texto */
+}
+
+.tooltip-btn:hover .hover-text {
+  max-width: 150px;
+  /* Expande la caja del texto */
+  opacity: 1;
+  /* Enciende la visibilidad */
+}
+
+
+.cart-btn {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 100px;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.cart-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(236, 72, 153, 0.5);
+}
+
+.badge {
+  background: white;
+  color: var(--bg-dark);
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+/* =========================================
+   HERO SECTION
+   ========================================= */
+.hero {
+  margin-top: 80px;
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10%;
+  position: relative;
+}
+
+.hero-content {
+  flex: 1;
+  max-width: 600px;
+  z-index: 2;
+}
+
+.hero-badge {
+  display: inline-block;
+  background: rgba(99, 102, 241, 0.2);
+  color: #818cf8;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+.hero h2 {
+  font-size: 4rem;
+  font-weight: 800;
+  line-height: 1.1;
+  margin-bottom: 20px;
+  background: linear-gradient(to right, #fff, #94a3b8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero p {
+  font-size: 1.2rem;
+  color: var(--text-muted);
+  margin-bottom: 40px;
+  line-height: 1.6;
+}
+
+.cta-primary {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 16px 36px;
+  border-radius: 100px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  font-family: 'Outfit';
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+}
+
+.cta-primary:hover {
+  background: var(--primary-hover);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.6);
+}
+
+.hero-graphics {
+  flex: 1;
+  position: relative;
+  height: 400px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Bolas abstractas flotantes para dar estética al Hero */
+.floating-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  animation: float 8s ease-in-out infinite alternate;
+}
+
+.orb-1 {
+  width: 300px;
+  height: 300px;
+  background: linear-gradient(135deg, var(--primary), #818cf8);
+  top: 10%;
+  right: 20%;
+}
+
+.orb-2 {
+  width: 250px;
+  height: 250px;
+  background: linear-gradient(135deg, var(--secondary), #f472b6);
+  bottom: 0;
+  left: 20%;
+  animation-delay: -3s;
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+
+  100% {
+    transform: translateY(-40px) scale(1.05);
+  }
+}
+
+/* =========================================
+   PRODUCTS SECTION
+   ========================================= */
+.products-section {
+  padding: 80px 10%;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 50px;
+}
+
+.section-header h3 {
+  font-size: 2.2rem;
+  font-weight: 800;
+}
+
+.category-filters {
+  display: flex;
+  gap: 15px;
+}
+
+.filter-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
+  color: var(--text-light);
+  padding: 10px 20px;
+  border-radius: 100px;
+  font-family: 'Outfit';
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.filter-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.filter-btn.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+}
+
+/* GRID DE PRODUCTOS (Se llenará con JS) */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 30px;
+}
+
+/* Estilos para las tarjetas generadas dinámicamente */
+.product-card {
+  background: var(--bg-card);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 20px;
+  backdrop-filter: blur(10px);
+  transition: all 0.4s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.product-card:hover {
+  transform: translateY(-10px);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: var(--glass-shadow);
+}
+
+.product-image {
+  width: 100%;
+  height: 200px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  margin-bottom: 20px;
+  object-fit: contain;
+  padding: 10px;
+}
+
+.product-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.product-price {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-light);
+  margin-bottom: 20px;
+}
+
+.product-price span {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.add-cart-btn {
+  width: 100%;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--glass-border);
+  color: white;
+  border-radius: 12px;
+  font-family: 'Outfit';
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.add-cart-btn:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.loader-spinner {
+  font-size: 1.5rem;
+  color: var(--text-muted);
+  text-align: center;
+  grid-column: 1 / -1;
+  padding: 50px 0;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.5;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0.5;
+  }
+}

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es-co">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elige tu Rol | Konrad Shop</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+    <!-- 1. Estilos Globales -->
+    <link rel="stylesheet" href="../src/css/style.css" />
+
+    <!-- 2. Tu nuevo CSS Modular -->
+    <link rel="stylesheet" href="../src/css/register.css" />
+</head>
+
+<body style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh;">
+
+
+    <!-- Título Principal -->
+    <div style="text-align: center; margin-bottom: 20px;">
+        <h1 style="font-size: 2.5rem; color: var(--text-light);">🛒 Konrad<span
+                style="color: var(--primary);">Commerce</span></h1>
+        <p style="color: var(--text-muted); font-size: 1.2rem; margin-top: 10px;">¿Cómo te gustaría usar la plataforma?
+        </p>
+    </div>
+
+    <!-- Contenedor de las dos tarjetas -->
+    <div class="role-container">
+        <!-- Enlace hacia el verdadero formulario de Vendedor (que haremos después) -->
+        <a href="register-vendor.html" class="role-card role-vendor">
+            <div class="role-icon">💼</div>
+            <h3 style="font-size: 1.5rem; margin-bottom: 10px; color: white;">Vendedor</h3>
+            <p style="color: rgba(255,255,255,0.6); font-size: 0.95rem;">Empieza a ofrecer tus productos a la comunidad
+                Konradista.</p>
+            <div style="flex-grow: 1;"></div>
+            <button class="role-btn">Quiero ser vendedor</button>
+        </a>
+
+        <!-- Enlace hacia el verdadero formulario de Comprador (que haremos después) -->
+        <a href="register-buyer.html" class="role-card role-buyer">
+            <div class="role-icon">🛍️</div>
+            <h3 style="font-size: 1.5rem; margin-bottom: 10px; color: white;">Comprador</h3>
+            <p style="color: rgba(255,255,255,0.6); font-size: 0.95rem;">Explora y compra los mejores productos con
+                total seguridad.</p>
+            <div style="flex-grow: 1;"></div>
+            <button class="role-btn">Quiero ser comprador</button>
+        </a>
+    </div>
+
+    <a href="login.html" style="color: var(--text-muted); text-decoration: none; margin-top: 40px; font-size: 0.9rem;">
+        ← Cancelar y volver
+    </a>
+
+</body>
+
+</html>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es-co">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro Vendedor | Konrad Shop</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <!-- 1. Estilos Globales (Fondo, variables, botones base) -->
+    <link rel="stylesheet" href="../src/css/style.css" />
+    <!-- 2. Tu nuevo CSS Modular de Vendedor (Naranja) -->
+    <link rel="stylesheet" href="../src/css/vendor.css" />
+</head>
+
+<body style="display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 40px 0;">
+
+    <div class="floating-orb orb-1"
+        style="width: 500px; height: 500px; top: 10%; right: 10%; background: linear-gradient(135deg, #f97316, #fb923c);">
+    </div>
+
+    <!-- TARJETA DE REGISTRO VENDEDOR -->
+    <div class="product-card"
+        style="width: 100%; max-width: 600px; z-index: 10; padding: 35px; border-color: rgba(249, 115, 22, 0.4); box-shadow: 0 10px 40px rgba(249, 115, 22, 0.1);">
+
+        <a href="register.html"
+            style="color: var(--text-muted); text-decoration: none; font-size: 0.9rem; margin-bottom: 20px; display: inline-block;">
+            ← Atrás
+        </a>
+
+        <div style="text-align: center; margin-bottom: 30px;">
+            <div style="font-size: 3rem; margin-bottom: 5px;">💼</div>
+            <h2 style="font-size: 1.8rem; color: var(--text-light); margin-bottom: 8px;">Solicitud de Vendedor</h2>
+            <p style="color: var(--text-muted); font-size: 0.95rem;">Únete a nuestra red de confianza y empieza a
+                facturar.</p>
+        </div>
+
+        <form id="vendorRegisterForm">
+            <p
+                style="font-size: 0.8rem; color: #fb923c; font-weight: bold; margin-bottom: 12px; text-transform: uppercase;">
+                Información Personal del Vendedor</p>
+            <div class="form-twocol" style="margin-bottom: 20px;">
+                <div>
+                    <label
+                        style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;">Nombres</label>
+                    <input type="text" class="search-bar"
+                        style="width: 100%; border-radius: 8px; height: 42px; padding: 0 15px;" placeholder="Ej: Juan"
+                        required>
+                </div>
+                <div>
+                    <label
+                        style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;">Apellidos</label>
+                    <input type="text" class="search-bar"
+                        style="width: 100%; border-radius: 8px; height: 42px; padding: 0 15px;" placeholder="Ej: Pérez"
+                        required>
+                </div>
+            </div>
+
+            <div class="form-twocol" style="margin-bottom: 20px;">
+                <div>
+                    <label
+                        style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;">Identificación</label>
+                    <div style="display: flex; gap: 8px;">
+                        <select class="search-bar"
+                            style="width: 35%; border-radius: 8px; color: white; background-color: rgba(255,255,255,0.02); height: 42px; padding: 0 10px; appearance: none; text-align: center;"
+                            required>
+                            <option value="NIT">NIT</option>
+                            <option value="CC">C.C.</option>
+                            <option value="CE">C.E.</option>
+                        </select>
+                        <input type="number" class="search-bar"
+                            style="width: 65%; border-radius: 8px; height: 42px; padding: 0 15px;"
+                            placeholder="Número..." required>
+                    </div>
+                </div>
+                <div>
+                    <label
+                        style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;">Teléfono
+                        de Contacto</label>
+                    <input type="tel" class="search-bar"
+                        style="width: 100%; border-radius: 8px; height: 42px; padding: 0 15px;"
+                        placeholder="Ej: 300 123 4567" required>
+                </div>
+            </div>
+
+            <div class="form-twocol" style="margin-bottom: 20px;">
+                <div>
+                    <label
+                        style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;">Tipo
+                        de Persona</label>
+                    <select class="search-bar"
+                        style="width: 100%; border-radius: 8px; color: white; appearance: none; background-color: rgba(255,255,255,0.02); height: 42px; padding: 0 15px;"
+                        required>
+                        <option value="NATURAL">Persona Natural</option>
+                        <option value="JURIDICA">Persona Jurídica</option>
+                    </select>
+                </div>
+                <div>
+                    <label
+                        style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;">Correo
+                        de Usuario</label>
+                    <input type="email" class="search-bar"
+                        style="width: 100%; border-radius: 8px; height: 42px; padding: 0 15px;"
+                        placeholder="tuemail@unimagdalena.edu.co" required>
+                </div>
+            </div>
+
+            <div class="form-twocol" style="margin-bottom: 30px;">
+                <div><label
+                        style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;">Contraseña</label><input
+                        type="password" class="search-bar"
+                        style="width: 100%; border-radius: 8px; height: 42px; padding: 0 15px;" placeholder="••••••••"
+                        required></div>
+                <div><label
+                        style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;">Confirmar
+                        Clave</label><input type="password" class="search-bar"
+                        style="width: 100%; border-radius: 8px; height: 42px; padding: 0 15px;" placeholder="••••••••"
+                        required></div>
+            </div>
+
+            <!-- DESCARGA DE FORMATOS LEGALES -->
+            <div style="margin-bottom: 25px;">
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px; line-height: 1.4;">
+                    ⚠️ Antes de continuar, debes descargar, firmar y escanear los siguientes documentos legales:
+                </p>
+                <div class="form-twocol">
+                    <a href="#" class="add-cart-btn"
+                        style="text-align: center; border-color: #f97316; color: #f97316; text-decoration: none; font-size: 0.85rem; padding: 10px;">
+                        📄 Consentimiento Centrales
+                    </a>
+                    <a href="#" class="add-cart-btn"
+                        style="text-align: center; border-color: #f97316; color: #f97316; text-decoration: none; font-size: 0.85rem; padding: 10px;">
+                        📄 Tratamiento de Datos
+                    </a>
+                </div>
+            </div>
+
+            <!-- CARGA DE DOCUMENTOS (Aquí subirá todo escaneado) -->
+            <div
+                style="background: rgba(255,255,255,0.05); border: 2px dashed rgba(249, 115, 22, 0.4); border-radius: 12px; padding: 25px; text-align: center; margin-bottom: 30px;">
+                <label
+                    style="display: block; font-size: 0.9rem; color: #fb923c; font-weight: 800; margin-bottom: 10px;">Carga
+                    de Documentación Completa</label>
+                <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 15px;">Adjunta en un solo PDF o
+                    Carpeta comprimida: Fotocopia de la cédula, RUT, Cámara de Comercio y los 2 Consentimientos
+                    firmados.</p>
+                <input type="file" id="legalDoc" required style="font-size: 0.85rem; color: var(--text-muted);">
+            </div>
+
+
+            <button type="submit" class="cta-primary" style="width: 100%; background: #f97316;">Enviar Solicitud
+                ✅</button>
+        </form>
+
+    </div>
+
+</body>
+
+</html>
