@@ -1,0 +1,12 @@
+Hola {{ nombre }},
+
+Tu cuenta ha sido creada exitosamente en Konrad Shop.
+
+Tus credenciales de acceso son:
+  Usuario: {{ email }}
+  Contraseña temporal: {{ password }}
+
+Por seguridad, te recomendamos cambiar tu contraseña después de tu primer inicio de sesión.
+
+¡Bienvenido!
+El equipo de Konrad Shop

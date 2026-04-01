@@ -40,13 +40,13 @@
                 <div>
                     <label
                         style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;">Nombre</label>
-                    <input type="text" class="search-bar" style="width: 100%; border-radius: 8px;"
+                    <input type="text" id="nombre" class="search-bar" style="width: 100%; border-radius: 8px;"
                         placeholder="Tus nombres" required>
                 </div>
                 <div>
                     <label
                         style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;">Apellido</label>
-                    <input type="text" class="search-bar" style="width: 100%; border-radius: 8px;"
+                    <input type="text" id="apellido" class="search-bar" style="width: 100%; border-radius: 8px;"
                         placeholder="Tus apellidos" required>
                 </div>
             </div>
@@ -58,7 +58,7 @@
                         de Identidad</label>
                     <div style="display: flex; gap: 8px;">
                         <!-- Selector de Tipo -->
-                        <select class="search-bar"
+                        <select id="tipo_documento" class="search-bar"
                             style="width: 35%; border-radius: 8px; color: white; background-color: rgba(255,255,255,0.02); height: 42px; padding: 0 10px; appearance: none; text-align: center;"
                             required>
                             <option value="CC" selected>C.C.</option>
@@ -66,7 +66,7 @@
                             <option value="PA">Pas.</option>
                         </select>
                         <!-- Número de Documento -->
-                        <input type="number" class="search-bar"
+                        <input type="number" id="numero_identificacion" class="search-bar"
                             style="width: 65%; border-radius: 8px; height: 42px; padding: 0 15px;"
                             placeholder="Ej: 10203040" required>
                     </div>
@@ -74,7 +74,7 @@
                 <div>
                     <label
                         style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;">Teléfono</label>
-                    <input type="tel" class="search-bar"
+                    <input type="tel" id="telefono" class="search-bar"
                         style="width: 100%; border-radius: 8px; height: 42px; padding: 0 15px;"
                         placeholder="Ej: 300 000 0000" required>
                 </div>
@@ -84,7 +84,7 @@
                     <label
                         style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;">País</label>
                     <!-- Forzamos la altura a 42px y color blanco para el select -->
-                    <select class="search-bar"
+                    <select id="pais" class="search-bar"
                         style="width: 100%; border-radius: 8px; color: white; appearance: none; background-color: rgba(255,255,255,0.02); height: 42px; padding: 0 15px;"
                         required>
                         <option value="" disabled selected>País...</option>
@@ -92,13 +92,14 @@
                         <option value="MX">México</option>
                         <option value="PE">Perú</option>
                         <option value="CL">Chile</option>
+                        <option value="JP">Japón</option>
                     </select>
                 </div>
                 <div>
                     <!-- Acortamos el label para evitar que salte de línea -->
                     <label
                         style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;">Ciudad</label>
-                    <input type="text" class="search-bar"
+                    <input type="text" id="ciudad" class="search-bar"
                         style="width: 100%; border-radius: 8px; height: 42px; padding: 0 15px;" placeholder="Ej: Bogotá"
                         required>
                 </div>
@@ -106,14 +107,14 @@
             <div style="margin-bottom: 15px;">
                 <label style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;">Correo
                     Electrónico</label>
-                <input type="email" class="search-bar" style="width: 100%; border-radius: 8px;"
+                <input type="email" id="email" class="search-bar" style="width: 100%; border-radius: 8px;"
                     placeholder="tucorreo@konrad.edu.co" required>
             </div>
             <div style="margin-bottom: 20px;">
                 <label
                     style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;">Dirección
                     de Envío</label>
-                <input type="text" class="search-bar"
+                <input type="text" id="direccion" class="search-bar"
                     style="width: 100%; border-radius: 8px; height: 42px; padding: 0 15px;"
                     placeholder="Ej: Calle 100 #... Conjunto Residencial..." required>
             </div>
@@ -127,14 +128,14 @@
                 <div>
                     <label
                         style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;">Instagram</label>
-                    <input type="text" class="search-bar" style="width: 100%; border-radius: 8px;"
+                    <input type="text" id="instagram" class="search-bar" style="width: 100%; border-radius: 8px;"
                         placeholder="@usuario">
                 </div>
                 <div>
                     <label
                         style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;">Twitter
                         / X</label>
-                    <input type="text" class="search-bar" style="width: 100%; border-radius: 8px;"
+                    <input type="text" id="twitter" class="search-bar" style="width: 100%; border-radius: 8px;"
                         placeholder="@usuario">
                 </div>
             </div>
@@ -142,6 +143,21 @@
                 ✅</button>
         </form>
     </div>
+    <!-- MODAL DE RESULTADO -->
+    <div id="modalResultado"
+        style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:9999; justify-content:center; align-items:center;">
+        <div
+            style="background:#1e293b; border:1px solid rgba(255,255,255,0.1); border-radius:20px; padding:40px; max-width:420px; width:90%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.5);">
+            <div id="modalIcono" style="font-size:3rem; margin-bottom:15px;"></div>
+            <h3 id="modalTitulo" style="font-size:1.4rem; color:#f8fafc; margin-bottom:10px;"></h3>
+            <p id="modalMensaje" style="color:#94a3b8; font-size:0.95rem; line-height:1.5; margin-bottom:25px;"></p>
+            <button id="modalBtn"
+                style="padding:12px 35px; border-radius:100px; border:none; font-family:'Outfit',sans-serif; font-weight:700; font-size:1rem; cursor:pointer;">
+                Aceptar
+            </button>
+        </div>
+    </div>
+    <script src="../src/js/register-buyer.js"></script>
 </body>
 
 </html>
