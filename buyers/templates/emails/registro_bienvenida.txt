@@ -10,3 +10,9 @@ Por seguridad, te recomendamos cambiar tu contraseña después de tu primer inic
 
 ¡Bienvenido!
 El equipo de Konrad Shop
+--------------------------------------------------
+CERTIFICACIÓN DE REGISTRO (Estampado Cronológico)
+Fecha de emisión: {{ fecha_stamp }}
+ID de Transacción: {{ transaccion_id }}
+Sistema: E-Commerce Konrad Core v1.0
+--------------------------------------------------

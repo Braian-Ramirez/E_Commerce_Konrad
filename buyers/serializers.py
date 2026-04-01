@@ -1,12 +1,30 @@
 from rest_framework import serializers
 from django.db import transaction
 from django.contrib.auth.models import User
-from django.utils.crypto import get_random_string
+from django.utils import timezone
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from .models import Comprador
+from notifications.models import CorreoEnviado
 from vendors.models import Persona
 from vendors.serializers import PersonaSerializer
+import random
+import string
+
+def generar_password_valido():
+        longitud = 12
+        # Aseguramos al menos uno de cada tipo requerido
+        p_min = random.choice(string.ascii_lowercase)
+        p_maj = random.choice(string.ascii_uppercase)
+        p_num = random.choice(string.digits)
+        p_simbol = random.choice("!#$%&/@")
+        # El resto es aleatorio
+        p_resto = ''.join(random.choices(string.ascii_letters + string.digits, k=longitud-4))
+        
+        password = list(p_min + p_maj + p_num + p_resto + p_simbol)
+        random.shuffle(password) # Mezclamos para que no siempre sea el mismo orden
+        return ''.join(password)
+
 
 # Serializer para Comprador
 class CompradorSerializer(serializers.ModelSerializer):
@@ -50,7 +68,7 @@ class CompradorRegistrationSerializer(serializers.ModelSerializer):
 
             #Crear Usuario
             username = email
-            password = get_random_string(12)
+            password = generar_password_valido()
             user = User.objects.create_user(username=username, email=email, password=password)
 
             #Crear Persona
@@ -72,11 +90,14 @@ class CompradorRegistrationSerializer(serializers.ModelSerializer):
 
             # Enviar credenciales por correo
             # Renderizar el mensaje usando el template externo
+            ahora = timezone.now()
             mensaje = render_to_string('emails/registro_bienvenida.txt', {
-                'nombre': nombre,
-                'email': email,
-                'password': password,
-            })
+              'nombre': nombre,
+              'email': email,
+              'password': password,
+              'fecha_stamp': ahora.strftime('%Y-%m-%d %H:%M:%S'),
+              'transaccion_id': f"REG-{ahora.strftime('%y%m%d')}-{user.id}"
+          })
             send_mail(
                 subject='Bienvenido a Konrad Shop - Tus Credenciales',
                 message=mensaje,
@@ -84,5 +105,14 @@ class CompradorRegistrationSerializer(serializers.ModelSerializer):
                 recipient_list=[email],
                 fail_silently=False,
             )
+
+            # Registrar el correo en la tabla de auditoría (Notificaciones)
+            CorreoEnviado.objects.create(
+                destinatario=persona,
+                asunto='Bienvenido a Konrad Shop - Tus Credenciales',
+                cuerpo=mensaje,
+                timestamp_hash=f"SHA256-{ahora.timestamp()}" # Simulación de hash legal
+            )
+
 
             return comprador
