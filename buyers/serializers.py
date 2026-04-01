@@ -90,7 +90,7 @@ class CompradorRegistrationSerializer(serializers.ModelSerializer):
 
             # Enviar credenciales por correo
             # Renderizar el mensaje usando el template externo
-            ahora = timezone.now()
+            ahora = timezone.localtime()
             mensaje = render_to_string('emails/registro_bienvenida.txt', {
               'nombre': nombre,
               'email': email,

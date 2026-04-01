@@ -6,9 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro Vendedor | Konrad Shop</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <!-- 1. Estilos Globales (Fondo, variables, botones base) -->
     <link rel="stylesheet" href="../src/css/style.css" />
-    <!-- 2. Tu nuevo CSS Modular de Vendedor (Naranja) -->
     <link rel="stylesheet" href="../src/css/vendor.css" />
 </head>
 
@@ -18,7 +16,6 @@
         style="width: 500px; height: 500px; top: 10%; right: 10%; background: linear-gradient(135deg, #f97316, #fb923c);">
     </div>
 
-    <!-- TARJETA DE REGISTRO VENDEDOR -->
     <div class="product-card"
         style="width: 100%; max-width: 600px; z-index: 10; padding: 35px; border-color: rgba(249, 115, 22, 0.4); box-shadow: 0 10px 40px rgba(249, 115, 22, 0.1);">
 
@@ -30,27 +27,24 @@
         <div style="text-align: center; margin-bottom: 30px;">
             <div style="font-size: 3rem; margin-bottom: 5px;">💼</div>
             <h2 style="font-size: 1.8rem; color: var(--text-light); margin-bottom: 8px;">Solicitud de Vendedor</h2>
-            <p style="color: var(--text-muted); font-size: 0.95rem;">Únete a nuestra red de confianza y empieza a
-                facturar.</p>
+            <p style="color: var(--text-muted); font-size: 0.95rem;">Únete a nuestra red de confianza.</p>
         </div>
 
         <form id="vendorRegisterForm">
             <p
                 style="font-size: 0.8rem; color: #fb923c; font-weight: bold; margin-bottom: 12px; text-transform: uppercase;">
-                Información Personal del Vendedor</p>
+                Información del Solicitante</p>
+
             <div class="form-twocol" style="margin-bottom: 20px;">
                 <div>
                     <label
-                        style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;">Nombres</label>
-                    <input type="text" class="search-bar"
-                        style="width: 100%; border-radius: 8px; height: 42px; padding: 0 15px;" placeholder="Ej: Juan"
-                        required>
+                        style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;">Nombre</label>
+                    <input type="text" id="nombre" class="search-bar" style="width: 100%; border-radius: 8px;" required>
                 </div>
                 <div>
                     <label
-                        style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;">Apellidos</label>
-                    <input type="text" class="search-bar"
-                        style="width: 100%; border-radius: 8px; height: 42px; padding: 0 15px;" placeholder="Ej: Pérez"
+                        style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;">Apellido</label>
+                    <input type="text" id="apellido" class="search-bar" style="width: 100%; border-radius: 8px;"
                         required>
                 </div>
             </div>
@@ -61,34 +55,40 @@
                         style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;">Número
                         de identificación</label>
                     <div style="display: flex; gap: 8px;">
-                        <select class="search-bar"
-                            style="width: 35%; border-radius: 8px; color: white; background-color: rgba(255,255,255,0.02); height: 42px; padding: 0 10px; appearance: none; text-align: center;"
-                            required>
+                        <select id="tipo_documento" class="search-bar"
+                            style="width: 35%; border-radius: 8px; color: white;" required>
                             <option value="NIT">NIT</option>
                             <option value="CC">C.C.</option>
                             <option value="CE">C.E.</option>
                         </select>
-                        <input type="number" class="search-bar"
-                            style="width: 65%; border-radius: 8px; height: 42px; padding: 0 15px;"
-                            placeholder="Número..." required>
+                        <input id="numero_identificacion" type="text" class="search-bar"
+                            style="width: 65%; border-radius: 8px;" required>
                     </div>
                 </div>
                 <div>
                     <label
-                        style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;">Teléfono
-                    </label>
-                    <input type="tel" class="search-bar"
-                        style="width: 100%; border-radius: 8px; height: 42px; padding: 0 15px;"
-                        placeholder="Ej: 300 123 4567" required>
+                        style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;">Teléfono</label>
+                    <input id="telefono" type="tel" class="search-bar" style="width: 100%; border-radius: 8px;"
+                        required>
                 </div>
             </div>
-            <div style="margin-bottom: 20px;">
-                <label
-                    style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;">Dirección
-                </label>
-                <input type="text" class="search-bar"
-                    style="width: 100%; border-radius: 8px; height: 42px; padding: 0 15px;"
-                    placeholder="Ej: Calle 100 #... Piso 2..." required>
+
+            <div class="form-twocol" style="margin-bottom: 20px;">
+                <div>
+                    <label
+                        style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;">País</label>
+                    <select id="pais" class="search-bar" style="width: 100%; border-radius: 8px; color: white;"
+                        required>
+                        <option value="CO">Colombia</option>
+                        <option value="MX">México</option>
+                        <option value="PE">Perú</option>
+                    </select>
+                </div>
+                <div>
+                    <label
+                        style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;">Ciudad</label>
+                    <input id="ciudad" type="text" class="search-bar" style="width: 100%; border-radius: 8px;" required>
+                </div>
             </div>
 
             <div class="form-twocol" style="margin-bottom: 20px;">
@@ -96,8 +96,7 @@
                     <label
                         style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;">Tipo
                         de Persona</label>
-                    <select class="search-bar"
-                        style="width: 100%; border-radius: 8px; color: white; appearance: none; background-color: rgba(255,255,255,0.02); height: 42px; padding: 0 15px;"
+                    <select id="tipo_persona" class="search-bar" style="width: 100%; border-radius: 8px; color: white;"
                         required>
                         <option value="NATURAL">Persona Natural</option>
                         <option value="JURIDICA">Persona Jurídica</option>
@@ -107,47 +106,97 @@
                     <label
                         style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;">Correo
                         electrónico</label>
-                    <input type="email" class="search-bar"
-                        style="width: 100%; border-radius: 8px; height: 42px; padding: 0 15px;"
-                        placeholder="tuemail@unimagdalena.edu.co" required>
+                    <input id="email" type="email" class="search-bar" style="width: 100%; border-radius: 8px;" required>
                 </div>
             </div>
-            <!-- DESCARGA DE FORMATOS LEGALES -->
+
+            <!-- SECCIÓN DE DESCARGAS-->
             <div style="margin-bottom: 25px;">
                 <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px; line-height: 1.4;">
-                    ⚠️ Antes de continuar, debes descargar, firmar y escanear los siguientes documentos legales:
+                    ⚠️ Antes de continuar, debes descargar, firmar y adjuntar los siguientes documentos legales:
                 </p>
-                <div class="form-twocol">
-                    <a href="#" class="add-cart-btn"
-                        style="text-align: center; border-color: #f97316; color: #f97316; text-decoration: none; font-size: 0.85rem; padding: 10px;">
+                <div class="form-twocol" style="display: flex; gap: 10px;">
+                    <a href="/assets/docs/Consentimiento_Centrales_Konrad.pdf"
+                        download="Consentimiento_Centrales_Konrad.pdf" class="add-cart-btn"
+                        style="text-align: center; border-color: #f97316; color: #f97316; text-decoration: none; font-size: 0.82rem; padding: 10px; flex: 1;">
                         📄 Consentimiento Centrales
                     </a>
-                    <a href="#" class="add-cart-btn"
-                        style="text-align: center; border-color: #f97316; color: #f97316; text-decoration: none; font-size: 0.85rem; padding: 10px;">
+                    <a href="/assets/docs/Tratamiento_Datos_Konrad.pdf" download="Tratamiento_Datos_Konrad.pdf"
+                        class="add-cart-btn"
+                        style="text-align: center; border-color: #f97316; color: #f97316; text-decoration: none; font-size: 0.82rem; padding: 10px; flex: 1;">
                         📄 Tratamiento de Datos
                     </a>
                 </div>
             </div>
 
-            <!-- CARGA DE DOCUMENTOS (Aquí subirá todo escaneado) -->
-            <div
-                style="background: rgba(255,255,255,0.05); border: 2px dashed rgba(249, 115, 22, 0.4); border-radius: 12px; padding: 25px; text-align: center; margin-bottom: 30px;">
-                <label
-                    style="display: block; font-size: 0.9rem; color: #fb923c; font-weight: 800; margin-bottom: 10px;">Carga
-                    de Documentación Completa</label>
-                <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 15px;">Adjunta en un solo PDF o
-                    Carpeta comprimida: Fotocopia de la cédula, RUT, Cámara de Comercio y los 2 Consentimientos
-                    firmados.</p>
-                <input type="file" id="legalDoc" required style="font-size: 0.85rem; color: var(--text-muted);">
-            </div>
+            <!-- CARGA DE DOCUMENTACIÓN OBLIGATORIA (RNF 40-42) -->
+            <p
+                style="font-size: 0.8rem; color: #fb923c; font-weight: bold; margin-bottom: 12px; text-transform: uppercase;">
+                Carga de Documentación Escaneada
+            </p>
 
+            <div
+                style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; background: rgba(255,255,255,0.02); padding: 15px; border-radius: 12px; border: 2px dashed rgba(249, 115, 22, 0.4);">
+                <div style="grid-column: span 2;">
+                    <label style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 5px;">1.
+                        Fotocopia de Cédula</label>
+                    <input type="file" id="doc_cedula" class="search-bar" style="width: 100%; font-size: 0.8rem;"
+                        required>
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 5px;">2.
+                        RUT</label>
+                    <input type="file" id="doc_rut" class="search-bar" style="width: 100%; font-size: 0.8rem;" required>
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 5px;">3.
+                        Cámara y Comercio</label>
+                    <input type="file" id="doc_camara" class="search-bar" style="width: 100%; font-size: 0.8rem;"
+                        required>
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 5px;">4.
+                        Consentimiento Centrales</label>
+                    <input type="file" id="doc_riesgo" class="search-bar" style="width: 100%; font-size: 0.8rem;"
+                        required>
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 5px;">5.
+                        Tratamiento de Datos</label>
+                    <input type="file" id="doc_datos" class="search-bar" style="width: 100%; font-size: 0.8rem;"
+                        required>
+                </div>
+            </div>
 
             <button type="submit" class="cta-primary" style="width: 100%; background: #f97316;">Enviar Solicitud
                 ✅</button>
         </form>
-
     </div>
 
+    <!-- MODAL DE RESULTADO (SOLICITUD VENDEDOR) -->
+    <div id="modalResultado"
+        style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:9999; justify-content:center; align-items:center; backdrop-filter: blur(5px);">
+        <div
+            style="background:#1c1917; border:1px solid #f97316; border-radius:20px; padding:40px; max-width:450px; width:90%; text-align:center; box-shadow:0 0 50px rgba(249, 115, 22, 0.2);">
+            <div id="modalIcono" style="font-size:4rem; margin-bottom:20px;"></div>
+            <h3 id="modalTitulo" style="font-size:1.5rem; color:#fff; margin-bottom:15px; font-weight: 800;"></h3>
+            <div id="modalCuerpo" style="margin-bottom:25px;">
+                <p id="modalMensaje" style="color:#d6d3d1; font-size:1rem; margin-bottom:10px;"></p>
+                <div id="radicadoBox"
+                    style="background:rgba(249, 115, 22, 0.1); padding:15px; border-radius:10px; border:1px dashed #f97316; display:none;">
+                    <span style="display:block; font-size:0.8rem; color:#f97316; text-transform:uppercase;">Número de
+                        Radicado</span>
+                    <strong id="numRadicado" style="font-size:1.4rem; color:#fff;"></strong>
+                </div>
+            </div>
+            <button id="modalBtn"
+                style="padding:12px 40px; border-radius:100px; border:none; font-family:'Outfit',sans-serif; font-weight:800; cursor:pointer; width: 100%;">
+                De acuerdo
+            </button>
+        </div>
+    </div>
+
+    <script src="../src/js/register-vendor.js"></script>
 </body>
 
 </html>

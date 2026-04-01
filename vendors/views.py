@@ -1,7 +1,11 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, status
+from rest_framework.response import Response
+from rest_framework.decorators import action
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.permissions import AllowAny
 from django.db.models import Avg
 from .models import Persona, Vendedor, Solicitud, CalificacionVendedor
-from .serializers import PersonaSerializer, VendedorSerializer, SolicitudSerializer, CalificacionVendedorSerializer
+from .serializers import PersonaSerializer, VendedorSerializer, SolicitudSerializer, CalificacionVendedorSerializer, SolicitudVendedorRegistrationSerializer
 from ecommerce_konrad.permissions import IsDirectorComercialOrPostOnly
 
 # Vista Persona
@@ -16,18 +20,21 @@ class VendedorViewSet(viewsets.ModelViewSet):
 
 # Vista Solicitud
 class SolicitudViewSet(viewsets.ModelViewSet):
+    queryset = Solicitud.objects.all()
     serializer_class = SolicitudSerializer
-    permission_classes = [IsDirectorComercialOrPostOnly]
-
-    def get_queryset(self):
-        user = self.request.user
-        if not user.is_authenticated:
-            return Solicitud.objects.none()
-        if user.is_staff or user.is_superuser:
-            return Solicitud.objects.all()
-        if hasattr(user, 'persona_profile'):
-            return Solicitud.objects.filter(persona=user.persona_profile)
-        return Solicitud.objects.none()
+    parser_classes = (MultiPartParser, FormParser) # Muy importante para subir archivos
+    
+    @action(detail=False, methods=['post'], permission_classes=[AllowAny])
+    def register_vendor(self, request):
+        serializer = SolicitudVendedorRegistrationSerializer(data=request.data)
+        if serializer.is_valid():
+            solicitud = serializer.save()
+            return Response({
+                "mensaje": "Solicitud creada con éxito",
+                "numero_radicado": solicitud.numero_solicitud,
+                "estado": solicitud.estado
+            }, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # [PATRÓN DE DISEÑO: ADAPTER]
 # Esta lógica sirve como ADAPTADOR para los servicios externos 
