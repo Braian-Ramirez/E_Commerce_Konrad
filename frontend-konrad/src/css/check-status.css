@@ -1,0 +1,160 @@
+:root {
+    --accent: #f97316;
+    --bg-dark: #0c0a09;
+    --card-bg: #141210;
+    --input-bg: #1c1a18;
+}
+
+body {
+    background: var(--bg-dark);
+    color: white;
+    font-family: 'Outfit', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+}
+
+/* RESPONSIVIDAD 📱 (Añadido arriba para evitar errores) */
+@media (max-width: 768px) {
+    .header-status { padding: 15px 20px; }
+    .status-card { padding: 40px 20px; border-radius: 20px; border: none; background: transparent; box-shadow: none; }
+}
+
+.header-status {
+    padding: 20px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.main-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.status-card {
+    background: var(--card-bg);
+    border: 1px solid rgba(249, 115, 22, 0.2);
+    border-radius: 32px;
+    padding: 60px 40px;
+    max-width: 550px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.8);
+}
+
+/* INPUTS Y BOTONES UNIFICADOS */
+.search-field, .btn-check, .btn-secondary {
+    width: 100%;
+    box-sizing: border-box;
+    height: 60px;
+    border-radius: 16px;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    margin-bottom: 16px;
+}
+
+.search-field {
+    background: var(--input-bg);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 0 25px;
+    text-align: center;
+}
+
+.search-field:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.btn-check {
+    background: var(--accent);
+    color: white;
+    border: none;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.btn-secondary {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #a8a29e;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+/* CAJA DE RESULTADOS ESTILO PREMIUM (TU REFERENCIA) */
+.result-box {
+    margin-top: 40px;
+    padding: 30px;
+    border-radius: 24px;
+    background: #1c1a18;
+    border-left: 8px solid var(--accent);
+    text-align: left; /* Alineado a la izquierda como en la foto */
+    display: none;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+}
+
+.status-label {
+    font-size: 0.75rem;
+    color: #a8a29e;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 10px;
+}
+
+.status-value {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: white;
+    margin: 5px 0 20px;
+    letter-spacing: -1px;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 10px 24px;
+    border-radius: 100px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    background: var(--accent);
+    color: white;
+    margin-bottom: 25px;
+}
+
+.result-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.footer-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #d6d3d1;
+    font-size: 1rem;
+}
+
+.footer-item strong { color: white; margin-right: 4px; }
+
+.back-link {
+    color: #a8a29e;
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.back-link:hover { color: white; }

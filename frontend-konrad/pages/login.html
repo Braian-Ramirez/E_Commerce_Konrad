@@ -5,66 +5,58 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar Sesión | Konrad Shop</title>
-    <!-- Mismos estilos y fuentes de nuestro Home -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <!-- OJO a la ruta: salimos de 'pages' (../) y entramos a 'src/css' -->
     <link rel="stylesheet" href="../src/css/style.css" />
 </head>
 
-<body style="display: flex; justify-content: center; align-items: center; height: 100vh;">
+<body style="display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow-x: hidden; background: #0c0a09; margin: 0;">
 
-    <!-- Bolas de neón de fondo (El toque premium) -->
+    <!-- Bolas de neón de fondo -->
     <div class="floating-orb orb-1" style="width: 400px; height: 400px; top: 10%; right: 10%;"></div>
     <div class="floating-orb orb-2" style="width: 500px; height: 500px; bottom: 0; left: -5%;"></div>
 
     <!-- TARJETA DE LOGIN -->
-    <div class="product-card" style="width: 100%; max-width: 400px; z-index: 10; padding: 40px;">
+    <div class="product-card" style="width: 90%; max-width: 400px; z-index: 10; padding: 40px;">
         <div style="text-align: center; margin-bottom: 30px;">
             <a href="../index.html" style="text-decoration: none;">
-                <h1 style="font-size: 2rem; color: var(--text-light);">🛍️ Konrad<span
-                        style="color: var(--primary);">Shop</span></h1>
+                <h1 style="font-size: 2rem; color: var(--text-light); font-weight: 800;">🛍️ Comercial <span
+                        style="color: var(--primary);">Konrad</span></h1>
             </a>
             <p style="color: var(--text-muted); margin-top: 5px;">Bienvenido de nuevo</p>
         </div>
 
         <form id="loginForm">
             <div style="margin-bottom: 20px;">
-                <label
-                    style="display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px;">Usuario</label>
-                <input type="text" id="username" class="search-bar" style="width: 100%; border-radius: 8px;"
-                    placeholder="Tu usuario_konrad" required>
+                <label style="display: block; font-size: 0.9rem; color: #a8a29e; margin-bottom: 8px;">Correo Electrónico</label>
+                <input type="email" id="email" class="search-bar" style="width: 100%; border-radius: 8px; background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); padding: 12px;"
+                    placeholder="ejemplo@konradlorenz.edu.co" required>
             </div>
 
             <div style="margin-bottom: 30px;">
-                <label
-                    style="display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px;">Contraseña</label>
-                <input type="password" id="password" class="search-bar" style="width: 100%; border-radius: 8px;"
+                <label style="display: block; font-size: 0.9rem; color: #a8a29e; margin-bottom: 8px;">Contraseña</label>
+                <input type="password" id="password" class="search-bar" style="width: 100%; border-radius: 8px; background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); padding: 12px;"
                     placeholder="••••••••" required>
             </div>
 
-            <button type="submit" class="cta-primary" style="width: 100%; margin-bottom: 20px;">Ingresar</button>
+            <button type="submit" class="cta-primary" style="width: 100%; margin-bottom: 20px; cursor: pointer; padding: 15px; border-radius: 12px; font-weight: 800; border: none; background: var(--primary); color: white;">Ingresar</button>
 
-            <!-- Nuevos Enlaces de Ayuda Estilizados -->
             <div style="text-align: center; display: flex; flex-direction: column; gap: 15px;">
-                <a href="/pages/forget-password.html" class="nav-item"
-                    style="font-size: 0.9rem; color: var(--text-muted); text-decoration: underline;">
-                    ¿Olvidaste tu contraseña? Haz clic aquí
+                <a href="forget-password.html" style="font-size: 0.9rem; color: #a8a29e; text-decoration: none;">
+                    ¿Olvidaste tu contraseña?
                 </a>
-
-                <div style="width: 100%; height: 1px; background: var(--glass-border); margin: 5px 0;"></div>
-
-                <span style="font-size: 0.9rem; color: var(--text-muted);">
+                <div style="width: 100%; height: 1px; background: rgba(255,255,255,0.05); margin: 5px 0;"></div>
+                <span style="font-size: 0.9rem; color: #a8a29e;">
                     ¿No tienes una cuenta?
-                    <a href="/pages/register.html" class="nav-item"
-                        style="color: var(--primary); font-weight: bold; text-decoration: none;">
-                        ¡Regístrate ahora!
+                    <a href="register.html" style="color: var(--primary); font-weight: bold; text-decoration: none;">
+                        Regístrate
                     </a>
                 </span>
             </div>
-
         </form>
     </div>
 
-</body>
+    <!-- SCRIPT DE CONEXIÓN CON EL BACKEND -->
+    <script src="../src/js/login.js"></script>
 
+</body>
 </html>

@@ -32,11 +32,20 @@ class VendedorSerializer(serializers.ModelSerializer):
             'fecha_vencimiento', 'calificacion_promedio'
         ]
 
-# Serializador Solicitud
+# Serializador Solicitud (Aplanado para el Dashboard)
 class SolicitudSerializer(serializers.ModelSerializer):
+    identificacion = serializers.CharField(source='persona.numero_identificacion', read_only=True)
+    nombres = serializers.CharField(source='persona.nombre', read_only=True)
+    apellidos = serializers.CharField(source='persona.apellido', read_only=True)
+    email = serializers.EmailField(source='persona.email', read_only=True)
+    telefono = serializers.CharField(source='persona.telefono', read_only=True)
+
     class Meta:
         model = Solicitud
-        fields = '__all__'
+        fields = [
+            'id', 'numero_solicitud', 'estado', 'fecha_creacion',
+            'identificacion', 'nombres', 'apellidos', 'email', 'telefono'
+        ]
 
 # Serializador CalificacionVendedor
 class CalificacionVendedorSerializer(serializers.ModelSerializer):

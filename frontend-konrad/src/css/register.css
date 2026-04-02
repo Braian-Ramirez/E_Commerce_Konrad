@@ -1,13 +1,17 @@
 .role-container {
     display: flex;
-    gap: 40px;
+    flex-wrap: wrap; /* Para que bajen si no caben */
+    gap: 20px;
     justify-content: center;
     align-items: stretch;
     margin-top: 40px;
+    width: 100%;
 }
 
 .role-card {
-    width: 350px;
+    max-width: 350px;
+    width: 100%;
+    /* ... resto igual ... */
     background: rgba(30, 41, 59, 0.5);
     border: 2px solid;
     border-radius: 20px;

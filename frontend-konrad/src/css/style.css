@@ -20,7 +20,9 @@
   box-sizing: border-box;
 }
 
-body {
+html, body {
+  overflow-x: hidden; /* ¡Cero scroll horizontal! */
+  width: 100%;
   font-family: 'Outfit', sans-serif;
   background-color: var(--bg-dark);
   color: var(--text-light);
@@ -30,7 +32,6 @@ body {
     radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 20%),
     radial-gradient(circle at 90% 80%, rgba(236, 72, 153, 0.15) 0%, transparent 20%);
   background-attachment: fixed;
-  overflow-x: hidden;
 }
 
 /* =========================================
@@ -287,19 +288,19 @@ body {
 }
 
 .orb-1 {
-  width: 300px;
-  height: 300px;
+  width: 200px;
+  height: 200px;
   background: linear-gradient(135deg, var(--primary), #818cf8);
-  top: 10%;
-  right: 20%;
+  top: 5%;
+  right: -5%; /* ¡Cuidado aquí! Movido para no salirse */
 }
 
 .orb-2 {
-  width: 250px;
-  height: 250px;
+  width: 180px;
+  height: 180px;
   background: linear-gradient(135deg, var(--secondary), #f472b6);
-  bottom: 0;
-  left: 20%;
+  bottom: -10%;
+  left: -5%;
   animation-delay: -3s;
 }
 
@@ -435,6 +436,26 @@ body {
 .add-cart-btn:hover {
   background: var(--primary);
   border-color: var(--primary);
+}
+
+/* =========================================
+   RESPONSIVIDAD GLOBAL 📱✨
+   ========================================= */
+
+@media (max-width: 1024px) {
+  .hero h2 { font-size: 3rem; }
+}
+
+@media (max-width: 768px) {
+  .navbar { padding: 0 20px; }
+  .search-bar { display: none; } 
+  .nav-item .hover-text { display: none; }
+  .hero { flex-direction: column; text-align: center; padding-top: 100px; }
+  .hero h2 { font-size: 2.5rem; }
+  .hero-graphics { height: 200px; margin-top: 20px; }
+  /* Formulario Registro */
+  .register-card { margin: 10px; padding: 20px !important; }
+  .form-grid { grid-template-columns: 1fr !important; }
 }
 
 .loader-spinner {
