@@ -7,7 +7,7 @@ from django.db.models import Avg
 from .models import Persona, Vendedor, Solicitud, CalificacionVendedor, ConsultaCrediticia_Local
 from .serializers import PersonaSerializer, VendedorSerializer, SolicitudSerializer, CalificacionVendedorSerializer, SolicitudVendedorRegistrationSerializer
 from ecommerce_konrad.permissions import IsDirectorComercialOrPostOnly
-from external_mocks.views import mock_datacredito, mock_cifin
+from external_mocks.views import mock_datacredito, mock_cifin, mock_antecedentes_judiciales
 import json 
 
 # Vista Persona
@@ -48,6 +48,7 @@ class SolicitudViewSet(viewsets.ModelViewSet):
             })
         
         return Response({"error": "Solicitud no encontrada"}, status=status.HTTP_404_NOT_FOUND)
+
     # Acción para que el Director apruebe/rechace (solo autenticados)
     @action(detail=True, methods=['patch'], url_path='cambiar-estado')
     def cambiar_estado(self, request, pk=None):
@@ -114,6 +115,29 @@ class SolicitudViewSet(viewsets.ModelViewSet):
         credit_data.save()
         # Devover la respuesta al frontend
         return response    
+
+    # Acción consultar Antecedentes (Policía)
+    @action(detail=True, methods=['post'], url_path='consultar-antecedentes')
+    def consultar_antecedentes(self, request, pk=None):
+        # Obtener la solicitud actual (para guardarle el resultado al final)
+        solicitud = self.get_object()
+        
+        # Tomar la cédula que el Director escribió en el buscador del modal
+        documento_ingresado = request.data.get('numero_identificacion')
+        
+        if not documento_ingresado:
+            return Response({"error": "Debe ingresar una identificación"}, status=400)
+        
+        # 3. Llamar al Mock de Antecedentes
+        response = mock_antecedentes_judiciales(request, documento_ingresado)
+        data = json.loads(response.content.decode('utf-8'))
+        
+        # 4. PASO CLAVE: Guardamos el estado judicial ('REQUERIDO' o 'NO_REQUERIDO')
+        # solo si la consulta terminó bien.
+        solicitud.resultado_judicial = data.get('estado')
+        solicitud.save()
+        
+        return response
 
 # [PATRÓN DE DISEÑO: ADAPTER]
 # Esta lógica sirve como ADAPTADOR para los servicios externos 

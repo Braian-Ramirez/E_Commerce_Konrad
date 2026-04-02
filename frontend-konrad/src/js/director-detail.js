@@ -168,4 +168,65 @@ document.addEventListener('DOMContentLoaded', () => {
             btnCifin.disabled = false;
         }
     });
+    // 5. SIMULADOR POLICÍA (ANTECEDENTES)
+    const btnPolicia = document.getElementById('btnPolicia');
+    const modalPolicia = document.getElementById('modalPolicia');
+
+    // Abre el modal y reinicia la vista
+    btnPolicia.addEventListener('click', () => {
+        document.getElementById('policiaSearchArea').style.display = 'block';
+        document.getElementById('policiaResultArea').style.display = 'none';
+        document.getElementById('inputCedulaPolicia').value = ''; // Limpiar el input
+        modalPolicia.style.display = 'flex';
+    });
+
+    // Realiza la búsqueda "institucional"
+    document.getElementById('btnEjecutarBusquedaPolicia').addEventListener('click', async () => {
+        const cedula = document.getElementById('inputCedulaPolicia').value;
+        if (!cedula) { alert("Debe ingresar una cédula"); return; }
+
+        const btnBusqueda = document.getElementById('btnEjecutarBusquedaPolicia');
+        btnBusqueda.textContent = "Buscando en Base de Datos... ⚖️";
+        btnBusqueda.disabled = true;
+
+        try {
+            const res = await fetch(`http://127.0.0.1:8000/api/v1/vendors/solicitudes/${solId}/consultar-antecedentes/`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ numero_identificacion: cedula })
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+
+                // 1. Ocultar el formulario y mostrar certificado
+                document.getElementById('policiaSearchArea').style.display = 'none';
+                document.getElementById('policiaResultArea').style.display = 'block';
+
+                // 2. Rellenar datos del "Certificado"
+                document.getElementById('certId').textContent = Math.floor(Math.random() * 900000) + 100000;
+                document.getElementById('certNombre').textContent = `Persona Identificada: ${cedula}`;
+
+                const certStatus = document.getElementById('certStatus');
+                certStatus.textContent = data.estado === "NO_REQUERIDO" ? "LIBRE DE ANTECEDENTES ✅" : "REQUERIDO POR LA JUSTICIA ⚠️";
+
+                // Colores institucionales
+                certStatus.style.background = data.estado === "NO_REQUERIDO" ? "#dcfce7" : "#fee2e2";
+                certStatus.style.color = data.estado === "NO_REQUERIDO" ? "#166534" : "#991b1b";
+
+            } else {
+                alert("Error al conectar con el servidor de la Policía.");
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Falla técnica en la consulta judicial.");
+        } finally {
+            btnBusqueda.textContent = "GENERAR CERTIFICADO ⚖️";
+            btnBusqueda.disabled = false;
+        }
+    });
+
 });

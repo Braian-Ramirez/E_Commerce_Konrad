@@ -134,6 +134,47 @@
         </div>
     </div>
 
+    <!-- MODAL SIMULADOR POLICÍA NACIONAL -->
+    <div id="modalPolicia" class="modal-overlay">
+        <div class="modal-content"
+            style="max-width: 550px; background: #f8fafc; border: 2px solid #1e293b; color: #1e293b;">
+            <header style="border-bottom: 2px solid #e2e8f0; padding-bottom: 15px; margin-bottom: 20px;">
+                <h3 style="margin: 0; color: #1e3a8a; font-weight: 800;">🏛️ SISTEMA DE ANTECEDENTES NACIONALES</h3>
+                <p style="font-size: 0.8rem; color: #64748b; margin: 5px 0 0;">Bienvenido al portal de consulta
+                    ciudadana</p>
+            </header>
+
+            <div id="policiaSearchArea">
+                <p style="text-align: left; font-size: 0.9rem;">Por favor, ingrese el número de identificación para
+                    verificar el pasado judicial:</p>
+                <input type="text" id="inputCedulaPolicia" placeholder="Ej: 123456789"
+                    style="width: 100%; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 15px; font-size: 1.1rem; box-sizing: border-box;">
+
+                <button id="btnEjecutarBusquedaPolicia"
+                    style="background: #1e3a8a; color: white; width: 100%; padding: 15px; border-radius: 8px; border: none; font-weight: 800; cursor: pointer;">
+                    GENERAR CERTIFICADO ⚖️
+                </button>
+            </div>
+
+            <!-- Área de resultados (oculta por defecto) -->
+            <div id="policiaResultArea"
+                style="display: none; text-align: left; background: white; border: 1px dashed #cbd5e1; padding: 20px; border-radius: 8px;">
+                <p style="color: #64748b; font-size: 0.8rem; margin: 0;">CERTIFICADO OFICIAL #<span
+                        id="certId">...</span></p>
+                <h4 id="certNombre" style="margin: 10px 0; font-size: 1.2rem;">CARGANDO...</h4>
+                <div id="certStatus"
+                    style="padding: 10px; border-radius: 6px; font-weight: 800; text-align: center; margin-top: 10px;">
+                    ...</div>
+            </div>
+
+            <button onclick="document.getElementById('modalPolicia').style.display = 'none'"
+                style="margin-top: 20px; background: transparent; color: #64748b; border: none; font-size: 0.8rem; cursor: pointer; text-decoration: underline;">
+                Cerrar Ventana
+            </button>
+        </div>
+    </div>
+
+
     <!-- SCRIPT DE CONEXIÓN -->
     <script src="../src/js/director-detail.js"></script>
 </body>
