@@ -4,9 +4,11 @@ from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.db.models import Avg
-from .models import Persona, Vendedor, Solicitud, CalificacionVendedor
+from .models import Persona, Vendedor, Solicitud, CalificacionVendedor, ConsultaCrediticia_Local
 from .serializers import PersonaSerializer, VendedorSerializer, SolicitudSerializer, CalificacionVendedorSerializer, SolicitudVendedorRegistrationSerializer
 from ecommerce_konrad.permissions import IsDirectorComercialOrPostOnly
+from external_mocks.views import mock_datacredito
+import json 
 
 # Vista Persona
 class PersonaViewSet(viewsets.ModelViewSet):
@@ -58,6 +60,34 @@ class SolicitudViewSet(viewsets.ModelViewSet):
             return Response({"message": f"Estado actualizado a {nuevo_estado}"})
         
         return Response({"error": "Estado no válido"}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['get'], url_path= 'mock_datacredito')
+    def consultar_datacredito(self, request, pk=None):
+        # Obtener la solicitud específica 
+        solicitud = self.get_object()
+        # Obtenemos el número de identificación de la solicitud
+        numero_identificacion = solicitud.persona.numero_identificacion
+        # Guardar el resultado de calificación 
+        response = mock_datacredito(request,numero_identificacion) 
+        # Traducir la respuesta 
+        data = json.loads(response.content.decode('utf-8'))
+        # Extracción de datos de mock
+        score = data.get('score_datacredito')
+        claficacion = data.get('calificacion')
+        # Guardar la calificación en solictud
+        solicitud.resultado_datacredito = claficacion
+        solicitud.save()
+        # Guardar el score
+        credit_data, created = ConsultaCrediticia_Local.objects.get_or_create(
+            solicitud=solicitud
+        )
+        credit_data.score_datacredito = score
+        credit_data.dictamen_datacredito = claficacion
+        credit_data.save()
+        # Devover la respuesta al frontend
+        return response
+
+
 
 # [PATRÓN DE DISEÑO: ADAPTER]
 # Esta lógica sirve como ADAPTADOR para los servicios externos 

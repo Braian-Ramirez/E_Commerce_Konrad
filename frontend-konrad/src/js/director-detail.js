@@ -14,37 +14,37 @@ document.addEventListener('DOMContentLoaded', () => {
     fetch(`http://127.0.0.1:8000/api/v1/vendors/solicitudes/${solId}/`, {
         headers: { 'Authorization': `Bearer ${token}` }
     })
-    .then(res => {
-        if (!res.ok) throw new Error("Error al cargar detalle");
-        return res.json();
-    })
-    .then(sol => {
-        console.log("Detalle de solicitud cargado:", sol);
-        
-        // Rellenar los campos con los datos REALES
-        document.getElementById('radicadoTitle').textContent = sol.numero_solicitud || 'SIN RADICADO';
-        document.getElementById('v_nombres').textContent = sol.nombres || 'No disponible';
-        document.getElementById('v_apellidos').textContent = sol.apellidos || 'No disponible';
-        document.getElementById('v_email').textContent = sol.email || 'No disponible';
-        document.getElementById('v_id').textContent = sol.identificacion || 'No disponible';
-        document.getElementById('v_telefono').textContent = sol.telefono || 'N/A';
-        document.getElementById('v_estado').textContent = sol.estado;
+        .then(res => {
+            if (!res.ok) throw new Error("Error al cargar detalle");
+            return res.json();
+        })
+        .then(sol => {
+            console.log("Detalle de solicitud cargado:", sol);
 
-        // Color del estado
-        const estadoEl = document.getElementById('v_estado');
-        if (sol.estado === 'PENDIENTE') estadoEl.style.color = '#f97316';
-        if (sol.estado === 'APROBADA') estadoEl.style.color = '#22c55e';
-    })
-    .catch(err => console.error(err));
+            // Rellenar los campos con los datos REALES
+            document.getElementById('radicadoTitle').textContent = sol.numero_solicitud || 'SIN RADICADO';
+            document.getElementById('v_nombres').textContent = sol.nombres || 'No disponible';
+            document.getElementById('v_apellidos').textContent = sol.apellidos || 'No disponible';
+            document.getElementById('v_email').textContent = sol.email || 'No disponible';
+            document.getElementById('v_id').textContent = sol.identificacion || 'No disponible';
+            document.getElementById('v_telefono').textContent = sol.telefono || 'N/A';
+            document.getElementById('v_estado').textContent = sol.estado;
+
+            // Color del estado
+            const estadoEl = document.getElementById('v_estado');
+            if (sol.estado === 'PENDIENTE') estadoEl.style.color = '#f97316';
+            if (sol.estado === 'APROBADA') estadoEl.style.color = '#22c55e';
+        })
+        .catch(err => console.error(err));
 
     // 2. LOGICA DE BOTONES (APROBAR / RECHAZAR)
     const updateEstado = async (nuevoEstado) => {
         try {
             const res = await fetch(`http://127.0.0.1:8000/api/v1/vendors/solicitudes/${solId}/cambiar-estado/`, {
                 method: 'PATCH',
-                headers: { 
+                headers: {
                     'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json' 
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ estado: nuevoEstado })
             });
@@ -65,4 +65,56 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btnAprobar').addEventListener('click', () => updateEstado('APROBADA'));
     document.getElementById('btnDevolver').addEventListener('click', () => updateEstado('DEVUELTA'));
     document.getElementById('btnRechazar').addEventListener('click', () => updateEstado('RECHAZADA'));
+
+    // 3. CONSULTAR DATACRÉDITO (MOCK)
+    const btnDatacredito = document.getElementById('btnDatacredito');
+    const modalMock = document.getElementById('modalMock');
+
+    btnDatacredito.addEventListener('click', async () => {
+        btnDatacredito.textContent = "Consultando... ⏳";
+        btnDatacredito.disabled = true;
+
+        try {
+            const res = await fetch(`http://127.0.0.1:8000/api/v1/vendors/solicitudes/${solId}/mock_datacredito/`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+
+                // Rellenamos el Modal con los datos del Mock
+                document.getElementById('mockScore').textContent = data.score_datacredito;
+                document.getElementById('mockCalificacion').textContent = data.calificacion;
+                document.getElementById('mockTitle').textContent = "DATACRÉDITO (EXPERIAN)";
+
+                // Ajustamos colores según la calificación
+                const califEl = document.getElementById('mockCalificacion');
+                const scoreEl = document.getElementById('mockScore');
+                const iconEl = document.getElementById('mockIcon');
+
+                if (data.calificacion === 'ALTA') {
+                    califEl.style.color = '#22c55e'; // Verde
+                    iconEl.textContent = "📈";
+                } else if (data.calificacion === 'ADVERTENCIA') {
+                    califEl.style.color = '#f97316'; // Naranja
+                    iconEl.textContent = "⚠️";
+                } else {
+                    califEl.style.color = '#ef4444'; // Rojo
+                    iconEl.textContent = "📉";
+                }
+
+                // Mostramos el modal
+                modalMock.style.display = 'flex';
+
+            } else {
+                alert("Error en el servidor al consultar Datacredito");
+            }
+        } catch (error) {
+            console.error(error);
+            alert("No se pudo conectar con el Mock de Datacredito");
+        } finally {
+            btnDatacredito.textContent = "Consultar Datacredito";
+            btnDatacredito.disabled = false;
+        }
+    });
 });

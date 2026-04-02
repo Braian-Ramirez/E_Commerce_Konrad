@@ -6,19 +6,33 @@
 }
 
 body {
-    background: var(--bg-dark);
     color: white;
     font-family: 'Outfit', sans-serif;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     margin: 0;
+    /* MEZCLA DE MARCA: Azul Comprador + Fucsia + NARANJA VENDEDOR 🦁🧡 */
+    background-image: 
+        radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 25%),
+        radial-gradient(circle at 85% 15%, rgba(249, 115, 22, 0.12) 0%, transparent 25%), /* ¡NARANJA AQUÍ! */
+        radial-gradient(circle at 90% 80%, rgba(236, 72, 153, 0.15) 0%, transparent 25%) !important;
+    background-attachment: fixed !important;
 }
 
-/* RESPONSIVIDAD 📱 (Añadido arriba para evitar errores) */
+/* RESPONSIVIDAD(Añadido arriba para evitar errores) */
 @media (max-width: 768px) {
-    .header-status { padding: 15px 20px; }
-    .status-card { padding: 40px 20px; border-radius: 20px; border: none; background: transparent; box-shadow: none; }
+    .header-status {
+        padding: 15px 20px;
+    }
+
+    .status-card {
+        padding: 40px 20px;
+        border-radius: 20px;
+        border: none;
+        background: transparent;
+        box-shadow: none;
+    }
 }
 
 .header-status {
@@ -50,7 +64,9 @@ body {
 }
 
 /* INPUTS Y BOTONES UNIFICADOS */
-.search-field, .btn-check, .btn-secondary {
+.search-field,
+.btn-check,
+.btn-secondary {
     width: 100%;
     box-sizing: border-box;
     height: 60px;
@@ -99,9 +115,10 @@ body {
     border-radius: 24px;
     background: #1c1a18;
     border-left: 8px solid var(--accent);
-    text-align: left; /* Alineado a la izquierda como en la foto */
+    text-align: left;
+    /* Alineado a la izquierda como en la foto */
     display: none;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
 }
 
 .status-label {
@@ -148,7 +165,10 @@ body {
     font-size: 1rem;
 }
 
-.footer-item strong { color: white; margin-right: 4px; }
+.footer-item strong {
+    color: white;
+    margin-right: 4px;
+}
 
 .back-link {
     color: #a8a29e;
@@ -157,4 +177,6 @@ body {
     font-weight: 500;
 }
 
-.back-link:hover { color: white; }
+.back-link:hover {
+    color: white;
+}

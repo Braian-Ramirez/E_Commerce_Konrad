@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Director Comercial | Konrad Commerce</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../src/css/style.css">
     <link rel="stylesheet" href="../src/css/dashboard.css">
 </head>
 
@@ -20,7 +21,7 @@
             <a href="#" class="nav-item">📊 Dashboard BAM</a>
             <a href="#" class="nav-item">👤 Mi Perfil</a>
         </nav>
-        
+
         <div style="margin-top: auto;">
             <a href="../index.html" class="nav-item" style="color: #ef4444;">🚪 Cerrar Sesión</a>
         </div>
@@ -35,7 +36,7 @@
 
         <section class="content-body">
             <h3 style="margin-top: 0; font-weight: 400; color: #a8a29e;">Listado de solicitudes:</h3>
-            
+
             <!-- BARRA DE FILTROS 🔍 -->
             <div class="filter-bar">
                 <input type="text" placeholder="Buscar por # Identificación" class="search-mini">
@@ -43,52 +44,19 @@
             </div>
 
             <!-- CABECERA DE TABLA 📋 -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1.5fr 1fr 1fr; padding: 0 20px 15px; color: #78716c; font-size: 0.85rem; font-weight: 700;">
+            <div
+                style="display: grid; grid-template-columns: 1fr 1fr 1.5fr 1fr 1fr; padding: 0 20px 15px; color: #78716c; font-size: 0.85rem; font-weight: 700;">
                 <div># IDENTIFICACIÓN</div>
                 <div>APELLIDOS / NOMBRES</div>
                 <div>CORREO ELECTRÓNICO</div>
                 <div style="text-align: center;">ESTADO</div>
                 <div>FECHA CREACIÓN</div>
             </div>
-
-            <!-- LISTADO DE SOLICITUDES (MOCK DATA) -->
             <div id="solicitudesContainer">
-                <!-- Tarjeta 1 -->
-                <div class="solicitud-card">
-                    <div style="font-weight: 600;">1020304050</div>
-                    <div>Gómez Felipe</div>
-                    <div style="color: #a8a29e;">felipe.gomez@mail.com</div>
-                    <div style="text-align: center;">
-                        <span class="badge-status status-pendiente">PENDIENTE</span>
-                    </div>
-                    <div style="font-size: 0.9rem; opacity: 0.8;">02/04/2026</div>
-                </div>
-
-                <!-- Tarjeta 2 -->
-                <div class="solicitud-card">
-                    <div style="font-weight: 600;">9080706050</div>
-                    <div>Pérez Andrea</div>
-                    <div style="color: #a8a29e;">andrea.p@mail.com</div>
-                    <div style="text-align: center;">
-                        <span class="badge-status status-pendiente">PENDIENTE</span>
-                    </div>
-                    <div style="font-size: 0.9rem; opacity: 0.8;">01/04/2026</div>
-                </div>
-
-                <!-- Tarjeta 3 -->
-                <div class="solicitud-card">
-                    <div style="font-weight: 600;">1122334455</div>
-                    <div>Ramírez Braian</div>
-                    <div style="color: #a8a29e;">braian.r@mail.com</div>
-                    <div style="text-align: center;">
-                        <span class="badge-status status-pendiente">PENDIENTE</span>
-                    </div>
-                    <div style="font-size: 0.9rem; opacity: 0.8;">31/03/2026</div>
-                </div>
             </div>
         </section>
     </main>
-
     <script src="../src/js/director-dashboard.js"></script>
 </body>
+
 </html>
