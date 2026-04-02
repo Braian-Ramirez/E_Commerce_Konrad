@@ -7,7 +7,7 @@ from django.db.models import Avg
 from .models import Persona, Vendedor, Solicitud, CalificacionVendedor, ConsultaCrediticia_Local
 from .serializers import PersonaSerializer, VendedorSerializer, SolicitudSerializer, CalificacionVendedorSerializer, SolicitudVendedorRegistrationSerializer
 from ecommerce_konrad.permissions import IsDirectorComercialOrPostOnly
-from external_mocks.views import mock_datacredito
+from external_mocks.views import mock_datacredito, mock_cifin
 import json 
 
 # Vista Persona
@@ -61,6 +61,7 @@ class SolicitudViewSet(viewsets.ModelViewSet):
         
         return Response({"error": "Estado no válido"}, status=status.HTTP_400_BAD_REQUEST)
 
+    # Acción consultar datacrédito
     @action(detail=True, methods=['get'], url_path= 'mock_datacredito')
     def consultar_datacredito(self, request, pk=None):
         # Obtener la solicitud específica 
@@ -87,7 +88,32 @@ class SolicitudViewSet(viewsets.ModelViewSet):
         # Devover la respuesta al frontend
         return response
 
-
+    #Acción consultar CIFIN
+    @action(detail=True, methods=['get'], url_path= 'mock_cifin')
+    def consultar_cifin(self, request, pk=None):
+        # Obtener la solicitud específica 
+        solicitud = self.get_object()
+        # Obtenemos el número de identificación de la solicitud
+        numero_identificacion = solicitud.persona.numero_identificacion
+        # Guardar el resultado de calificación 
+        response = mock_cifin(request,numero_identificacion) 
+        # Traducir la respuesta 
+        data = json.loads(response.content.decode('utf-8'))
+        # Extracción de datos de mock
+        score = data.get('score_cifin')
+        claficacion = data.get('calificacion')
+        # Guardar la calificación en solictud
+        solicitud.resultado_cifin = claficacion
+        solicitud.save()
+        # Guardar el score
+        credit_data, created = ConsultaCrediticia_Local.objects.get_or_create(
+            solicitud=solicitud
+        )
+        credit_data.score_cifin = score
+        credit_data.dictamen_cifin = claficacion
+        credit_data.save()
+        # Devover la respuesta al frontend
+        return response    
 
 # [PATRÓN DE DISEÑO: ADAPTER]
 # Esta lógica sirve como ADAPTADOR para los servicios externos 

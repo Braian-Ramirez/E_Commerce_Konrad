@@ -117,4 +117,55 @@ document.addEventListener('DOMContentLoaded', () => {
             btnDatacredito.disabled = false;
         }
     });
+
+    // 4. CONSULTAR CIFIN (MOCK)
+    const btnCifin = document.getElementById('btnCifin');
+
+    btnCifin.addEventListener('click', async () => {
+        btnCifin.textContent = "Consultando... ⏳";
+        btnCifin.disabled = true;
+
+        try {
+            const res = await fetch(`http://127.0.0.1:8000/api/v1/vendors/solicitudes/${solId}/mock_cifin/`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+
+                // Rellenamos el Modal con los datos del Mock
+                document.getElementById('mockScore').textContent = data.score_cifin;
+                document.getElementById('mockCalificacion').textContent = data.calificacion;
+                document.getElementById('mockTitle').textContent = "CIFIN (TRANSUNION)";
+
+                // Ajustamos colores según la calificación
+                const califEl = document.getElementById('mockCalificacion');
+                const scoreEl = document.getElementById('mockScore');
+                const iconEl = document.getElementById('mockIcon');
+
+                if (data.calificacion === 'ALTA') {
+                    califEl.style.color = '#22c55e'; // Verde
+                    iconEl.textContent = "📈";
+                } else if (data.calificacion === 'ADVERTENCIA') {
+                    califEl.style.color = '#f97316'; // Naranja
+                    iconEl.textContent = "⚠️";
+                } else {
+                    califEl.style.color = '#ef4444'; // Rojo
+                    iconEl.textContent = "📉";
+                }
+
+                // Mostramos el modal
+                modalMock.style.display = 'flex';
+
+            } else {
+                alert("Error en el servidor al consultar CIFIN");
+            }
+        } catch (error) {
+            console.error(error);
+            alert("No se pudo conectar con el Mock de CIFIN");
+        } finally {
+            btnCifin.textContent = "Consultar CIFIN";
+            btnCifin.disabled = false;
+        }
+    });
 });
