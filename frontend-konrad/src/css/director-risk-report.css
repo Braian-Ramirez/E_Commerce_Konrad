@@ -1,0 +1,140 @@
+/* ESTILOS DEL REPORTE DE RIESGO INTEGRAL */
+
+.risk-report-container {
+    padding: 30px;
+}
+
+.report-header-section {
+    margin-bottom: 40px;
+    border-left: 4px solid #22c55e;
+    padding-left: 20px;
+}
+
+.report-header-section h3 {
+    margin: 0;
+    font-size: 1.8rem;
+    color: #fff;
+}
+
+.report-header-section p {
+    color: #a8a29e;
+    margin-top: 5px;
+}
+
+/* Grilla de Scores de Riesgo */
+.risk-score-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.risk-card-score {
+    padding: 25px;
+    text-align: center;
+}
+
+.risk-card-score .label-title {
+    color: #a8a29e;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.risk-card-score .score-big-number {
+    font-size: 3.5rem;
+    font-weight: 800;
+    margin: 15px 0;
+}
+
+.risk-card-score .status-badge {
+    font-weight: 800;
+    padding: 5px 15px;
+    border-radius: 20px;
+    display: inline-block;
+}
+
+/* Tabla de Trazabilidad */
+.traceability-table-container {
+    padding: 30px;
+}
+
+.trace-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    color: white;
+}
+
+.trace-table thead tr {
+    text-align: left;
+    background: rgba(255, 255, 255, 0.05);
+    font-size: 0.8rem;
+    color: #a8a29e;
+}
+
+.trace-table th,
+.trace-table td {
+    padding: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Caja de Observaciones */
+.system-observations-box {
+    margin-top: 40px;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+.system-observations-box h5 {
+    margin: 0 0 10px;
+    color: #f97316;
+}
+
+.system-observations-box p {
+    color: #d6d3d1;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Fila de Botones de Decisión*/
+.decision-row {
+    margin-top: 40px;
+    display: flex;
+    gap: 15px;
+    width: 100%;
+}
+
+.btn-decision {
+    flex: 1;
+    /* Todos del mismo tamaño */
+    padding: 18px;
+    border-radius: 12px;
+    border: none;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: 'Outfit', sans-serif;
+    color: white;
+    transition: transform 0.2s, filter 0.2s;
+}
+
+.btn-decision:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+}
+
+.btn-approve {
+    background: #22c55e;
+}
+
+.btn-return {
+    background: #f97316;
+}
+
+.btn-reject {
+    background: #ef4444;
+}

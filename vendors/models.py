@@ -74,6 +74,7 @@ class Solicitud(models.Model):
     resultado_datacredito = models.CharField(max_length=20, choices=RESULTADO_CREDITICIO_CHOICES, default='PENDIENTE')
     resultado_cifin = models.CharField(max_length=20, choices=RESULTADO_CREDITICIO_CHOICES, default='PENDIENTE')
     resultado_judicial = models.CharField(max_length=20, choices=RESULTADO_JUDICIAL_CHOICES, default='PENDIENTE')
+    fecha_consulta_judicial = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"Solicitud {self.numero_solicitud} - {self.persona} [{self.estado}]"

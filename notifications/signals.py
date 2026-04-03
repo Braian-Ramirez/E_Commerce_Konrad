@@ -9,18 +9,10 @@ from vendors.models import Solicitud
 @receiver(post_save, sender=Solicitud)
 def enviar_notificacion_solicitud(sender, instance, created, **kwargs):
     if not created:
-        correo_destino = instance.persona.email
-        
-        # --- LÓGICA DE APROBACIÓN ---
-        if instance.estado == 'APROBADA':
-            asunto = '¡Bienvenido a Comercial Konrad!'
-            mensaje = f'¡Felicidades {instance.persona.nombre}! Su solicitud fue APROBADA. Pronto recibirá más instrucciones para acceder a su panel de ventas.'
-            
-            # El disparo automático a internet:
-            send_mail(asunto, mensaje, settings.DEFAULT_FROM_EMAIL, [correo_destino], fail_silently=False)
-
+        correo_destino = instance.persona.email      
+     
         # --- LÓGICA DE RECHAZO ---
-        elif instance.estado == 'RECHAZADA':
+        if instance.estado == 'RECHAZADA':
             asunto = 'Comercial Konrad - Novedad Solicitud'
             mensaje = f'Hola {instance.persona.nombre}, lo sentimos. Tu solicitud fue rechazada por antecedentes o datacrédito.'
             

@@ -1,0 +1,15 @@
+Hola {{ nombre }},
+
+¡Es oficial! Ya eres parte de Comercial Konrad. 🎁✨
+
+Nos alegra mucho que te hayas unido a nuestra comunidad. A partir de ahora, tienes acceso a los mejores productos de tecnología y accesorios directamente desde tu panel de comprador.
+a continuación te dejamos tus credenciales de acceso:
+
+👤 Usuario: {{ email }}
+🔑 Contraseña Temporal: {{ password }}
+
+Te recomendamos cambiar tu contraseña una vez inicies sesión por primera vez.
+
+¡Bienvenido a bordo! 🚀
+
+Equipo Comercial Konrad

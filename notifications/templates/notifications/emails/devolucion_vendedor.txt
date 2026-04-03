@@ -1,0 +1,10 @@
+Hola {{ nombre }},
+
+Tu solicitud ha sido revisada por nuestro equipo comercial y se ha marcado como DEVUELTA.
+
+Esto suele significar que necesitamos que revises tus documentos o esperes a mejorar tu calificación en las centrales de riesgo.
+
+Por favor, mantente atento a nuestras próximas comunicaciones.
+
+Atentamente,
+Equipo Comercial Konrad ⚠️

@@ -3,7 +3,11 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from django.utils import timezone
+from django.utils.crypto import get_random_string
+from django.contrib.auth.models import User
 from django.db.models import Avg
+from notifications.services import enviar_correo_bienvenida_vendedor, enviar_correo_devolucion, enviar_correo_rechazo
 from .models import Persona, Vendedor, Solicitud, CalificacionVendedor, ConsultaCrediticia_Local
 from .serializers import PersonaSerializer, VendedorSerializer, SolicitudSerializer, CalificacionVendedorSerializer, SolicitudVendedorRegistrationSerializer
 from ecommerce_konrad.permissions import IsDirectorComercialOrPostOnly
@@ -58,9 +62,40 @@ class SolicitudViewSet(viewsets.ModelViewSet):
         solicitud = self.get_object()
         nuevo_estado = request.data.get('estado')
         
-        if nuevo_estado in ['APROBADA', 'RECHAZADA', 'PENDIENTE']:
+        if nuevo_estado in ['APROBADA', 'RECHAZADA', 'PENDIENTE', 'DEVUELTA']:
             solicitud.estado = nuevo_estado
             solicitud.save()
+
+            # --- LÓGICA DE APROBACIÓN (CREACIÓN DE USUARIO Y CORREO) --- 🏛️👤✨⚖️🍿
+            if nuevo_estado == 'APROBADA' and not solicitud.persona.user:
+                # 1. Generar credenciales
+                password_temporal = get_random_string(10)
+                username = solicitud.persona.email
+                
+                # 2. Crear el Usuario de Django
+                nuevo_usuario = User.objects.create_user(
+                    username=username,
+                    email=solicitud.persona.email,
+                    password=password_temporal,
+                    first_name=solicitud.persona.nombre,
+                    last_name=solicitud.persona.apellido
+                )
+                
+                # 3. Vincular Persona con User
+                solicitud.persona.user = nuevo_usuario
+                solicitud.persona.save()
+
+                # 4. Enviar Correo de Bienvenida (A TRAVÉS DEL SERVICIO) 
+                enviar_correo_bienvenida_vendedor(solicitud.persona, password_temporal)
+
+            # --- LÓGICA DE DEVOLUCIÓN (NUEVA) ---
+            elif nuevo_estado == 'DEVUELTA':
+                enviar_correo_devolucion(solicitud.persona)
+
+            # --- LÓGICA DE RECHAZO ---
+            elif nuevo_estado == 'RECHAZADA':
+                enviar_correo_rechazo(solicitud.persona)
+
             return Response({"message": f"Estado actualizado a {nuevo_estado}"})
         
         return Response({"error": "Estado no válido"}, status=status.HTTP_400_BAD_REQUEST)
@@ -138,6 +173,7 @@ class SolicitudViewSet(viewsets.ModelViewSet):
         # 4. PASO CLAVE: Guardamos el estado judicial ('REQUERIDO' o 'NO_REQUERIDO')
         # solo si la consulta terminó bien.
         solicitud.resultado_judicial = data.get('estado')
+        solicitud.fecha_consulta_judicial = timezone.localtime() # Guardar fecha real 🕰️
         solicitud.save()
         
         return response

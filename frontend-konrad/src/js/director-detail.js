@@ -11,6 +11,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 1. CARGAR DATOS DE LA SOLICITUD
+    document.getElementById('lnkReporteRiesgo').href = `director-risk-report.html?id=${solId}`;
+    
     fetch(`http://127.0.0.1:8000/api/v1/vendors/solicitudes/${solId}/`, {
         headers: { 'Authorization': `Bearer ${token}` }
     })

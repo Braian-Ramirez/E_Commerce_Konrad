@@ -1,13 +1,10 @@
 from rest_framework import serializers
 from django.db import transaction
 from django.contrib.auth.models import User
-from django.utils import timezone
-from django.core.mail import send_mail
-from django.template.loader import render_to_string
 from .models import Comprador
-from notifications.models import CorreoEnviado
 from vendors.models import Persona
 from vendors.serializers import PersonaSerializer
+from notifications.services import enviar_correo_bienvenida_comprador
 import random
 import string
 
@@ -88,31 +85,7 @@ class CompradorRegistrationSerializer(serializers.ModelSerializer):
             #Crear Comprador
             comprador = Comprador.objects.create(persona=persona, **validated_data)
 
-            # Enviar credenciales por correo
-            # Renderizar el mensaje usando el template externo
-            ahora = timezone.localtime()
-            mensaje = render_to_string('emails/registro_bienvenida.txt', {
-              'nombre': nombre,
-              'email': email,
-              'password': password,
-              'fecha_stamp': ahora.strftime('%Y-%m-%d %H:%M:%S'),
-              'transaccion_id': f"REG-{ahora.strftime('%y%m%d')}-{user.id}"
-          })
-            send_mail(
-                subject='Bienvenido a Konrad Shop - Tus Credenciales',
-                message=mensaje,
-                from_email=None,
-                recipient_list=[email],
-                fail_silently=False,
-            )
-
-            # Registrar el correo en la tabla de auditoría (Notificaciones)
-            CorreoEnviado.objects.create(
-                destinatario=persona,
-                asunto='Bienvenido a Konrad Shop - Tus Credenciales',
-                cuerpo=mensaje,
-                timestamp_hash=f"SHA256-{ahora.timestamp()}" # Simulación de hash legal
-            )
-
+            # Enviar credenciales a través del SERVICIO CENTRALIZADO 🏛️📧✨
+            enviar_correo_bienvenida_comprador(persona, password)
 
             return comprador
