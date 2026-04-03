@@ -229,4 +229,42 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // 6. DESCARGAR EXPEDIENTE (ZIP) 
+    const btnZIP = document.getElementById('btnDescargarZIP');
+    if (btnZIP) {
+        btnZIP.addEventListener('click', async () => {
+            btnZIP.textContent = "Generando ZIP... ⏳";
+            btnZIP.disabled = true;
+
+            try {
+                const response = await fetch(`http://127.0.0.1:8000/api/v1/vendors/solicitudes/${solId}/descargar-expediente/`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    // Usamos el radicado para el nombre del archivo
+                    const radicado = document.getElementById('radicadoTitle').textContent;
+                    a.download = `EXPEDIENTE_${radicado}.zip`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                } else {
+                    const err = await response.json();
+                    alert("Error: " + (err.error || "No se pudo generar el ZIP"));
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Error al conectar con el servidor para la descarga.");
+            } finally {
+                btnZIP.textContent = "Descargar Paquete de Documentos (ZIP) 📥";
+                btnZIP.disabled = false;
+            }
+        });
+    }
+
 });

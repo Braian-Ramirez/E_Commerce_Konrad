@@ -10,7 +10,8 @@
     <link rel="stylesheet" href="../src/css/vendor.css" />
 </head>
 
-<body style="display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; box-sizing: border-box;">
+<body
+    style="display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; box-sizing: border-box;">
 
     <div class="floating-orb orb-1"
         style="width: 500px; height: 500px; top: 10%; right: 10%; background: linear-gradient(135deg, #f97316, #fb923c);">
@@ -116,12 +117,12 @@
                     ⚠️ Antes de continuar, debes descargar, firmar y adjuntar los siguientes documentos legales:
                 </p>
                 <div class="form-twocol" style="display: flex; gap: 10px;">
-                    <a href="/assets/docs/Consentimiento_Centrales_Konrad.pdf"
+                    <a href="/assets/docs/Consentimiento_Centrales_Riesgo_Comercial_konrad.pdf"
                         download="Consentimiento_Centrales_Konrad.pdf" class="add-cart-btn"
                         style="text-align: center; border-color: #f97316; color: #f97316; text-decoration: none; font-size: 0.82rem; padding: 10px; flex: 1;">
                         📄 Consentimiento Centrales
                     </a>
-                    <a href="/assets/docs/Tratamiento_Datos_Konrad.pdf" download="Tratamiento_Datos_Konrad.pdf"
+                    <a href="/assets/docs/Consentimiento_Tratamiento_Datos.pdf" download="Tratamiento_Datos_Konrad.pdf"
                         class="add-cart-btn"
                         style="text-align: center; border-color: #f97316; color: #f97316; text-decoration: none; font-size: 0.82rem; padding: 10px; flex: 1;">
                         📄 Tratamiento de Datos
@@ -143,24 +144,24 @@
                     <input type="file" id="doc_cedula" class="search-bar" style="width: 100%; font-size: 0.8rem;"
                         required>
                 </div>
-                <div>
+                <div style="grid-column: span 2;">
                     <label style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 5px;">2.
                         RUT</label>
                     <input type="file" id="doc_rut" class="search-bar" style="width: 100%; font-size: 0.8rem;" required>
                 </div>
-                <div>
+                <div style="grid-column: span 2;">
                     <label style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 5px;">3.
-                        Cámara y Comercio</label>
+                        Cámara de Comercio</label>
                     <input type="file" id="doc_camara" class="search-bar" style="width: 100%; font-size: 0.8rem;"
                         required>
                 </div>
-                <div>
+                <div style="grid-column: span 2;">
                     <label style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 5px;">4.
                         Consentimiento Centrales</label>
                     <input type="file" id="doc_riesgo" class="search-bar" style="width: 100%; font-size: 0.8rem;"
                         required>
                 </div>
-                <div>
+                <div style="grid-column: span 2;">
                     <label style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 5px;">5.
                         Tratamiento de Datos</label>
                     <input type="file" id="doc_datos" class="search-bar" style="width: 100%; font-size: 0.8rem;"

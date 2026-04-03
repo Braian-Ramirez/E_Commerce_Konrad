@@ -9,6 +9,9 @@ from .serializers import PersonaSerializer, VendedorSerializer, SolicitudSeriali
 from ecommerce_konrad.permissions import IsDirectorComercialOrPostOnly
 from external_mocks.views import mock_datacredito, mock_cifin, mock_antecedentes_judiciales
 import json 
+import io
+import zipfile
+from django.http import FileResponse
 
 # Vista Persona
 class PersonaViewSet(viewsets.ModelViewSet):
@@ -138,6 +141,30 @@ class SolicitudViewSet(viewsets.ModelViewSet):
         solicitud.save()
         
         return response
+
+    # Acción para Descargar el ZIP con todos los documentos
+    @action(detail=True, methods=['get'], url_path='descargar-expediente')
+    def descargar_expediente(self, request, pk=None):
+        solicitud = self.get_object()
+        documentos = solicitud.documentos.all()
+        
+        if not documentos.exists():
+            return Response({"error": "No hay documentos adjuntos a esta solicitud"}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Crear un buffer en memoria para el ZIP
+        buffer = io.BytesIO()
+        with zipfile.ZipFile(buffer, 'w') as zip_file:
+            for doc in documentos:
+                if doc.url_archivo:
+                    # Obtenemos la ruta física del archivo
+                    archivo_path = doc.url_archivo.path
+                    # Nombre amigable dentro del ZIP (ej: CEDULA_123.pdf)
+                    nombre_amigable = f"{doc.get_tipo_display().replace(' ', '_')}_{solicitud.numero_solicitud}"
+                    extension = doc.url_archivo.name.split('.')[-1]
+                    zip_file.write(archivo_path, f"{nombre_amigable}.{extension}")
+        
+        buffer.seek(0)
+        return FileResponse(buffer, as_attachment=True, filename=f"EXPEDIENTE_{solicitud.numero_solicitud}.zip")
 
 # [PATRÓN DE DISEÑO: ADAPTER]
 # Esta lógica sirve como ADAPTADOR para los servicios externos 
