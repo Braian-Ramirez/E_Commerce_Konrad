@@ -20,11 +20,43 @@ class VendedorViewSet(viewsets.ModelViewSet):
 
 # Vista Solicitud
 class SolicitudViewSet(viewsets.ModelViewSet):
-    queryset = Solicitud.objects.all()
     serializer_class = SolicitudSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        if not user.is_authenticated:
+            return Solicitud.objects.none()
+            
+        if user.is_superuser:
+            return Solicitud.objects.all()
+            
+        if hasattr(user, 'persona_profile') and user.persona_profile:
+            persona = user.persona_profile
+            if hasattr(persona, 'vendedor_profile'):
+                return Solicitud.objects.filter(persona=persona)
+            elif hasattr(persona, 'perfil_comprador'):
+                # Los compradores no deberían ver solicitudes de vendedores (o solo la suya si existiera)
+                return Solicitud.objects.filter(persona=persona)
+            else:
+                # Se asume Director si no tiene perfil específico de tercero pero sí persona_profile
+                return Solicitud.objects.all()
+                
+        return Solicitud.objects.none()
     
     # Solo el Director (autenticado) puede ver la lista completa
     permission_classes = [IsAuthenticated]
+
+    @action(detail=False, methods=['post'], url_path='register_vendor', permission_classes=[AllowAny])
+    def register_vendor(self, request):
+        serializer = SolicitudVendedorRegistrationSerializer(data=request.data)
+        if serializer.is_valid():
+            solicitud = serializer.save()
+            return Response({
+                "message": "Solicitud creada exitosamente",
+                "numero_radicado": solicitud.numero_solicitud
+            }, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     # Acción pública para que el Vendedor consulte su estado
     @action(detail=False, methods=['get'], url_path='consultar-estado', permission_classes=[AllowAny])
     def consultar_estado(self, request):

@@ -1,7 +1,15 @@
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
     e.preventDefault();
+    
+    // BACKUP: Preservamos carrito y favoritos antes de limpiar la sesión
+    const cartB = localStorage.getItem('konrad_cart_v99');
+    const favsB = localStorage.getItem('konrad_favs_v99');
+    
+    localStorage.clear(); 
+    
+    if (cartB) localStorage.setItem('konrad_cart_v99', cartB);
+    if (favsB) localStorage.setItem('konrad_favs_v99', favsB);
 
-    // Suponiendo que tus inputs tienen los IDs: email y password
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
 
@@ -12,24 +20,32 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
             body: JSON.stringify({ username: email, password })
         });
 
-        // Si la respuesta no es OK, leemos el texto para ver el error de Django
         if (!response.ok) {
             const errorText = await response.text();
             console.error('Error del Servidor:', errorText);
-            alert('Error en el login. Revisa la consola para más detalles.');
+            alert('Error en el login. Revisa tus credenciales.');
             return;
         }
 
         const data = await response.json();
 
         if (response.ok) {
-            // Guardamos los tokens en el navegador
             localStorage.setItem('access_token', data.access);
             localStorage.setItem('refresh_token', data.refresh);
+            localStorage.setItem('rol', data.rol);
+            localStorage.setItem('user_data', JSON.stringify(data.user || {email: email}));
 
-            // Redirigimos al Dashboard
-            window.location.href = 'director-dashboard.html';
-        } else {
+            // Redirigimos al Dashboard correcto basado en el rol con protección de fallos
+            const r = String(data.rol).toUpperCase();
+            if (r === 'DIRECTOR' || r === 'ADMIN') {
+                window.location.href = 'director-dashboard.html';
+            } else if (r === 'VENDEDOR') {
+                window.location.href = 'vendor-dashboard.html';
+            } else {
+                window.location.href = '../index.html'; // Compradores y otros roles seguros
+            }
+        }
+ else {
             alert('Credenciales incorrectas: ' + (data.detail || 'Error de login'));
         }
     } catch (error) {

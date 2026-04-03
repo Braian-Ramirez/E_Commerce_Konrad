@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
-from .models import Comprador
+from .models import Comprador, MedioPago
 from notifications.models import CorreoEnviado
 from vendors.models import Persona
 from vendors.serializers import PersonaSerializer
@@ -12,30 +12,58 @@ import random
 import string
 
 def generar_password_valido():
-        longitud = 12
-        # Aseguramos al menos uno de cada tipo requerido
-        p_min = random.choice(string.ascii_lowercase)
-        p_maj = random.choice(string.ascii_uppercase)
-        p_num = random.choice(string.digits)
-        p_simbol = random.choice("!#$%&/@")
-        # El resto es aleatorio
-        p_resto = ''.join(random.choices(string.ascii_letters + string.digits, k=longitud-4))
-        
-        password = list(p_min + p_maj + p_num + p_resto + p_simbol)
-        random.shuffle(password) # Mezclamos para que no siempre sea el mismo orden
-        return ''.join(password)
+    longitud = 12
+    p_min = random.choice(string.ascii_lowercase)
+    p_maj = random.choice(string.ascii_uppercase)
+    p_num = random.choice(string.digits)
+    p_simbol = random.choice("!#$%&/@")
+    p_resto = ''.join(random.choices(string.ascii_letters + string.digits, k=longitud-4))
+    password = list(p_min + p_maj + p_num + p_resto + p_simbol)
+    random.shuffle(password)
+    return ''.join(password)
 
-
-# Serializer para Comprador
 class CompradorSerializer(serializers.ModelSerializer):
-    #ANIDACIÓN: Traemos toda la info de la persona vinculada
     persona_detalles = PersonaSerializer(source='persona', read_only=True)
-    
     class Meta:
         model = Comprador
         fields = ['id', 'persona', 'persona_detalles', 'puntos_recompensa', 'twitter', 'instagram']
 
-# Serializerespecilizado en REGISTRO
+class MedioPagoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MedioPago
+        fields = '__all__'
+        read_only_fields = ['comprador']
+
+class CompradorUpdateSerializer(serializers.ModelSerializer):
+    # Usamos required=False y allow_blank=True para evitar el error 400 si algún campo falta o está vacío
+    nombre = serializers.CharField(source='persona.nombre', required=False, allow_blank=True)
+    apellido = serializers.CharField(source='persona.apellido', required=False, allow_blank=True)
+    telefono = serializers.CharField(source='persona.telefono', required=False, allow_blank=True)
+    ciudad = serializers.CharField(source='persona.ciudad', required=False, allow_blank=True)
+    pais = serializers.CharField(source='persona.pais', required=False, allow_blank=True)
+    direccion = serializers.CharField(source='persona.direccion', required=False, allow_blank=True)
+    email = serializers.EmailField(source='persona.email', read_only=True)
+
+    class Meta:
+        model = Comprador
+        fields = ['nombre', 'apellido', 'telefono', 'ciudad', 'pais', 'direccion', 'email', 'twitter', 'instagram']
+
+    def update(self, instance, validated_data):
+        persona_data = validated_data.pop('persona', {})
+        persona = instance.persona
+        
+        # Actualizar Persona si hay datos
+        for attr, value in persona_data.items():
+            setattr(persona, attr, value)
+        persona.save()
+        
+        # Actualizar Comprador (instagram, twitter, etc)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        
+        return instance
+
 class CompradorRegistrationSerializer(serializers.ModelSerializer):
     nombre = serializers.CharField(write_only=True)
     apellido = serializers.CharField(write_only=True)
@@ -53,9 +81,21 @@ class CompradorRegistrationSerializer(serializers.ModelSerializer):
         'numero_identificacion', 'telefono', 'pais', 'ciudad',
         'direccion', 'twitter', 'instagram']
 
+    def validate_email(self, value):
+        from django.contrib.auth.models import User
+        from vendors.models import Persona
+        if User.objects.filter(username=value).exists() or Persona.objects.filter(email=value).exists():
+            raise serializers.ValidationError("Este correo ya se encuentra registrado en el sistema.")
+        return value
+
+    def validate_numero_identificacion(self, value):
+        from vendors.models import Persona
+        if Persona.objects.filter(numero_identificacion=value).exists():
+            raise serializers.ValidationError("Este número de documento ya está registrado.")
+        return value
+
     def create(self,validated_data):
         with transaction.atomic():
-            # Extraer los datos pertenecientes a Persona
             email = validated_data.pop('email')
             nombre = validated_data.pop('nombre')
             apellido = validated_data.pop('apellido')
@@ -66,12 +106,10 @@ class CompradorRegistrationSerializer(serializers.ModelSerializer):
             ciudad = validated_data.pop('ciudad')
             direccion = validated_data.pop('direccion')
 
-            #Crear Usuario
             username = email
             password = generar_password_valido()
             user = User.objects.create_user(username=username, email=email, password=password)
 
-            #Crear Persona
             persona = Persona.objects.create(
                 user=user,
                 nombre=nombre,
@@ -85,11 +123,8 @@ class CompradorRegistrationSerializer(serializers.ModelSerializer):
                 direccion=direccion
             )
 
-            #Crear Comprador
             comprador = Comprador.objects.create(persona=persona, **validated_data)
 
-            # Enviar credenciales por correo
-            # Renderizar el mensaje usando el template externo
             ahora = timezone.localtime()
             mensaje = render_to_string('emails/registro_bienvenida.txt', {
               'nombre': nombre,
@@ -106,13 +141,11 @@ class CompradorRegistrationSerializer(serializers.ModelSerializer):
                 fail_silently=False,
             )
 
-            # Registrar el correo en la tabla de auditoría (Notificaciones)
             CorreoEnviado.objects.create(
                 destinatario=persona,
                 asunto='Bienvenido a Konrad Shop - Tus Credenciales',
                 cuerpo=mensaje,
-                timestamp_hash=f"SHA256-{ahora.timestamp()}" # Simulación de hash legal
+                timestamp_hash=f"SHA256-{ahora.timestamp()}"
             )
-
 
             return comprador

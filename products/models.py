@@ -57,6 +57,7 @@ class Producto(models.Model):
     condicion = models.CharField(max_length=10, choices=CONDICION_CHOICES, default='NUEVO')
     cantidad = models.IntegerField(default=1)
     valor = models.DecimalField(max_digits=12, decimal_places=2)
+    ventas_totales = models.IntegerField(default=0, help_text="Contador para productos destacados")
 
     # Control de tiempo
     fecha_publicacion = models.DateTimeField(auto_now_add=True)
@@ -99,6 +100,7 @@ class ComentarioProducto(models.Model):
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE, related_name='comentarios')
     comprador = models.ForeignKey('vendors.Persona', on_delete=models.CASCADE)
     comentario = models.TextField()
+    calificacion = models.IntegerField(default=10, help_text="Calificación de 1 a 10")
     fecha = models.DateTimeField(auto_now_add=True)
 
     class Meta:

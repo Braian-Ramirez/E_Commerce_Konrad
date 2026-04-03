@@ -18,7 +18,7 @@
   <!-- HEADER: Navegación Principal -->
   <header class="navbar glass-effect">
     <div class="nav-brand">
-      <h1>🛍️ Konrad<span>Shop</span></h1>
+      <h1>🛍️Comercial<span>Konrad</span></h1>
     </div>
 
     <div class="search-bar">
@@ -35,7 +35,7 @@
         <span class="icon">🔐</span>
         <span class="hover-text">Iniciar Sesión</span>
       </a>
-      <a href="#" class="nav-item tooltip-btn">
+      <a href="/pages/check-status.html" class="nav-item tooltip-btn">
         <span class="icon">📋</span>
         <span class="hover-text">Consultar Solicitud</span>
       </a>

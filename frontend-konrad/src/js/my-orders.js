@@ -1,0 +1,260 @@
+const API_ORDERS   = 'http://127.0.0.1:8000/api/v1/orders/ordenes/';
+const API_PRODUCTS = 'http://127.0.0.1:8000/api/v1/products/productos/';
+const token = localStorage.getItem("access_token");
+
+if (!token) window.location.href = "/pages/login.html";
+
+// Órdenes simuladas como respaldo si el backend falla
+const MOCK_ORDERS = JSON.parse(localStorage.getItem('mock_orders') || '[]');
+
+document.addEventListener("DOMContentLoaded", () => {
+    cargarPedidos();
+    updateBadge();
+});
+
+let currentOrders = []; 
+
+function getUserKey() {
+    const u = JSON.parse(localStorage.getItem('user_data') || '{}');
+    return u.email || u.username || 'guest';
+}
+function getCartItems() {
+    const key = `cart_${getUserKey()}`;
+    return JSON.parse(localStorage.getItem(key) || '[]');
+}
+function updateBadge() {
+    const b = document.getElementById('cartCount');
+    if (b) b.textContent = getCartItems().length;
+}
+
+async function cargarPedidos() {
+    const list = document.getElementById("ordersList");
+    if (!list) return;
+
+    let orders = [];
+    let usandoSimulados = false;
+
+    try {
+        const res = await fetch(API_ORDERS, {
+            signal: AbortSignal.timeout(5000),
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.status === 401) {
+            console.warn("La sesión del backend parece haber expirado, pero mantendremos la vista actual.");
+            return;
+        }
+        if (res.ok) {
+            const data = await res.json();
+            orders = Array.isArray(data) ? data : (data.results || []);
+        }
+    } catch (err) {
+        console.warn("Backend no disponible, usando órdenes simuladas.");
+        usandoSimulados = true;
+    }
+
+    // Combinar reales + simuladas del localStorage
+    const mockOrders = JSON.parse(localStorage.getItem('mock_orders') || '[]');
+    orders = [...orders, ...mockOrders];
+
+    list.innerHTML = "";
+
+    if (!orders || orders.length === 0) {
+        list.innerHTML = `
+            <div style="text-align:center; padding:100px 20px;">
+                <div style="font-size:5rem; margin-bottom:20px;">📦</div>
+                <h3 style="color:white; margin-bottom:10px;">Aún no tienes pedidos</h3>
+                <p style="color:#94a3b8; margin-bottom:30px;">¡Explora nuestro catálogo y realiza tu primera compra!</p>
+                <button class="cta-primary" onclick="window.location.href='/pages/catalog.html'">Ir al Catálogo</button>
+            </div>`;
+        return;
+    }
+
+    const estadoConfig = {
+        'PENDIENTE':  { color: '#f59e0b', icon: '⏳' },
+        'PAGADA':     { color: '#22c55e', icon: '✅' },
+        'ENVIADA':    { color: '#3b82f6', icon: '🚚' },
+        'ENTREGADA':  { color: '#8b5cf6', icon: '🏠' },
+        'CANCELADA':  { color: '#ef4444', icon: '❌' },
+        'CARRITO':    { color: '#64748b', icon: '🛒' },
+        'APROBADO':   { color: '#22c55e', icon: '✅' },
+    };
+
+    list.innerHTML = orders.map(o => {
+        if (o.estado === 'CARRITO') return '';
+
+        // Compatibilidad: campos reales del backend + campos simulados
+        const fechaRaw = o.fecha || o.creado_en || o.fecha_simulada || new Date().toISOString();
+        const fecha = new Date(fechaRaw).toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
+        const totalNum = parseFloat(o.total_final || o.total_pedido || 0);
+        const total = totalNum > 0 ? '$' + new Intl.NumberFormat('es-CO').format(totalNum) + ' COP' : 'Ver detalle';
+        
+        let estado = (o.estado || 'PENDIENTE').toUpperCase();
+        if (estado === 'PENDIENTE') estado = 'PAGADA';
+        
+        const cfg = estadoConfig[estado] || { color: '#94a3b8', icon: '📦' };
+        const esSimulado = ''; // Removido por requerimiento
+
+        return `
+        <div class="order-card" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:25px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;transition:border-color 0.2s;" onmouseenter="this.style.borderColor='rgba(139,92,246,0.3)'" onmouseleave="this.style.borderColor='rgba(255,255,255,0.08)'">
+            <div style="display:flex;gap:20px;align-items:center;">
+                <div style="width:65px;height:65px;background:rgba(139,92,246,0.1);border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:2rem;">${cfg.icon}</div>
+                <div>
+                    <p style="font-weight:800;color:white;font-size:1.05rem;margin-bottom:4px;">Pedido #${String(o.id).padStart(5, '0')}</p>
+                    <p style="color:#64748b;font-size:0.85rem;">📅 ${fecha}</p>
+                    <p style="color:var(--primary);font-weight:800;margin-top:5px;">${total}</p>
+                </div>
+            </div>
+            <div style="text-align:right;">
+                <span style="display:inline-block;padding:6px 14px;border-radius:30px;background:${cfg.color}20;color:${cfg.color};font-weight:800;font-size:0.75rem;text-transform:uppercase;margin-bottom:12px;">${estado}</span><br>
+                <button class="cta-primary" style="padding:10px 20px;font-size:0.85rem;" onclick="openOrderDetails('${o.id}')">🔍 Detalles</button>
+            </div>
+        </div>`;
+    }).join('');
+    
+    currentOrders = orders; // Sincronizar con el global
+}
+
+
+
+window.openOrderDetails = async (id) => {
+    let orderData = currentOrders.find(o => String(o.id) === String(id));
+    
+    const modal   = document.getElementById('orderDetailModal');
+    const content = document.getElementById('orderDetailContent');
+    const closeBtn = document.getElementById('closeOrderModal');
+    if (closeBtn) closeBtn.onclick = () => modal.style.display = 'none';
+    content.innerHTML = `<p style="text-align:center;color:#94a3b8;padding:20px;">⏳ Cargando detalles...</p>`;
+    modal.style.display = "flex";
+
+    let detalles = orderData?.detalles || [];
+    try {
+        const res = await fetch(`${API_ORDERS}${id}/`, {
+            signal: AbortSignal.timeout(4000),
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+            const od = await res.json();
+            detalles = od.detalles || [];
+            orderData = od;
+        }
+    } catch(e) {}
+
+    const fmt = (n) => '$' + new Intl.NumberFormat('es-CO').format(Math.round(parseFloat(n) || 0));
+    
+    // Generar HTML de items con formulario de reseña
+    const itemsHtml = detalles.length > 0
+        ? detalles.map(d => {
+            const pid = d.producto;
+            const pName = d.producto_nombre || 'Producto #' + pid;
+            const link = `/pages/catalog.html?viewProduct=${pid}`;
+            
+            return `
+            <div style="background:rgba(255,255,255,0.03); padding:20px; border-radius:15px; margin-bottom:15px; border:1px solid rgba(255,255,255,0.05); display: flex; gap: 15px; transition: 0.3s;" onmouseenter="this.style.background='rgba(255,255,255,0.06)'" onmouseleave="this.style.background='rgba(255,255,255,0.03)'">
+                <div onclick="window.location.href='${link}'" style="width: 70px; height: 70px; background: rgba(0,0,0,0.5); border-radius: 10px; flex-shrink: 0; display:flex; align-items:center; justify-content:center; overflow:hidden; cursor:pointer; border:1px solid rgba(255,255,255,0.1);">
+                    ${(d.producto_imagen && d.producto_imagen.startsWith('http')) ? `<img src="${d.producto_imagen}" onerror="this.src='https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=800&auto=format&fit=crop'" style="width:100%;height:100%;object-fit:cover;">` : `<span style="font-size:2rem;">${d.producto_imagen || '📦'}</span>`}
+                </div>
+                <div style="flex: 1;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
+                        <span onclick="window.location.href='${link}'" style="font-weight:700; color:white; font-size:1rem; cursor:pointer;" onmouseenter="this.style.textDecoration='underline'" onmouseleave="this.style.textDecoration='none'">${pName} x${d.cantidad}</span>
+                        <span style="color:var(--primary); font-weight:800;">${fmt(d.valor_unitario * d.cantidad)}</span>
+                    </div>
+                
+                <!-- SECCIÓN DE CALIFICACIÓN -->
+                <div id="review-form-${pid}" style="border-top:1px solid rgba(255,255,255,0.1); padding-top:15px; margin-top:10px;">
+                    <p style="font-size:0.8rem; color:#94a3b8; margin-bottom:10px;">⭐ Califica este producto (1-10):</p>
+                    <div style="display:flex; gap:8px; margin-bottom:12px;">
+                        <input type="number" id="rating-${pid}" min="1" max="10" value="10" style="width:60px; padding:8px; border-radius:8px; background:#1e293b; color:white; border:1px solid rgba(255,255,255,0.1);">
+                        <input type="text" id="comment-${pid}" placeholder="Escribe tu opinión aquí..." style="flex:1; padding:8px 12px; border-radius:8px; background:#1e293b; color:white; border:1px solid rgba(255,255,255,0.1);">
+                        <button onclick="submitReview('${pid}')" style="background:var(--primary); color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer; font-weight:700; transition:0.3s;">Enviar</button>
+                    </div>
+                </div>
+                </div>
+            </div>`;
+        }).join('')
+        : `<p style="color:#64748b; text-align:center; padding:15px;">Sin detalles disponibles</p>`;
+
+        const costoEnvio = parseFloat(orderData?.costo_envio || 0);
+        const comision = parseFloat(orderData?.total_comision || 0);
+        const parsedTotal = parseFloat(orderData?.total_final || orderData?.total_pedido || 0);
+        const subtotalSuma = detalles.reduce((sum, d) => sum + (d.valor_unitario * d.cantidad), 0);
+        
+        // El verdadero subtotal es lo sumado o lo pedido menos recargos
+        const calcSubtotal = parsedTotal > 0 ? (parsedTotal - comision - costoEnvio) : subtotalSuma;
+        const calcTotal = parsedTotal > 0 ? parsedTotal : (subtotalSuma + comision + costoEnvio);
+
+        content.innerHTML = `
+        <div style="max-height:60vh; overflow-y:auto; padding-right:10px;">
+            ${itemsHtml}
+        </div>
+        <div style="background:rgba(139,92,246,0.05); padding:20px; border-radius:15px; border:1px solid rgba(139,92,246,0.1); margin-top:15px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:8px; color:#94a3b8; font-size:0.9rem;">
+                <span>Subtotal (IVA Inc.)</span><span>${fmt(calcSubtotal)}</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:8px; color:#94a3b8; font-size:0.9rem;">
+                <span>Comisión</span><span>${fmt(comision)}</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:15px; color:#94a3b8; font-size:0.9rem;">
+                <span>Envío</span><span>${costoEnvio > 0 ? fmt(costoEnvio) : 'GRATIS'}</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-weight:800; font-size:1.4rem; color:white; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px;">
+                <span>TOTAL</span><span style="color:var(--primary);">${fmt(calcTotal)}</span>
+            </div>
+        </div>`;
+};
+
+window.submitReview = async (productId) => {
+    const btn = event.target;
+    const rating = document.getElementById(`rating-${productId}`).value;
+    const comment = document.getElementById(`comment-${productId}`).value;
+    const userData = JSON.parse(localStorage.getItem('user_data') || '{}');
+    const personaId = userData.persona_id || userData.id;
+
+    if (!comment) {
+        alert("⚠️ Por favor escribe un comentario."); return;
+    }
+
+    // Validación: No se pueden comentar productos "Virtuales/Mock" en la BD real
+    if (String(productId).startsWith('v')) {
+        alert("🚫 Este es un producto de prueba (Mock) y no existe en la Base de Datos real. Solo puedes comentar productos cargados desde el catálogo real.");
+        return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = "Enviando...";
+
+    try {
+        const res = await fetch('http://127.0.0.1:8000/api/v1/products/comentarios/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                producto: parseInt(productId),
+                comprador: personaId,
+                comentario: comment,
+                calificacion: parseInt(rating)
+            })
+        });
+
+        if (res.ok) {
+            const form = document.getElementById(`review-form-${productId}`);
+            if (form) {
+                form.innerHTML = `
+                    <div style="background:rgba(34,197,94,0.1); padding:15px; border-radius:10px; border:1px solid rgba(34,197,94,0.2); text-align:center;">
+                        <p style="color:#22c55e; font-weight:700; margin:0;">✅ ¡Reseña guardada en Base de Datos!</p>
+                    </div>`;
+            }
+        } else {
+            const err = await res.json();
+            alert("❌ Error del servidor (" + res.status + "): " + (err.detail || "Verifica que el producto exista en la BD."));
+            btn.disabled = false;
+            btn.textContent = "Enviar";
+        }
+    } catch (e) {
+        console.error(e);
+        alert("❌ Error de comunicación con el servidor. ¿Está encendido el backend?");
+        btn.disabled = false;
+        btn.textContent = "Enviar";
+    }
+}

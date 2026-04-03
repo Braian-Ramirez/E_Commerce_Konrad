@@ -24,24 +24,7 @@ document.getElementById('buyerRegisterForm').addEventListener('submit', async (e
 
         const data = await response.json();
 
-        // Función para mostrar el modal
-        function mostrarModal(exito, titulo, mensaje) {
-            const modal = document.getElementById('modalResultado');
-            document.getElementById('modalIcono').textContent = exito ? '✅' : '❌';
-            document.getElementById('modalTitulo').textContent = titulo;
-            document.getElementById('modalMensaje').textContent = mensaje;
-            const btn = document.getElementById('modalBtn');
-            btn.style.background = exito ? '#3b82f6' : '#ef4444';
-            btn.style.color = 'white';
-            modal.style.display = 'flex';
 
-            btn.onclick = () => {
-                modal.style.display = 'none';
-                if (exito) window.location.href = 'login.html';
-            };
-        }
-
-        // Reemplaza los alert() en el fetch:
         if (response.ok) {
             mostrarModal(true, '¡Registro Exitoso!', 'Tus credenciales serán enviadas a tu correo. Ya puedes iniciar sesión.');
         } else {
@@ -55,3 +38,19 @@ document.getElementById('buyerRegisterForm').addEventListener('submit', async (e
     }
 });
 
+// Función para mostrar el modal
+function mostrarModal(exito, titulo, mensaje) {
+    const modal = document.getElementById('modalResultado');
+    document.getElementById('modalIcono').textContent = exito ? '✅' : '❌';
+    document.getElementById('modalTitulo').textContent = titulo;
+    document.getElementById('modalMensaje').textContent = mensaje;
+    const btn = document.getElementById('modalBtn');
+    btn.style.background = exito ? '#3b82f6' : '#ef4444';
+    btn.style.color = 'white';
+    modal.style.display = 'flex';
+
+    btn.onclick = () => {
+        modal.style.display = 'none';
+        if (exito) window.location.href = 'login.html';
+    };
+}

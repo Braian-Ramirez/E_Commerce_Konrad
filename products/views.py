@@ -31,3 +31,9 @@ class ComentarioProductoViewSet(viewsets.ModelViewSet):
     queryset = ComentarioProducto.objects.all()
     serializer_class = ComentarioProductoSerializer
 
+    def perform_create(self, serializer):
+        user = self.request.user
+        from vendors.models import Persona
+        persona, _ = Persona.objects.get_or_create(user=user)
+        serializer.save(comprador=persona)
+

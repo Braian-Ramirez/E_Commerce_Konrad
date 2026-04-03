@@ -23,10 +23,9 @@ class OrdenViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         user = self.request.user
-        if hasattr(user, 'persona_profile'):
-            serializer.save(comprador=user.persona_profile)
-        else:
-            serializer.save()
+        from vendors.models import Persona
+        persona, _ = Persona.objects.get_or_create(user=user)
+        serializer.save(comprador=persona)
 
     @action(detail=True, methods=['post'])
     def checkout(self, request, pk=None):
@@ -67,8 +66,12 @@ class OrdenViewSet(viewsets.ModelViewSet):
             if categoria.aplica_iva:
                 total_iva += (precio_base * Decimal('0.19'))
                 
-            # --- D. CÁLCULO DE PESO ---
+            # --- D. CÁLCULO DE PESO Y ACTUALIZACIÓN DE ESTADÍSTICAS ---
             peso_total += (producto.peso * detalle.cantidad)
+            
+            # --- E. ACTUALIZAR VENTAS TOTALES PARA "DESTACADOS" ---
+            producto.ventas_totales += detalle.cantidad
+            producto.save()
 
         # 5. Cálculo del costo de envío
         costo_envio = 0
