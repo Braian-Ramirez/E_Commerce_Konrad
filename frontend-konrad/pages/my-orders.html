@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es-co">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/src/css/style.css">
 </head>
+
 <body>
     <header class="navbar glass-effect">
         <div class="nav-brand">
@@ -15,20 +17,26 @@
         <nav class="nav-links">
             <a href="/index.html" class="nav-item">🏠 Inicio</a>
             <a href="/pages/catalog.html" class="nav-item">💎 Catálogo</a>
-            <button class="cart-btn" onclick="window.location.href='/pages/cart.html'">🛒 Carrito <span id="cartCount" class="badge">0</span></button>
+            <button class="cart-btn" onclick="window.location.href='/pages/cart.html'">🛒 Carrito <span id="cartCount"
+                    class="badge">0</span></button>
         </nav>
     </header>
 
-    <div class="dashboard-container" style="margin-top: 100px;">
+    <div class="dashboard-container" style="margin-top: 100px; width: 100%;">
         <aside class="sidebar-nav">
-          <div class="sidebar-section">
-            <p class="section-title">Navegación</p>
-            <a href="/index.html" class="sidebar-item"><span class="icon">🏠</span> Inicio</a>
-            <a href="/pages/my-orders.html" class="sidebar-item active"><span class="icon">🛍️</span> Mis Compras</a>
-            <a href="/pages/payment-methods.html" class="sidebar-item"><span class="icon">💳</span> Medios de Pago</a>
-            <a href="/pages/profile.html" class="sidebar-item"><span class="icon">👤</span> Mi Perfil</a>
-          </div>
-          <button onclick="localStorage.clear(); window.location.href='/pages/login.html'" class="logout-btn" style="width: 100%; margin-top: 40px; background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); padding: 12px; border-radius: 10px; cursor: pointer; font-weight: 600;">🚪 Cerrar Sesión</button>
+            <div class="sidebar-section">
+                <p class="section-title">Navegación</p>
+                <a href="/pages/buyer-dashboard.html" class="sidebar-item"><span class="icon">🏠</span> Inicio</a>
+                <a href="/pages/my-orders.html" class="sidebar-item active"><span class="icon">🛍️</span> Mis
+                    Compras</a>
+                <a href="/pages/favorites.html" class="sidebar-item"><span class="icon">❤️</span> Favoritos</a>
+                <a href="/pages/payment-methods.html" class="sidebar-item"><span class="icon">💳</span> Medios de
+                    Pago</a>
+                <a href="/pages/profile.html" class="sidebar-item"><span class="icon">👤</span> Mi Perfil</a>
+            </div>
+            <button onclick="localStorage.clear(); window.location.href='/pages/login.html'" class="logout-btn"
+                style="width: 100%; margin-top: 40px; background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); padding: 12px; border-radius: 10px; cursor: pointer; font-weight: 600;">🚪
+                Cerrar Sesión</button>
         </aside>
 
         <main class="main-content">
@@ -40,28 +48,38 @@
     </div>
 
     <!-- MODAL DETALLES PRODUCTO (Req. 4.9) -->
-    <div id="orderDetailModal" class="modal" style="display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.85); position: fixed; inset: 0; z-index: 1000;">
-        <div class="glass-effect" style="width: 90%; max-width: 600px; padding: 40px; border-radius: 25px; border: 1px solid rgba(255,255,255,0.1); position: relative;">
-            <button id="closeOrderModal" style="position: absolute; top: 20px; right: 20px; background: transparent; border: none; font-size: 1.5rem; color: #94a3b8; cursor: pointer;">✕</button>
+    <div id="orderDetailModal" class="modal"
+        style="display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.85); position: fixed; inset: 0; z-index: 1000;">
+        <div class="glass-effect"
+            style="width: 90%; max-width: 600px; padding: 40px; border-radius: 25px; border: 1px solid rgba(255,255,255,0.1); position: relative;">
+            <button id="closeOrderModal"
+                style="position: absolute; top: 20px; right: 20px; background: transparent; border: none; font-size: 1.5rem; color: #94a3b8; cursor: pointer;">✕</button>
             <h3 style="font-size: 1.8rem; margin-bottom: 25px;">Detalles de Compra</h3>
             <div id="orderDetailContent" style="display: flex; flex-direction: column; gap: 20px;">
                 <!-- Dinámico -->
             </div>
-            <button onclick="document.getElementById('orderDetailModal').style.display='none'" class="cta-primary" style="width: 100%; margin-top: 30px; padding: 15px;">Entendido</button>
+            <button onclick="document.getElementById('orderDetailModal').style.display='none'" class="cta-primary"
+                style="width: 100%; margin-top: 30px; padding: 15px;">Entendido</button>
         </div>
     </div>
 
     <!-- MODAL CALIFICACION (Req. 4.12) -->
-    <div id="ratingModal" class="modal" style="display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.85); position: fixed; inset: 0; z-index: 1000;">
+    <div id="ratingModal" class="modal"
+        style="display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.85); position: fixed; inset: 0; z-index: 1000;">
         <div class="glass-effect" style="width: 90%; max-width: 500px; padding: 40px; border-radius: 25px;">
             <h3>Calificar Compra (Rango 1-10)</h3>
-            <p style="color: #94a3b8; margin: 15px 0;">Califica la atención y el producto según el reglamento del proyecto.</p>
-            <input type="number" id="ratingValue" min="1" max="10" value="10" style="width: 100%; padding: 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 12px; margin-bottom: 20px; font-size: 1.5rem; text-align: center;">
-            <textarea id="ratingComment" placeholder="Cuéntanos tu experiencia (Opcional)" style="width: 100%; padding: 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 12px; min-height: 100px; margin-bottom: 25px;"></textarea>
-            <button id="submitRating" class="cta-primary" style="width: 100%; padding: 18px;">Enviar Calificación</button>
+            <p style="color: #94a3b8; margin: 15px 0;">Califica la atención y el producto según el reglamento del
+                proyecto.</p>
+            <input type="number" id="ratingValue" min="1" max="10" value="10"
+                style="width: 100%; padding: 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 12px; margin-bottom: 20px; font-size: 1.5rem; text-align: center;">
+            <textarea id="ratingComment" placeholder="Cuéntanos tu experiencia (Opcional)"
+                style="width: 100%; padding: 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 12px; min-height: 100px; margin-bottom: 25px;"></textarea>
+            <button id="submitRating" class="cta-primary" style="width: 100%; padding: 18px;">Enviar
+                Calificación</button>
         </div>
     </div>
 
     <script type="module" src="/src/js/my-orders.js"></script>
 </body>
+
 </html>

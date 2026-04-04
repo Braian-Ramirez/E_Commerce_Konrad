@@ -1,69 +1,65 @@
 <!DOCTYPE html>
-<html lang="es-co">
+<html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Consulta tu Estado | Comercial Konrad</title>
+    <title>Consultar Estado | Comercial Konrad</title>
+    <link rel="stylesheet" href="../src/css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/src/css/style.css">
+    <link rel="stylesheet" href="../src/css/check-status.css">
 </head>
-<body>
-    <header class="navbar glass-effect">
-        <div class="nav-brand">
-            <h1>🛍️Comercial<span>Konrad</span></h1>
-        </div>
-        <nav class="nav-links">
-            <a href="/index.html" class="nav-item">🏠 Inicio</a>
-            <a href="/pages/catalog.html" class="nav-item">💎 Catálogo</a>
-            <button class="cart-btn" onclick="window.location.href='/pages/cart.html'">🛒 Carrito</button>
-        </nav>
+
+<body style="min-height: 100vh; background: #0c0a09; margin: 0;">
+
+    <header class="header-status" style="display: flex; justify-content: space-between; align-items: center; padding: 25px 5%; background: rgba(0,0,0,0.2); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.05); position: fixed; width: 100%; top: 0; z-index: 1000; box-sizing: border-box;">
+        <h2 style="font-weight: 800; letter-spacing: -1.5px; margin: 0; font-size: 1.5rem; color: white;">🛍️Comercial <span
+                style="color: var(--primary);">Konrad</span></h2>
+        <a href="../index.html" class="back-link" style="color: white; text-decoration: none; font-weight: 600; opacity: 0.8; transition: 0.3s;">← Regresar al Portal</a>
     </header>
 
-    <div class="dashboard-container" style="margin-top: 100px;">
-        <aside class="sidebar-nav">
-          <div class="sidebar-section">
-            <p class="section-title">Navegación</p>
-            <a href="/index.html" class="sidebar-item"><span class="icon">🏠</span> Inicio</a>
-            <a href="/pages/my-orders.html" class="sidebar-item"><span class="icon">🛍️</span> Mis Compras</a>
-            <a href="/pages/payment-methods.html" class="sidebar-item"><span class="icon">💳</span> Medios de Pago</a>
-            <a href="/pages/profile.html" class="sidebar-item"><span class="icon">👤</span> Mi Perfil</a>
-          </div>
-          <button onclick="localStorage.clear(); window.location.href='/pages/login.html'" class="logout-btn" style="width: 100%; margin-top: 40px; background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); padding: 12px; border-radius: 10px; cursor: pointer; font-weight: 600;">🚪 Cerrar Sesión</button>
-        </aside>
+    <main class="main-container" style="padding-top: 150px; padding-bottom: 80px; display: flex; justify-content: center; align-items: center; min-height: 80vh;">
 
-        <main class="main-content" style="padding: 40px 60px;">
-            <div style="text-align: center; margin-bottom: 50px;">
-                <h2 style="font-size: 2.5rem; margin-bottom: 15px;">Consulta tu Estado</h2>
-                <p style="color: #94a3b8; max-width: 600px; margin: 0 auto;">Ingresa tu número de identificación o radicado para saber cómo va tu proceso con Konrad Shop.</p>
-            </div>
+        <div class="status-card glass-effect" style="width: 90%; max-width: 700px; padding: 60px; border-radius: 40px; text-align: center; border: 1px solid rgba(255,255,255,0.05);">
+            <h1 style="font-size: 2.8rem; font-weight: 800; margin: 0; color: white; letter-spacing: -1.5px;">Consulta
+                tu Estado</h1>
+            <p
+                style="color: #a8a29e; font-size: 1.05rem; line-height: 1.6; margin: 20px auto 40px; max-width: 400px; opacity: 0.8;">
+                Ingresa tu número de identificación o radicado para saber cómo va tu proceso.
+            </p>
 
-            <div class="form-card" style="max-width: 600px; margin: 0 auto; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); text-align: center;">
-                <div class="input-group" style="margin-bottom: 25px;">
-                    <label>ID o No. Radicado</label>
-                    <input type="text" id="statusId" placeholder="Ej: 10102020 o RAD-0001" style="text-align: center; font-size: 1.1rem; padding: 18px;">
-                </div>
-                <button class="cta-primary" id="checkStatusBtn" style="width: 100%; padding: 18px;">Consultar ahora 🔍</button>
+            <form id="statusForm" style="max-width: 450px; margin: 0 auto; display: flex; flex-direction: column;">
+                <input type="text" id="queryInput" class="search-field" placeholder="Ej: 10102020 o RAD-0001" required>
+                <button type="submit" class="btn-check">Consultar ahora 🔍</button>
+                <a href="login.html" class="btn-secondary">Regresar a Iniciar Sesión</a>
+            </form>
+
+            <!-- ÁREA DE RESULTADOS -->
+            <div id="resultArea" class="result-box" style="margin-top: 40px; padding-top: 40px; border-top: 1px solid rgba(255,255,255,0.05); display: none;">
+                <div class="status-label" style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Estado Actual:</div>
+                <h2 id="statusText" class="status-value" style="color: white; font-size: 2.2rem; font-weight: 800; margin: 0 0 10px 0;">...</h2>
+                <div id="statusBadge" class="status-badge" style="background: var(--primary); color: white; display: inline-block; padding: 6px 15px; border-radius: 10px; font-size: 0.85rem; font-weight: 800; margin-bottom: 25px;">...</div>
                 
-                <div id="statusResult" style="margin-top: 40px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 30px; display: none;">
-                    <div style="background: rgba(99,102,241,0.1); color: #818cf8; padding: 20px; border-radius: 12px; margin-bottom: 20px;">
-                        <strong>Estado Actual:</strong> <span id="statusValue">PENDIENTE</span>
+                <h3 id="text" style="color: #a8a29e; font-size: 0.95rem; line-height: 1.6; margin: 0 auto 30px; max-width: 500px; font-weight: 400;">
+                    Si el estado de su solicitud es "PENDIENTE" en los próximos días será evaluado. De 
+                    lo contrario recibirá un correo con más información sobre el estado de su solicitud.
+                </h3>
+
+                <div class="result-footer" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: left; background: rgba(255,255,255,0.02); padding: 20px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05);">
+                    <div class="footer-item">
+                        <span style="display: block; font-size: 0.7rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">👤 Titular:</span>
+                        <strong id="vendedorNombre" style="color: white; font-size: 0.95rem;">---</strong>
                     </div>
-                    <p id="statusMsg" style="font-size: 0.9rem; color: #94a3b8; line-height: 1.6;"></p>
+                    <div class="footer-item">
+                        <span style="display: block; font-size: 0.7rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">📅 Fecha:</span>
+                        <strong id="fechaRegistro" style="color: white; font-size: 0.95rem;">---</strong>
+                    </div>
                 </div>
             </div>
-        </main>
-    </div>
+        </div>
+    </main>
 
-    <script type="module">
-        document.getElementById('checkStatusBtn').onclick = () => {
-            const result = document.getElementById('statusResult');
-            const value = document.getElementById('statusValue');
-            const msg = document.getElementById('statusMsg');
-            
-            result.style.display = 'block';
-            value.textContent = 'PENDIENTE';
-            msg.textContent = 'Si el estado de su solicitud es "PENDIENTE" en los próximos días será evaluado. De lo contrario recibirá un correo con más información sobre el estado de su solicitud.';
-        };
-    </script>
+    <script src="../src/js/check-status.js"></script>
 </body>
+
 </html>

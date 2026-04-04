@@ -42,7 +42,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
             } else if (r === 'VENDEDOR') {
                 window.location.href = 'vendor-dashboard.html';
             } else {
-                window.location.href = '../index.html'; // Compradores y otros roles seguros
+                window.location.href = 'buyer-dashboard.html'; // Compradores van a su panel específico
             }
         }
  else {

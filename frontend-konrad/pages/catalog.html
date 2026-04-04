@@ -28,59 +28,64 @@
         </nav>
     </header>
 
-    <div class="dashboard-container" style="margin-top: 100px;">
-        <!-- SIDEBAR SINCRONIZADO (EL QUE PEDISTE ARREGLAR) -->
-        <aside class="sidebar-nav">
-          <div class="sidebar-section">
-            <p class="section-title">Mi Cuenta</p>
-            <a href="/index.html" class="sidebar-item">
-                <span class="icon">🏠</span> Inicio
-            </a>
-            <a href="/pages/my-orders.html" class="sidebar-item">
-                <span class="icon">🛍️</span> Mis Compras
-            </a>
-            <a href="/pages/favorites.html" class="sidebar-item">
-                <span class="icon">❤️</span> Favoritos
-            </a>
-            <a href="/pages/payment-methods.html" class="sidebar-item">
-                <span class="icon">💳</span> Medios de Pago
-            </a>
-            <a href="/pages/profile.html" class="sidebar-item">
-                <span class="icon">👤</span> Mi Perfil
-            </a>
-          </div>
+    <div class="dashboard-container" style="margin-top: 100px; width: 100%;">
+        <!-- SIDEBAR CONDICIONAL SEGÚN SESIÓN -->
+        <aside class="sidebar-nav" id="catalogSidebar"></aside>
+        <script>
+          (function() {
+            const token = localStorage.getItem('access_token');
+            const sidebar = document.getElementById('catalogSidebar');
+            const accountSection = token ? `
+              <div class="sidebar-section" style="margin-bottom:30px;">
+                <p class="section-title">Navegación</p>
+                <a href="/pages/buyer-dashboard.html" class="sidebar-item"><span class="icon">🏠</span> Inicio</a>
+                <a href="/pages/my-orders.html" class="sidebar-item"><span class="icon">🛍️</span> Mis Compras</a>
+                <a href="/pages/favorites.html" class="sidebar-item"><span class="icon">❤️</span> Favoritos</a>
+                <a href="/pages/payment-methods.html" class="sidebar-item"><span class="icon">💳</span> Medios de Pago</a>
+                <a href="/pages/profile.html" class="sidebar-item"><span class="icon">👤</span> Mi Perfil</a>
+              </div>` : `
+              <div class="sidebar-section" style="text-align:center; margin-bottom:10px;">
+                <div style="font-size:2rem; margin-bottom:10px;">👤</div>
+                <a href="/pages/login.html" class="cta-primary"
+                  style="display:block; text-align:center; text-decoration:none; padding:10px; border-radius:10px; margin-bottom:10px; font-size:0.9rem;">
+                  🔐 Iniciar Sesión
+                </a>
+                <a href="/pages/register.html"
+                  style="display:block; text-align:center; color:#94a3b8; text-decoration:none; font-size:0.82rem;">
+                  ¿Sin cuenta? <span style="color:var(--primary);">Regístrate</span>
+                </a>
+              </div>`;
 
-          <div class="sidebar-section" style="margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 25px;">
-            <p class="section-title">Explorar por Categoría</p>
-            <div class="filter-group-v">
-                <label class="filter-option">
-                    <input type="checkbox" id="cat-all" checked> Todos los productos
-                </label>
-                <label class="filter-option">
-                    <input type="checkbox" class="cat-filter" value="Tecnología"> 💻 Tecnología
-                </label>
-                <label class="filter-option">
-                    <input type="checkbox" class="cat-filter" value="Moda"> ✨ Moda
-                </label>
-                <label class="filter-option">
-                    <input type="checkbox" class="cat-filter" value="Hogar"> 🏠 Hogar
-                </label>
-            </div>
-          </div>
-
-          <div class="sidebar-section" style="margin-top: 25px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px;">
-            <p class="section-title">Presupuesto</p>
-            <div style="padding: 0 10px;">
-                <input type="range" id="priceRange" min="0" max="20000000" step="500000" value="20000000" style="width: 100%; accent-color: var(--primary);">
-                <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-top: 10px; color: #94a3b8;">
-                    <span>$0</span>
-                    <span id="priceValue" style="color: var(--primary); font-weight: 800;">$20M+</span>
+            const filtersSection = `
+              <div class="sidebar-section" style="margin-top:25px; border-top:1px solid rgba(255,255,255,0.05); padding-top:25px;">
+                <p class="section-title">Explorar por Categoría</p>
+                <div class="filter-group-v">
+                  <label class="filter-option"><input type="checkbox" id="cat-all" checked> Todos los productos</label>
+                  <label class="filter-option"><input type="checkbox" class="cat-filter" value="Tecnología"> 💻 Tecnología</label>
+                  <label class="filter-option"><input type="checkbox" class="cat-filter" value="Moda"> ✨ Moda</label>
+                  <label class="filter-option"><input type="checkbox" class="cat-filter" value="Hogar"> 🏠 Hogar</label>
                 </div>
-            </div>
-          </div>
+              </div>
+              <div class="sidebar-section" style="margin-top:20px; border-top:1px solid rgba(255,255,255,0.05); padding-top:20px;">
+                <p class="section-title">Presupuesto</p>
+                <div style="padding:0 10px;">
+                  <input type="range" id="priceRange" min="0" max="20000000" step="500000" value="20000000" style="width:100%; accent-color:var(--primary);">
+                  <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-top:10px; color:#94a3b8;">
+                    <span>$0</span>
+                    <span id="priceValue" style="color:var(--primary); font-weight:800;">$20M+</span>
+                  </div>
+                </div>
+              </div>`;
 
-          <button onclick="localStorage.removeItem('access_token'); localStorage.removeItem('refresh_token'); localStorage.removeItem('user_data'); window.location.href='/pages/login.html'" class="logout-btn" style="width: 100%; margin-top: auto; background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); padding: 12px; border-radius: 10px; cursor: pointer; font-weight: 600;">🚪 Cerrar Sesión</button>
-        </aside>
+            const logoutBtn = token ? `
+              <button onclick="localStorage.removeItem('access_token'); localStorage.removeItem('refresh_token'); localStorage.removeItem('user_data'); window.location.href='/pages/login.html'"
+                style="width:100%; margin-top:20px; background:rgba(239,68,68,0.1); color:#ef4444; border:1px solid rgba(239,68,68,0.2); padding:12px; border-radius:10px; cursor:pointer; font-weight:600;">
+                🚪 Cerrar Sesión
+              </button>` : '';
+
+            sidebar.innerHTML = accountSection + filtersSection + logoutBtn;
+          })();
+        </script>
 
         <main class="main-content" style="padding: 0 40px;">
             <div style="margin-bottom: 40px;">

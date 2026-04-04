@@ -40,6 +40,9 @@ function toggleFav(id) {
 
 // ─── INICIALIZACIÓN ──────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", async () => {
+    // 0. Renderizar la interfaz según la sesión (Perfil vs Login)
+    renderAuthUI();
+
     // 1. Antes de renderizar, sincronizamos para que el badge y el estado sea el real de la BD
     await syncCartWithBackend();
     
@@ -226,10 +229,12 @@ function renderGrid(containerId, products, showFav = false) {
 
         return `
         <div class="product-card glass-effect" id="card-${p_id}" style="position:relative;animation: fadeIn 0.4s ease-out;">
+        ${token ? `
             <button id="fav-${p_id}" onclick="handleFav('${p_id}')"
                 style="position:absolute;top:12px;right:12px;z-index:10;background:${favOn ? 'rgba(239,68,68,0.2)' : 'rgba(255,255,255,0.05)'};border:1px solid ${favOn ? 'rgba(239,68,68,0.4)' : 'rgba(255,255,255,0.1)'};width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;">
                 ${favOn ? '❤️' : '🤍'}
             </button>
+        ` : ''}
 
             <div class="product-image" style="position:relative; cursor:pointer; background: #0c0f18; display:flex; align-items:center; justify-content:center; border-radius:15px; overflow:hidden; border:1px solid rgba(255,255,255,0.03);">
                 <button onclick="event.stopPropagation(); flipCardImg('${p_id}', -1)" style="position:absolute;left:5px;z-index:20;background:rgba(0,0,0,0.5);border:none;color:white;width:30px;height:30px;border-radius:50%;cursor:pointer;">‹</button>
@@ -359,7 +364,8 @@ function setupFilters() {
         const max = range ? parseFloat(range.value) : 20000000;
         if (label) label.textContent = '$' + new Intl.NumberFormat('es-CO').format(max) + (max >= 20000000 ? '+' : '');
 
-        const selected = Array.from(boxes).filter(c => c.checked).map(c => c.value.toLowerCase());
+        const normalize = (str) => (str || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const selected = Array.from(boxes).filter(c => c.checked).map(c => normalize(c.value));
         
         // DETERMINAR ORIGEN DE DATOS CORRECTO
         const isHomePage = !!document.getElementById('productHighlights');
@@ -367,7 +373,8 @@ function setupFilters() {
 
         const filtered = sourceProducts.filter(p => {
             const matchesPrice = p.precio_fijo <= max;
-            const matchesCat   = (allC && allC.checked) || selected.length === 0 || selected.includes((p.categoria_nombre || '').toLowerCase());
+            const pCat = normalize(p.categoria_nombre);
+            const matchesCat   = (allC && allC.checked) || selected.length === 0 || selected.includes(pCat);
             return matchesPrice && matchesCat;
         });
 
@@ -385,6 +392,44 @@ function setupFilters() {
     if (allC) {
         allC.addEventListener('change', () => { if (allC.checked) { boxes.forEach(b => b.checked = false); apply(); } });
     }
+
+    // SOPORTE PARA BOTONES NUEVOS (PÁGINA PÚBLICA)
+    const btnAll  = document.getElementById('cat-all-btn');
+    const catBtns = document.querySelectorAll('.cat-filter-btn');
+
+    const updateBtns = (activeBtn) => {
+        [btnAll, ...catBtns].forEach(b => {
+             if (b) {
+                b.classList.remove('active');
+                b.style.background = 'transparent';
+                b.style.color = '#94a3b8';
+             }
+        });
+        if (activeBtn) {
+            activeBtn.classList.add('active');
+            activeBtn.style.background = 'var(--primary)';
+            activeBtn.style.color = 'white';
+        }
+    };
+
+    btnAll?.addEventListener('click', () => {
+        updateBtns(btnAll);
+        if (allC) allC.checked = true;
+        boxes.forEach(b => b.checked = false);
+        apply();
+    });
+
+    catBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const cat = btn.getAttribute('data-cat');
+            updateBtns(btn);
+            if (allC) allC.checked = false;
+            boxes.forEach(b => {
+                b.checked = (b.value === cat);
+            });
+            apply();
+        });
+    });
 }
 
 function setupSearch() {
@@ -546,6 +591,40 @@ window.openProductDetail = (p) => {
     };
     m.style.display = 'flex';
 };
+
+function renderAuthUI() {
+    const authLinks  = document.getElementById('authLinks');
+    const token      = localStorage.getItem('access_token');
+    // Ya no se afecta el sidebar desde aquí de forma general
+
+    if (!authLinks) return;
+
+    if (token) {
+        // SESIÓN ACTIVA: Mostrar Perfil
+        authLinks.style.display = 'flex';
+        authLinks.style.flexDirection = 'row';
+        authLinks.style.gap = '20px';
+        authLinks.innerHTML = `<a href="/pages/profile.html" class="nav-item tooltip-btn">
+            <span class="icon">👤</span>
+            <span class="hover-text">Mi Perfil</span>
+        </a>`;
+    } else {
+        // SESIÓN INACTIVA: Mostrar Login y Registro horizontales
+        authLinks.style.display = 'flex';
+        authLinks.style.flexDirection = 'row';
+        authLinks.style.gap = '20px';
+        authLinks.innerHTML = `
+            <a href="/pages/login.html" class="nav-item tooltip-btn" style="color:var(--primary);">
+                <span class="icon">🔐</span>
+                <span class="hover-text">Ingresar</span>
+            </a>
+            <a href="/pages/register.html" class="nav-item tooltip-btn">
+                <span class="icon">📝</span>
+                <span class="hover-text">Registrarse</span>
+            </a>
+        `;
+    }
+}
 
 function showToast(msg) {
     let t = document.getElementById('toast');

@@ -10,7 +10,30 @@
 </head>
 
 <body
-    style="display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow-x: hidden; background: #0c0a09; margin: 0;">
+    style="min-height: 100vh; overflow-x: hidden; background: #0c0a09; margin: 0; padding-top: 100px;">
+
+    <!-- HEADER: Navegación Principal -->
+    <header class="navbar glass-effect" style="position: fixed; top: 0; width: 100%; z-index: 1000; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; padding: 15px 5%;">
+        <div class="nav-brand">
+            <a href="../index.html" style="text-decoration: none;">
+                <h1 style="font-size: 1.5rem; color: var(--text-light); font-weight: 800; margin:0;">🛍️Comercial<span style="color: var(--primary);">Konrad</span></h1>
+            </a>
+        </div>
+
+        <nav class="nav-links" style="display: flex; gap: 20px; align-items: center;">
+            <a href="/pages/register.html" class="nav-item tooltip-btn">
+                <span class="icon">📝</span>
+                <span class="hover-text">Registrarse</span>
+            </a>
+            <a href="/pages/check-status.html" class="nav-item tooltip-btn">
+                <span class="icon">📋</span>
+                <span class="hover-text">Consultar Solicitud</span>
+            </a>
+            <a href="../index.html" class="nav-item">🏠 Inicio</a>
+        </nav>
+    </header>
+
+    <div style="display: flex; justify-content: center; align-items: center; min-height: 80vh;">
 
     <!-- Bolas de neón de fondo -->
     <div class="floating-orb orb-1" style="width: 400px; height: 400px; top: 10%; right: 10%;"></div>

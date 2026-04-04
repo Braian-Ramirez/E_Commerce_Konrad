@@ -19,17 +19,48 @@
         </nav>
     </header>
 
-    <div class="dashboard-container" style="margin-top: 100px; gap: 30px; display: grid; grid-template-columns: 280px 1fr 400px;">
-        <aside class="sidebar-nav">
-          <div class="sidebar-section">
-            <p class="section-title">Mi Cuenta</p>
-            <a href="/index.html" class="sidebar-item"><span class="icon">🏠</span> Inicio</a>
+    <div class="dashboard-container" style="margin-top: 100px; width: 100%; gap: 30px; display: grid; grid-template-columns: 280px 1fr 400px;">
+        <aside class="sidebar-nav" id="cartSidebar">
+          <!-- renderizado por script según sesión -->
+        </aside>
+        <script>
+          (function() {
+            const token = localStorage.getItem('access_token');
+            const sidebar = document.getElementById('cartSidebar');
+            if (token) {
+              sidebar.innerHTML = `
+                <div class="sidebar-section">
+            <p class="section-title">Navegación</p>
+            <a href="/pages/buyer-dashboard.html" class="sidebar-item"><span class="icon">🏠</span> Inicio</a>
             <a href="/pages/my-orders.html" class="sidebar-item"><span class="icon">🛍️</span> Mis Compras</a>
+            <a href="/pages/favorites.html" class="sidebar-item"><span class="icon">❤️</span> Favoritos</a>
             <a href="/pages/payment-methods.html" class="sidebar-item"><span class="icon">💳</span> Medios de Pago</a>
             <a href="/pages/profile.html" class="sidebar-item"><span class="icon">👤</span> Mi Perfil</a>
           </div>
-          <button onclick="localStorage.removeItem('access_token'); localStorage.removeItem('refresh_token'); localStorage.removeItem('user_data'); window.location.href='/pages/login.html'" class="logout-btn" style="width: 100%; margin-top: 40px; background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); padding: 12px; border-radius: 10px; cursor: pointer; font-weight: 600;">🚪 Cerrar Sesión</button>
-        </aside>
+                <button onclick="localStorage.removeItem('access_token'); localStorage.removeItem('refresh_token'); localStorage.removeItem('user_data'); window.location.href='/pages/login.html'"
+                  class="logout-btn" style="width:100%; margin-top:40px; background:rgba(239,68,68,0.1); color:#ef4444; border:1px solid rgba(239,68,68,0.2); padding:12px; border-radius:10px; cursor:pointer; font-weight:600;">
+                  🚪 Cerrar Sesión
+                </button>`;
+            } else {
+              sidebar.innerHTML = `
+                <div class="sidebar-section" style="text-align:center;">
+                  <div style="font-size:2.5rem; margin-bottom:15px;">🔐</div>
+                  <p class="section-title">Acceso Requerido</p>
+                  <p style="color:#94a3b8; font-size:0.85rem; line-height:1.6; margin-bottom:20px;">
+                    Inicia sesión para gestionar tu carrito y realizar compras.
+                  </p>
+                  <a href="/pages/login.html" class="cta-primary"
+                    style="display:block; text-align:center; text-decoration:none; padding:12px; border-radius:10px; margin-bottom:12px;">
+                    🔐 Iniciar Sesión
+                  </a>
+                  <a href="/pages/register.html"
+                    style="display:block; text-align:center; color:#94a3b8; text-decoration:none; font-size:0.85rem;">
+                    ¿No tienes cuenta? <span style="color:var(--primary);">Regístrate</span>
+                  </a>
+                </div>`;
+            }
+          })();
+        </script>
 
         <main class="main-content" style="padding: 0; max-width: 850px;">
             <div style="display:flex; align-items:center; gap:15px; margin-bottom:40px;">

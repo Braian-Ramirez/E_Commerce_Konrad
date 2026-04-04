@@ -40,7 +40,10 @@ async function cargarPedidos() {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (res.status === 401) {
-            console.warn("La sesión del backend parece haber expirado, pero mantendremos la vista actual.");
+            console.warn("La sesión del backend parece haber expirado.");
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            window.location.href = '/pages/login.html';
             return;
         }
         if (res.ok) {
