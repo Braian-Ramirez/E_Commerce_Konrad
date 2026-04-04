@@ -4,31 +4,44 @@ from .models import Orden, DetalleOrden, CalificacionProducto
 # 1. Primero el Detalle (porque la Orden lo usará)
 class DetalleOrdenSerializer(serializers.ModelSerializer):
     producto_nombre = serializers.ReadOnlyField(source='producto.nombre')
+    producto_imagen = serializers.SerializerMethodField()
     
+    def get_producto_imagen(self, obj):
+        if hasattr(obj.producto, 'imagenes') and obj.producto.imagenes.exists():
+            return obj.producto.imagenes.first().imagen
+        if hasattr(obj.producto, 'descripcion') and '||IMG:' in obj.producto.descripcion:
+            import re
+            match = re.search(r'\|\|IMG:(.*?)\|\|', obj.producto.descripcion)
+            if match: return match.group(1)
+        return '📦'
+
     class Meta:
         model = DetalleOrden
-        fields = ['id', 'producto', 'producto_nombre', 'cantidad', 'valor_unitario']
+        fields = ['id', 'orden', 'producto', 'producto_nombre', 'producto_imagen', 'cantidad', 'valor_unitario']
 
     def validate(self, attrs):
-        # Obtener datos del carrito
-        producto = attrs.get('producto') or self.instance.producto
-        cantidad_pedida = attrs.get('cantidad') or self.instance.cantidad
+        # Para creación (self.instance es None), obtenemos de attrs directamente
+        producto = attrs.get('producto') or (self.instance.producto if self.instance else None)
+        cantidad_pedida = attrs.get('cantidad') or (self.instance.cantidad if self.instance else None)
+
+        if producto is None or cantidad_pedida is None:
+            return attrs  # Dejar que la validación de campos requeridos lo maneje
 
         # Validación para cantidades negativas o cero
         if cantidad_pedida <= 0:
             raise serializers.ValidationError({
-                "cantidad": f"cantidad invalida solo puede seleccionar cantidades mayores a cero"
+                "cantidad": "Cantidad inválida: solo puede seleccionar cantidades mayores a cero"
             })
 
         # Validación para cantidades mayores al stock    
         if producto.cantidad < cantidad_pedida:
             raise serializers.ValidationError({
                 "cantidad": f"No hay suficiente stock. Stock actual: {producto.cantidad}"
-            })     
+            })
 
         # Validación estado de la orden
-        orden = attrs.get('orden') or self.instance.orden
-        if orden.estado != 'CARRITO':
+        orden = attrs.get('orden') or (self.instance.orden if self.instance else None)
+        if orden and orden.estado != 'CARRITO':
             raise serializers.ValidationError("No puede modificar un producto de una orden que ya no se encuentra en su carrito")
         return attrs
 
@@ -44,6 +57,9 @@ class OrdenSerializer(serializers.ModelSerializer):
             'tipo_entrega', 'costo_envio', 'total_iva', 
             'total_comision', 'total_final', 'detalles' 
         ]
+        # comprador se inyecta desde perform_create; no es necesario en el body del request
+        read_only_fields = ['comprador', 'comprador_nombre', 'fecha', 'estado',
+                            'costo_envio', 'total_iva', 'total_comision', 'total_final']
 
 # 3. Calificación de Producto (vinculada a una Orden)
 class CalificacionProductoSerializer(serializers.ModelSerializer):

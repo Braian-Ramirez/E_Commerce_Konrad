@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es-co">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil | Comercial Konrad</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/src/css/style.css">
+    <style>
+        .profile-container { max-width: 900px; margin: 40px auto; padding: 40px; }
+        .avatar-section { display: flex; flex-direction: column; align-items: center; gap: 20px; margin-bottom: 40px; }
+        .avatar-circle { width: 140px; height: 140px; border-radius: 50%; background: var(--primary-gradient); border: 4px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 3.5rem; font-weight: 800; color: white; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+        .avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
+        .file-upload-btn { background: rgba(255,255,255,0.05); color: white; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-size: 0.9rem; border: 1px solid rgba(255,255,255,0.1); transition: all 0.3s; }
+        .file-upload-btn:hover { background: var(--primary); transform: translateY(-2px); }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+    </style>
+</head>
+<body>
+    <header class="navbar glass-effect">
+        <div class="nav-brand">
+            <h1>🛍️Comercial<span>Konrad</span></h1>
+        </div>
+        <nav class="nav-links">
+            <a href="/index.html" class="nav-item">🏠 Inicio</a>
+            <a href="/pages/catalog.html" class="nav-item">💎 Catálogo</a>
+            <button class="cart-btn" onclick="window.location.href='/pages/cart.html'">🛒 Carrito <span id="cartCount" class="badge">0</span></button>
+        </nav>
+    </header>
+
+    <div class="dashboard-container" style="margin-top: 100px;">
+        <aside class="sidebar-nav">
+          <div class="sidebar-section">
+            <p class="section-title">Navegación</p>
+            <a href="/pages/buyer-dashboard.html" class="sidebar-item"><span class="icon">🏠</span> Inicio</a>
+            <a href="/pages/my-orders.html" class="sidebar-item"><span class="icon">🛍️</span> Mis Compras</a>
+            <a href="/pages/favorites.html" class="sidebar-item"><span class="icon">❤️</span> Favoritos</a>
+            <a href="/pages/payment-methods.html" class="sidebar-item"><span class="icon">💳</span> Medios de Pago</a>
+            <a href="/pages/profile.html" class="sidebar-item active"><span class="icon">👤</span> Mi Perfil</a>
+          </div>
+          <button onclick="localStorage.clear(); window.location.href='/pages/login.html'" class="logout-btn" style="width: 100%; margin-top: auto; background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); padding: 12px; border-radius: 10px; cursor: pointer; font-weight: 600;">🚪 Cerrar Sesión</button>
+        </aside>
+
+        <main class="main-content">
+            <div class="profile-container glass-effect" style="border-radius: 30px; border: 1px solid rgba(255,255,255,0.05);">
+                <div class="avatar-section">
+                    <div id="avatarCircle" class="avatar-circle">V</div>
+                    <label class="file-upload-btn">
+                        📷 Cambiar Foto de Perfil
+                        <input type="file" id="avatarInput" accept="image/*" style="display: none;">
+                    </label>
+                </div>
+
+                <form id="profileForm">
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label>Nombre</label>
+                            <input type="text" id="nombre" value="Viviana" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Apellido</label>
+                            <input type="text" id="apellido" value="García" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Email (No editable)</label>
+                            <input type="email" id="email" disabled style="opacity: 0.5;">
+                        </div>
+                        <div class="input-group">
+                            <label>Teléfono</label>
+                            <input type="text" id="telefono">
+                        </div>
+                        <div class="input-group">
+                            <label>País</label>
+                            <input type="text" id="pais" placeholder="Colombia">
+                        </div>
+                        <div class="input-group">
+                            <label>Ciudad</label>
+                            <input type="text" id="ciudad" placeholder="Bogotá">
+                        </div>
+                        <div class="input-group">
+                            <label>Dirección</label>
+                            <input type="text" id="direccion" placeholder="Calle ...">
+                        </div>
+                        <div class="input-group">
+                            <label>Instagram</label>
+                            <input type="text" id="instagram" placeholder="@user">
+                        </div>
+                    </div>
+                    <button type="submit" class="cta-primary" style="margin-top: 40px; width: 100%; padding: 18px;">✅ Guardar Cambios del Perfil</button>
+                </form>
+
+                <div style="margin-top: 50px; padding-top: 40px; border-top: 1px solid rgba(255,255,255,0.1);">
+                    <h3 style="margin-bottom: 25px; font-size: 1.5rem; display: flex; align-items: center; gap: 10px;">🔐 Seguridad y Contraseña</h3>
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label>Nueva Contraseña</label>
+                            <input type="password" id="new_password" placeholder="••••••••">
+                        </div>
+                        <div class="input-group">
+                            <label>Confirmar Contraseña</label>
+                            <input type="password" id="confirm_password" placeholder="••••••••">
+                        </div>
+                    </div>
+                    <button id="changePassBtn" class="cta-primary" style="margin-top: 20px; width: 100%; padding: 15px; background: rgba(59, 130, 246, 0.2); border: 1px solid var(--primary);">Actualizar Seguridad</button>
+                    
+                    <button onclick="localStorage.clear(); window.location.href='/pages/login.html'" style="margin-top: 40px; width: 100%; padding: 18px; border-radius: 15px; background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid #ef4444; font-weight: 800; cursor: pointer;">🚪 Cerrar Sesión Segura</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module" src="/src/js/profile.js"></script>
+</body>
+</html>

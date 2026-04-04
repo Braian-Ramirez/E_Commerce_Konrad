@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es-co">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Favoritos | Comercial Konrad</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/src/css/style.css">
+</head>
+<body>
+    <header class="navbar glass-effect">
+        <div class="nav-brand"><h1>🛍️Comercial<span>Konrad</span></h1></div>
+        <nav class="nav-links">
+            <a href="/index.html" class="nav-item">🏠 Inicio</a>
+            <a href="/pages/catalog.html" class="nav-item">💎 Catálogo</a>
+            <button class="cart-btn" onclick="window.location.href='/pages/cart.html'">🛒 Carrito <span id="cartCount" class="badge">0</span></button>
+        </nav>
+    </header>
+
+    <div class="dashboard-container" style="margin-top:100px;">
+        <aside class="sidebar-nav">
+            <div class="sidebar-section">
+                <p class="section-title">Navegación</p>
+                <a href="/pages/buyer-dashboard.html" class="sidebar-item"><span class="icon">🏠</span> Inicio</a>
+                <a href="/pages/my-orders.html" class="sidebar-item"><span class="icon">🛍️</span> Mis Compras</a>
+                <a href="/pages/favorites.html" class="sidebar-item active"><span class="icon">❤️</span> Favoritos</a>
+                <a href="/pages/payment-methods.html" class="sidebar-item"><span class="icon">💳</span> Medios de Pago</a>
+                <a href="/pages/profile.html" class="sidebar-item"><span class="icon">👤</span> Mi Perfil</a>
+            </div>
+            <button onclick="localStorage.removeItem('access_token'); localStorage.removeItem('refresh_token'); localStorage.removeItem('user_data'); window.location.href='/pages/login.html'"
+                style="width:100%;margin-top:40px;background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.2);padding:12px;border-radius:10px;cursor:pointer;font-weight:600;">
+                🚪 Cerrar Sesión
+            </button>
+        </aside>
+
+        <main class="main-content">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:35px;">
+                <h2 style="font-size:2rem;">❤️ Mis Favoritos</h2>
+                <button id="clearFavsBtn" style="background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.2);padding:10px 20px;border-radius:10px;cursor:pointer;font-weight:700;font-size:0.85rem;">
+                    🗑️ Limpiar todos
+                </button>
+            </div>
+            <div id="favsGrid" class="products-grid">
+                <p style="color:#94a3b8;text-align:center;padding:60px;">Cargando favoritos...</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL DETALLE -->
+    <div id="productDetailModal" class="modal" style="display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.9);position:fixed;inset:0;z-index:2000;">
+        <div class="glass-effect" style="width:90%;max-width:950px;padding:40px;border-radius:30px;border:1px solid rgba(255,255,255,0.1);position:relative;max-height:90vh;overflow-y:auto;">
+            <button id="closeModal" style="position:absolute;top:25px;right:25px;background:rgba(255,255,255,0.05);border:none;width:40px;height:40px;border-radius:50%;color:white;cursor:pointer;font-size:1.2rem;">✕</button>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <div id="toast"></div>
+    <script type="module" src="/src/js/favorites.js"></script>
+</body>
+</html>

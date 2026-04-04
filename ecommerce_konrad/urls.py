@@ -16,12 +16,39 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-)
+from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.conf import settings
 from django.conf.urls.static import static
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        # El frontend envía el email en el campo "username"
+        email_ingresado = attrs.get('username')
+        from django.contrib.auth.models import User
+        
+        # Filtramos ignorando mayúsculas/minúsculas y tomamos el primero
+        user_obj = User.objects.filter(email__iexact=email_ingresado).first()
+        if user_obj:
+            attrs['username'] = user_obj.username
+
+        data = super().validate(attrs)
+        rol = "DIRECTOR_COMERCIAL"
+        user = self.user
+        
+        if hasattr(user, 'persona_profile') and user.persona_profile:
+            persona = user.persona_profile
+            if hasattr(persona, 'vendedor_profile'):
+                rol = 'VENDEDOR'
+            elif hasattr(persona, 'perfil_comprador'):
+                rol = 'COMPRADOR'
+            
+        data['rol'] = rol
+        return data
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -32,7 +59,7 @@ urlpatterns = [
     path('api/v1/payments/', include('payments.urls')), #urls de pagos
     path('api/v1/notifications/', include('notifications.urls')), #urls de notificaciones
     path('api/v1/buyers/', include('buyers.urls')), #urls de compradores
-    path('api/v1/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'), #Ruta login
+    path('api/v1/login/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'), #Ruta login customizada
     path('api/v1/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'), #Ruta refresh token
     path('api/v1/bam/', include('bam.urls')), #urls de bam
     path('api/v1/directors/', include('directors.urls')), #urls de directores

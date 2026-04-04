@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es-co">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurar Pagos | Comercial Konrad</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/src/css/style.css">
+    <style>
+        .payments-header { text-align: center; margin-bottom: 50px; margin-top: 20px; }
+        .empty-payments {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 80px 20px; border: 2px dashed rgba(255,255,255,0.05); border-radius: 30px;
+            background: rgba(255,255,255,0.02); margin: 0 auto; max-width: 600px;
+        }
+        .payment-type-select {
+            width: 100%; padding: 15px; border-radius: 12px; background: #1e293b;
+            color: white; border: 1px solid rgba(255,255,255,0.1); font-size: 1rem;
+            cursor: pointer; appearance: none; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat; background-position: right 15px center; background-size: 15px;
+        }
+    </style>
+</head>
+<body>
+    <header class="navbar glass-effect">
+        <div class="nav-brand">
+            <h1>🛍️Comercial<span>Konrad</span></h1>
+        </div>
+        <nav class="nav-links">
+            <a href="/index.html" class="nav-item">🏠 Inicio</a>
+            <a href="/pages/catalog.html" class="nav-item">💎 Catálogo</a>
+            <button class="cart-btn" onclick="window.location.href='/pages/cart.html'">🛒 Carrito</button>
+        </nav>
+    </header>
+
+    <div class="dashboard-container" style="margin-top: 100px;">
+        <aside class="sidebar-nav">
+          <div class="sidebar-section">
+            <p class="section-title">Navegación</p>
+            <a href="/pages/buyer-dashboard.html" class="sidebar-item"><span class="icon">🏠</span> Inicio</a>
+            <a href="/pages/my-orders.html" class="sidebar-item"><span class="icon">🛍️</span> Mis Compras</a>
+            <a href="/pages/favorites.html" class="sidebar-item"><span class="icon">❤️</span> Favoritos</a>
+            <a href="/pages/payment-methods.html" class="sidebar-item active"><span class="icon">💳</span> Medios de Pago</a>
+            <a href="/pages/profile.html" class="sidebar-item"><span class="icon">👤</span> Mi Perfil</a>
+          </div>
+          <button onclick="localStorage.clear(); window.location.href='/pages/login.html'" class="logout-btn" style="width: 100%; margin-top: 40px;">🚪 Cerrar Sesión</button>
+        </aside>
+
+        <main class="main-content">
+            <div class="payments-header">
+                <h2 style="font-size: 2.5rem; margin-bottom: 10px;">Mis Medios de Pago</h2>
+                <p style="color: #94a3b8;">Configura tus tarjetas y billeteras para compras rápidas</p>
+                <button id="openModalBtn" class="cta-primary" style="margin-top: 25px; padding: 15px 40px; font-size: 1.1rem; border-radius: 50px; font-weight: 800;">+ Agregar nuevo medio</button>
+            </div>
+            
+            <div id="paymentsList" style="max-width: 800px; margin: 0 auto;">
+                <!-- Cargando o lista -->
+                 <div class="empty-payments">
+                    <div style="font-size: 4rem; margin-bottom: 20px;">🛡️</div>
+                    <h4 style="margin-bottom: 10px;">Tu billetera está vacía</h4>
+                    <p style="color: #64748b; text-align: center; margin-bottom: 30px;">Agrega un medio de pago para empezar a comprar tus productos favoritos.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL CENTRADO MERCADO LIBRE -->
+    <div id="addPaymentModal" class="modal" style="display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.85); position: fixed; inset: 0; z-index: 1000;">
+        <div class="glass-effect" style="width: 95%; max-width: 500px; padding: 40px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.1);">
+            <h3 style="margin-bottom: 30px; font-size: 1.8rem; text-align: center;">Vincular Medio de Pago</h3>
+            <form id="paymentForm">
+                <div class="input-group" style="margin-bottom: 20px;">
+                    <label>Tipo de Medio</label>
+                    <select id="tipo_pago" class="payment-type-select">
+                        <option value="TARJETA">💳 Tarjeta de Crédito / Débito</option>
+                        <option value="BILLETERA">📱 Billetera Digital (Nequi, Daviplata)</option>
+                        <option value="CUENTA">🏦 Cuenta de Ahorros / Corriente (PSE)</option>
+                    </select>
+                </div>
+                <div class="input-group" style="margin-bottom: 20px;">
+                    <label>Entidad del Banco</label>
+                    <input type="text" id="banco_nombre" placeholder="Ej: Bancolombia, BBVA, Nequi" required>
+                </div>
+                <div class="input-group" style="margin-bottom: 20px;">
+                    <label>Titular</label>
+                    <input type="text" id="titular_nombre" placeholder="Nombre completo" required>
+                </div>
+                <div class="input-group" style="margin-bottom: 30px;">
+                    <label>Número / Usuario</label>
+                    <input type="text" id="numero_cuenta_tarjeta" placeholder="0000 0000 0000 0000" required>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button type="button" id="cancelBtn" style="flex:1; background:transparent; color:#94a3b8; border:none; cursor:pointer; font-weight:700;">Cancelar</button>
+                    <button type="submit" class="cta-primary" style="flex:2; padding:18px;">Vincular Ahora</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module" src="/src/js/payment-methods.js"></script>
+</body>
+</html>

@@ -52,3 +52,20 @@ document.getElementById('buyerRegisterForm').addEventListener('submit', async (e
         mostrarModal(false, 'Error de Conexión', 'No se pudo conectar con el servidor. Verifica que el backend esté corriendo.');
     }
 });
+
+// Función para mostrar el modal
+function mostrarModal(exito, titulo, mensaje) {
+    const modal = document.getElementById('modalResultado');
+    document.getElementById('modalIcono').textContent = exito ? '✅' : '❌';
+    document.getElementById('modalTitulo').textContent = titulo;
+    document.getElementById('modalMensaje').textContent = mensaje;
+    const btn = document.getElementById('modalBtn');
+    btn.style.background = exito ? '#3b82f6' : '#ef4444';
+    btn.style.color = 'white';
+    modal.style.display = 'flex';
+
+    btn.onclick = () => {
+        modal.style.display = 'none';
+        if (exito) window.location.href = 'login.html';
+    };
+}

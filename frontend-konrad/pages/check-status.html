@@ -10,17 +10,17 @@
     <link rel="stylesheet" href="../src/css/check-status.css">
 </head>
 
-<body>
+<body style="min-height: 100vh; background: #0c0a09; margin: 0;">
 
-    <header class="header-status">
-        <h2 style="font-weight: 800; letter-spacing: -1.5px; margin: 0; font-size: 1.5rem;">🛍️Comercial <span
-                style="color: var(--accent);">Konrad</span></h2>
-        <a href="../index.html" class="back-link">← Regresar al Portal</a>
+    <header class="header-status" style="display: flex; justify-content: space-between; align-items: center; padding: 25px 5%; background: rgba(0,0,0,0.2); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.05); position: fixed; width: 100%; top: 0; z-index: 1000; box-sizing: border-box;">
+        <h2 style="font-weight: 800; letter-spacing: -1.5px; margin: 0; font-size: 1.5rem; color: white;">🛍️Comercial <span
+                style="color: var(--primary);">Konrad</span></h2>
+        <a href="../index.html" class="back-link" style="color: white; text-decoration: none; font-weight: 600; opacity: 0.8; transition: 0.3s;">← Regresar al Portal</a>
     </header>
 
-    <main class="main-container">
+    <main class="main-container" style="padding-top: 150px; padding-bottom: 80px; display: flex; justify-content: center; align-items: center; min-height: 80vh;">
 
-        <div class="status-card">
+        <div class="status-card glass-effect" style="width: 90%; max-width: 700px; padding: 60px; border-radius: 40px; text-align: center; border: 1px solid rgba(255,255,255,0.05);">
             <h1 style="font-size: 2.8rem; font-weight: 800; margin: 0; color: white; letter-spacing: -1.5px;">Consulta
                 tu Estado</h1>
             <p
@@ -28,26 +28,31 @@
                 Ingresa tu número de identificación o radicado para saber cómo va tu proceso.
             </p>
 
-            <form id="statusForm" style="max-width: 450px; margin: 0 auto;">
+            <form id="statusForm" style="max-width: 450px; margin: 0 auto; display: flex; flex-direction: column;">
                 <input type="text" id="queryInput" class="search-field" placeholder="Ej: 10102020 o RAD-0001" required>
                 <button type="submit" class="btn-check">Consultar ahora 🔍</button>
                 <a href="login.html" class="btn-secondary">Regresar a Iniciar Sesión</a>
             </form>
 
-            <!-- ÁREA DE RESULTADOS ESTILO TU REFERENCIA -->
-            <div id="resultArea" class="result-box">
-                <div class="status-label">Estado Actual:</div>
-                <h2 id="statusText" class="status-value">...</h2>
-                <h3 id="text">Si el estado de su solicitud es "PENDIENTE" en los próximos días será evaluado. De
-                    lo contrario recibirá un correo con más información sobre el estado de su solicitud.</h3>
-                <div id="statusBadge" class="status-badge" style="margin-bottom: 25px;">...</div>
+            <!-- ÁREA DE RESULTADOS -->
+            <div id="resultArea" class="result-box" style="margin-top: 40px; padding-top: 40px; border-top: 1px solid rgba(255,255,255,0.05); display: none;">
+                <div class="status-label" style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Estado Actual:</div>
+                <h2 id="statusText" class="status-value" style="color: white; font-size: 2.2rem; font-weight: 800; margin: 0 0 10px 0;">...</h2>
+                <div id="statusBadge" class="status-badge" style="background: var(--primary); color: white; display: inline-block; padding: 6px 15px; border-radius: 10px; font-size: 0.85rem; font-weight: 800; margin-bottom: 25px;">...</div>
+                
+                <h3 id="text" style="color: #a8a29e; font-size: 0.95rem; line-height: 1.6; margin: 0 auto 30px; max-width: 500px; font-weight: 400;">
+                    Si el estado de su solicitud es "PENDIENTE" en los próximos días será evaluado. De 
+                    lo contrario recibirá un correo con más información sobre el estado de su solicitud.
+                </h3>
 
-                <div class="result-footer">
+                <div class="result-footer" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: left; background: rgba(255,255,255,0.02); padding: 20px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05);">
                     <div class="footer-item">
-                        <span>👤</span> <strong>Titular:</strong> <span id="vendedorNombre">---</span>
+                        <span style="display: block; font-size: 0.7rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">👤 Titular:</span>
+                        <strong id="vendedorNombre" style="color: white; font-size: 0.95rem;">---</strong>
                     </div>
                     <div class="footer-item">
-                        <span>📅</span> <strong>Fecha:</strong> <span id="fechaRegistro">---</span>
+                        <span style="display: block; font-size: 0.7rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">📅 Fecha:</span>
+                        <strong id="fechaRegistro" style="color: white; font-size: 0.95rem;">---</strong>
                     </div>
                 </div>
             </div>
