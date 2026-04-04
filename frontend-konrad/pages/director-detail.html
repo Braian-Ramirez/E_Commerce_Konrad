@@ -6,32 +6,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detalle Solicitud | Konrad Commerce</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../src/css/style.css">
     <link rel="stylesheet" href="../src/css/dashboard.css">
+    <link rel="stylesheet" href="../src/css/director-detail.css">
 </head>
 
 <body>
 
     <aside class="sidebar">
-        <div class="sidebar-title">Konrad <span style="color: #22c55e;">Commerce</span></div>
+        <div class="sidebar-title">Comercial<span style="color: #22c55e;">Konrad</span></div>
         <nav class="nav-menu">
             <a href="director-dashboard.html" class="nav-item active">💼 Solicitudes Pendientes</a>
-            <a href="#" class="nav-item">📜 Historial Solicitudes</a>
+            <a href="director-historial.html" class="nav-item">📜 Historial Solicitudes</a>
             <a href="#" class="nav-item">📊 Dashboard BAM</a>
             <a href="#" class="nav-item">👤 Mi Perfil</a>
         </nav>
+        <div style="margin-top: auto;">
+            <a href="../index.html" class="nav-item" style="color: #ef4444;">🚪 Cerrar Sesión</a>
+        </div>
     </aside>
 
     <main class="main-layout">
         <header class="header-top">
             <h2 style="font-weight: 800; margin: 0;">Detalle Solicitud</h2>
-            <a href="director-dashboard.html" style="color: #a8a29e; text-decoration: none; font-size: 0.9rem;">← Volver
-                al Listado</a>
+            
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <!-- CAMPANA DE NOTIFICACIONES -->
+                <div class="notification-container" style="position: relative;">
+                    <button id="btnNotificaciones" class="bell-btn" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; position: relative;">
+                        🔔
+                        <span id="notifCount" class="badge-count" style="display: none; position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; font-size: 0.6rem; padding: 2px 6px; border-radius: 10px; border: 2px solid #0c0a09; font-weight: 800;">0</span>
+                    </button>
+                    
+                    <!-- DROPDOWN DE NOTIFICACIONES -->
+                    <div id="notifDropdown" class="notif-dropdown" style="display: none; position: absolute; top: 40px; right: 0; width: 320px; background: #141210; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; z-index: 1000; box-shadow: 0 10px 25px rgba(0,0,0,0.5); overflow: hidden;">
+                        <div style="padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); font-weight: 800; font-size: 0.9rem; display: flex; justify-content: space-between;">
+                            <span>Notificaciones</span>
+                        </div>
+                        <div id="notifList" style="max-height: 350px; overflow-y: auto;">
+                            <!-- Listado dinámico -->
+                        </div>
+                    </div>
+                </div>
+
+                <a href="director-dashboard.html" class="back-link">← Volver al Listado</a>
+            </div>
         </header>
 
         <section class="detail-view-container">
             <article class="info-panel">
-                <h3 style="margin-top: 0; font-size: 1.4rem; color: #22c55e; margin-bottom: 30px;">
-                    Número de solicitud: <span id="radicadoTitle" style="color: white; font-weight: 800;">...</span>
+                <h3 class="info-panel-title">
+                    Número de solicitud: <span id="radicadoTitle" class="highlight-id">...</span>
                 </h3>
 
                 <div class="field-group">
@@ -61,40 +86,90 @@
 
                 <div class="field-group">
                     <div class="field-label">Estado Actual:</div>
-                    <div id="v_estado" class="field-value" style="font-weight: 800; color: #f97316;">...</div>
+                    <div id="v_estado" class="field-value field-value-strong">...</div>
                 </div>
 
-                <div style="margin-top: 30px;">
-                    <div class="field-label" style="font-weight: 700; color: white; margin-bottom: 10px;">Acciones de
-                        Documento:</div>
-                    <button class="btn-download">📂 Descargar Paquete de Documentos (ZIP)</button>
+                <div class="doc-actions-section">
+                    <div class="field-label doc-actions-title">Acciones de Documento:</div>
+                    <button id="btnDescargarZIP" class="btn-download">📂 Descargar Paquete de Documentos (ZIP)</button>
                 </div>
             </article>
 
             <aside class="action-panel">
-                <h4 style="margin: 0; text-align: center; color: #a8a29e; font-size: 0.8rem; letter-spacing: 2px;">
-                    SEGURIDAD Y RIESGO</h4>
+                <h4 class="action-panel-subtitle">SEGURIDAD Y RIESGO</h4>
 
-                <button class="btn-action">Consultar Datacredito</button>
-                <button class="btn-action">Consultar CIFIN</button>
-                <button class="btn-action">Antecedentes Judiciales</button>
+                <button id="btnDatacredito" class="btn-action">Consultar Datacredito</button>
+                <button id="btnCifin" class="btn-action">Consultar CIFIN</button>
+                <button id="btnPolicia" class="btn-action">Antecedentes Judiciales</button>
 
-                <div style="margin-top: auto; padding-top: 30px; display: flex; flex-direction: column; gap: 10px;">
-                    <button id="btnAprobar"
-                        style="background: #22c55e; color: white; border: none; padding: 15px; border-radius: 12px; font-weight: 800; cursor: pointer;">Aprovar
-                        Solicitud</button>
-                    <button id="btnDevolver"
-                        style="background: #f97316; color: white; border: none; padding: 15px; border-radius: 12px; font-weight: 800; cursor: pointer;">Devolver
-                        Solicitud</button>
-                    <button id="btnRechazar"
-                        style="background: #ef4444; color: white; border: none; padding: 15px; border-radius: 12px; font-weight: 800; cursor: pointer;">Rechazar
-                        Solicitud</button>
-                </div>
+                <hr class="action-panel-divider">
+
+                <a id="lnkReporteRiesgo" href="#" class="btn-risk-report">
+                    📊 Ver Reporte de Riesgo Integral
+                </a>
             </aside>
         </section>
     </main>
 
+    <!-- MODAL DE CONSULTAS EXTERNAS (DATACRÉDITO / CIFIN / POLICIA) -->
+    <div id="modalMock" class="modal-overlay">
+        <div class="modal-content modal-mock-content">
+            <header class="mock-header">
+                <div id="mockIcon" class="mock-icon">📉</div>
+                <h3 id="mockTitle" class="mock-title">CONSULTA RIESGO</h3>
+            </header>
+
+            <div class="mock-result-box">
+                <div style="margin-bottom: 20px;">
+                    <span class="mock-label">Índice de Riesgo (Score)</span>
+                    <div id="mockScore" class="mock-score-value">---</div>
+                </div>
+
+                <div class="mock-calificacion-box">
+                    <span class="mock-label">Resultado Oficial</span>
+                    <div id="mockCalificacion" class="mock-calificacion-value">...</div>
+                </div>
+            </div>
+
+            <button onclick="document.getElementById('modalMock').style.display = 'none'" class="btn-mock-accept">
+                Aceptar y Continuar
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL SIMULADOR POLICÍA NACIONAL -->
+    <div id="modalPolicia" class="modal-overlay">
+        <div class="modal-content modal-policia-content">
+            <header class="policia-header">
+                <h3 class="policia-title">🏛️ SISTEMA DE ANTECEDENTES NACIONALES</h3>
+                <p class="policia-subtitle">Bienvenido al portal de consulta ciudadana</p>
+            </header>
+
+            <div id="policiaSearchArea">
+                <p class="policia-instruction">Por favor, ingrese el número de identificación para verificar el pasado judicial:</p>
+                <input type="text" id="inputCedulaPolicia" class="policia-input" placeholder="Ej: 123456789">
+
+                <button id="btnEjecutarBusquedaPolicia" class="btn-policia-execute">
+                    GENERAR CERTIFICADO ⚖️
+                </button>
+            </div>
+
+            <!-- Área de resultados (oculta por defecto) -->
+            <div id="policiaResultArea" class="policia-result-area">
+                <p class="cert-label">CERTIFICADO OFICIAL #<span id="certId">...</span></p>
+                <h4 id="certNombre" class="cert-name">CARGANDO...</h4>
+                <div id="certStatus" class="cert-status">...</div>
+            </div>
+
+            <button onclick="document.getElementById('modalPolicia').style.display = 'none'" class="btn-policia-close">
+                Cerrar Ventana
+            </button>
+        </div>
+    </div>
+
+
     <!-- SCRIPT DE CONEXIÓN -->
+    <script src="../src/js/notifications-controller.js"></script>
     <script src="../src/js/director-detail.js"></script>
 </body>
 

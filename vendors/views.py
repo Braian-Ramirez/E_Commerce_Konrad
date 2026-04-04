@@ -4,9 +4,9 @@ from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.db.models import Avg
+
 from .models import Persona, Vendedor, Solicitud, CalificacionVendedor
-from .serializers import PersonaSerializer, VendedorSerializer, SolicitudSerializer, CalificacionVendedorSerializer, SolicitudVendedorRegistrationSerializer
-from ecommerce_konrad.permissions import IsDirectorComercialOrPostOnly
+from .serializers import PersonaSerializer, VendedorSerializer, CalificacionVendedorSerializer, SolicitudVendedorRegistrationSerializer
 
 # Vista Persona
 class PersonaViewSet(viewsets.ModelViewSet):
@@ -18,43 +18,18 @@ class VendedorViewSet(viewsets.ModelViewSet):
     queryset = Vendedor.objects.all()
     serializer_class = VendedorSerializer
 
-# Vista Solicitud
-class SolicitudViewSet(viewsets.ModelViewSet):
-    serializer_class = SolicitudSerializer
-
-    def get_queryset(self):
-        user = self.request.user
-        if not user.is_authenticated:
-            return Solicitud.objects.none()
-            
-        if user.is_superuser:
-            return Solicitud.objects.all()
-            
-        if hasattr(user, 'persona_profile') and user.persona_profile:
-            persona = user.persona_profile
-            if hasattr(persona, 'vendedor_profile'):
-                return Solicitud.objects.filter(persona=persona)
-            elif hasattr(persona, 'perfil_comprador'):
-                # Los compradores no deberían ver solicitudes de vendedores (o solo la suya si existiera)
-                return Solicitud.objects.filter(persona=persona)
-            else:
-                # Se asume Director si no tiene perfil específico de tercero pero sí persona_profile
-                return Solicitud.objects.all()
-                
-        return Solicitud.objects.none()
-    
-    # Solo el Director (autenticado) puede ver la lista completa
+# Vista Solicitud (SÓLO RUTAS PÚBLICAS Y BÁSICAS DE VENDEDORES)
+class SolicitudViewSet(viewsets.GenericViewSet):
+    queryset = Solicitud.objects.all()
     permission_classes = [IsAuthenticated]
 
-    @action(detail=False, methods=['post'], url_path='register_vendor', permission_classes=[AllowAny])
+    # Acción de registro público (abierto a todo mundo)
+    @action(detail=False, methods=['post'], url_path='register_vendor', permission_classes=[AllowAny], parser_classes=[MultiPartParser, FormParser])
     def register_vendor(self, request):
         serializer = SolicitudVendedorRegistrationSerializer(data=request.data)
         if serializer.is_valid():
-            solicitud = serializer.save()
-            return Response({
-                "message": "Solicitud creada exitosamente",
-                "numero_radicado": solicitud.numero_solicitud
-            }, status=status.HTTP_201_CREATED)
+            serializer.save()
+            return Response({"message": "Solicitud creada con éxito."}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     # Acción pública para que el Vendedor consulte su estado
@@ -78,54 +53,6 @@ class SolicitudViewSet(viewsets.ModelViewSet):
             })
         
         return Response({"error": "Solicitud no encontrada"}, status=status.HTTP_404_NOT_FOUND)
-    # Acción para que el Director apruebe/rechace (solo autenticados)
-    @action(detail=True, methods=['patch'], url_path='cambiar-estado')
-    def cambiar_estado(self, request, pk=None):
-        solicitud = self.get_object()
-        nuevo_estado = request.data.get('estado')
-        
-        if nuevo_estado in ['APROBADA', 'RECHAZADA', 'PENDIENTE']:
-            solicitud.estado = nuevo_estado
-            solicitud.save()
-            return Response({"message": f"Estado actualizado a {nuevo_estado}"})
-        
-        return Response({"error": "Estado no válido"}, status=status.HTTP_400_BAD_REQUEST)
-
-# [PATRÓN DE DISEÑO: ADAPTER]
-# Esta lógica sirve como ADAPTADOR para los servicios externos 
-# (Datacrédito y CIFIN). Convertimos los datos crudos del tercero 
-# (mock_data) en un estado interno de nuestra Solicitud (APROBADA/RECHAZADA).
-    def perform_create(self, serializer):
-        user = self.request.user
-        if hasattr(user, 'persona_profile'):
-            serializer.save(persona=user.persona_profile)
-        else:
-            serializer.save()
-
-    @action(detail=False, methods=['get'], url_path='consultar-estado', permission_classes=[AllowAny])
-    def consultar_estado(self, request):
-        identificacion = request.query_params.get('identificacion')
-        radicado = request.query_params.get('radicado')
-        
-        if not identificacion and not radicado:
-            return Response({"error": "Debes proporcionar un número de identificación o un radicado"}, status=400)
-        
-        # Lógica de búsqueda dinámica
-        if radicado:
-            solicitud = Solicitud.objects.filter(numero_solicitud=radicado).last()
-        else:
-            solicitud = Solicitud.objects.filter(persona__numero_identificacion=identificacion).last()
-    
-        if solicitud:
-            return Response({
-                "numero_radicado": solicitud.numero_solicitud,
-                "estado": solicitud.estado,
-                "fecha": solicitud.fecha_creacion.strftime("%d/%m/%Y"),
-                "nombre": f"{solicitud.persona.nombre} {solicitud.persona.apellido}"
-            })
-        else:
-            return Response({"error": "No se encontró ninguna solicitud con los datos proporcionados"}, status=404)
-            
 
 # Vista CalificacionVendedor
 class CalificacionVendedorViewSet(viewsets.ModelViewSet):
@@ -150,7 +77,6 @@ class CalificacionVendedorViewSet(viewsets.ModelViewSet):
         
         if malas_calificaciones >= 10 or nuevo_promedio < 5:
             vendedor.estado_suscripcion = 'CANCELADA'
-            # (Futuro: llamar a notifications para enviar email)
         
         # 5. Guardar los cambios
         vendedor.save()

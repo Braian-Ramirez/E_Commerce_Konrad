@@ -10,13 +10,28 @@
     <link rel="stylesheet" href="../src/css/style.css" />
     <!-- 2. CSS Modular Comprador (Limpio) -->
     <link rel="stylesheet" href="../src/css/buyer.css" />
+    <!-- 3. Estilos del Modal de Resultado -->
     <style>
-        /* Pequeño parche para el modal si no está en buyer.css */
         .modal-overlay {
-            display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:9999; justify-content:center; align-items:center;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 10000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(12px);
+            padding: 20px;
         }
         .modal-content {
-            background:#1e293b; border:1px solid rgba(255,255,255,0.1); border-radius:20px; padding:40px; max-width:420px; width:90%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.5);
+            background: #0c0a09;
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            border-radius: 24px;
+            padding: 40px;
+            text-align: center;
+            max-width: 420px;
+            width: 100%;
+            box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.9);
         }
     </style>
 </head>
@@ -116,20 +131,19 @@
                 </div>
             </div>
 
-            <button type="submit" class="cta-primary" style="width: 100%; background: #3b82f6; border:none; margin-top:20px;">Finalizar Registro
+            <button type="submit" class="cta-primary" style="width: 100%; background: #3b82f6;">Finalizar Registro
                 ✅</button>
         </form>
     </div>
 
     <!-- MODAL DE RESULTADO -->
-    <div id="modalResultado" class="modal-overlay">
+    <div id="modalResultado" class="modal-overlay" style="display: none;">
         <div class="modal-content">
             <div id="modalIcono" style="font-size:3rem; margin-bottom:15px;"></div>
             <h3 id="modalTitulo" style="font-size:1.4rem; color:#f8fafc; margin-bottom:10px;"></h3>
             <p id="modalMensaje" style="color:#94a3b8; font-size:0.95rem; line-height:1.5; margin-bottom:25px;"></p>
-            <button id="modalBtn"
-                style="padding:12px 35px; border-radius:100px; border:none; font-family:'Outfit',sans-serif; font-weight:700; font-size:1rem; cursor:pointer;">
-                Aceptar
+            <button id="modalBtn" style="padding:12px 30px; border-radius:10px; border:none; font-weight:700; font-size:1rem; cursor:pointer;">
+                Continuar
             </button>
         </div>
     </div>

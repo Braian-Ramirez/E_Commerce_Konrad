@@ -1,0 +1,14 @@
+Hola {{ nombre }},
+
+Nos alegra informarte que has pasado todos los filtros satisfactoriamente y eres oficialmente parte de nuestra red de Vendedores en Comercial Konrad. 🎉
+
+Aquí tienes tus credenciales de acceso para empezar a cargar tus productos:
+
+👤 Usuario: {{ email }}
+🔑 Contraseña Temporal: {{ password }}
+
+Te recomendamos cambiar tu contraseña una vez inicies sesión por primera vez.
+
+¡Estamos emocionados de tenerte a bordo y ver tus productos en nuestra tienda!
+
+Equipo Comercial Konrad 🚀

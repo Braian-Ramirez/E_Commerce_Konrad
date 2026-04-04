@@ -1,13 +1,10 @@
 from rest_framework import serializers
 from django.db import transaction
 from django.contrib.auth.models import User
-from django.utils import timezone
-from django.core.mail import send_mail
-from django.template.loader import render_to_string
-from .models import Comprador, MedioPago
-from notifications.models import CorreoEnviado
+from .models import Comprador
 from vendors.models import Persona
 from vendors.serializers import PersonaSerializer
+from notifications.services import enviar_correo_bienvenida_comprador
 import random
 import string
 
@@ -125,27 +122,7 @@ class CompradorRegistrationSerializer(serializers.ModelSerializer):
 
             comprador = Comprador.objects.create(persona=persona, **validated_data)
 
-            ahora = timezone.localtime()
-            mensaje = render_to_string('emails/registro_bienvenida.txt', {
-              'nombre': nombre,
-              'email': email,
-              'password': password,
-              'fecha_stamp': ahora.strftime('%Y-%m-%d %H:%M:%S'),
-              'transaccion_id': f"REG-{ahora.strftime('%y%m%d')}-{user.id}"
-          })
-            send_mail(
-                subject='Bienvenido a Konrad Shop - Tus Credenciales',
-                message=mensaje,
-                from_email=None,
-                recipient_list=[email],
-                fail_silently=False,
-            )
-
-            CorreoEnviado.objects.create(
-                destinatario=persona,
-                asunto='Bienvenido a Konrad Shop - Tus Credenciales',
-                cuerpo=mensaje,
-                timestamp_hash=f"SHA256-{ahora.timestamp()}"
-            )
+            # Enviar credenciales a través del SERVICIO CENTRALIZADO 🏛️📧✨
+            enviar_correo_bienvenida_comprador(persona, password)
 
             return comprador

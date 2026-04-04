@@ -32,6 +32,12 @@ class VendedorSerializer(serializers.ModelSerializer):
             'fecha_vencimiento', 'calificacion_promedio'
         ]
 
+# Serializador Consulta Crediticia Local
+class ConsultaCrediticiaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ConsultaCrediticia_Local
+        fields = '__all__'
+
 # Serializador Solicitud (Aplanado para el Dashboard)
 class SolicitudSerializer(serializers.ModelSerializer):
     identificacion = serializers.CharField(source='persona.numero_identificacion', read_only=True)
@@ -39,12 +45,17 @@ class SolicitudSerializer(serializers.ModelSerializer):
     apellidos = serializers.CharField(source='persona.apellido', read_only=True)
     email = serializers.EmailField(source='persona.email', read_only=True)
     telefono = serializers.CharField(source='persona.telefono', read_only=True)
+    
+    # Campo anidado para el reporte de riesgo detallado
+    credit_data = ConsultaCrediticiaSerializer(read_only=True)
 
     class Meta:
         model = Solicitud
         fields = [
             'id', 'numero_solicitud', 'estado', 'fecha_creacion',
-            'identificacion', 'nombres', 'apellidos', 'email', 'telefono'
+            'identificacion', 'nombres', 'apellidos', 'email', 'telefono',
+            'resultado_datacredito', 'resultado_cifin', 'resultado_judicial',
+            'fecha_consulta_judicial', 'credit_data'
         ]
 
 # Serializador CalificacionVendedor

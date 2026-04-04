@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte de Riesgo Integral | Konrad Shop</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../src/css/style.css">
+    <link rel="stylesheet" href="../src/css/dashboard.css">
+    <!-- Estilos específicos del reporte -->
+    <link rel="stylesheet" href="../src/css/director-risk-report.css">
+</head>
+
+<body>
+
+    <aside class="sidebar">
+        <div class="sidebar-title">Comercial <span style="color: #22c55e;">Konrad</span></div>
+        <nav class="nav-menu">
+            <a href="director-dashboard.html" class="nav-item">💼 Solicitudes Pendientes</a>
+            <a href="director-historial.html" class="nav-item">📜 Historial Solicitudes</a>
+            <a href="#" class="nav-item">📊 Dashboard BAM</a>
+            <a href="#" class="nav-item">👤 Mi Perfil</a>
+        </nav>
+        <div style="margin-top: auto;">
+            <a href="../index.html" class="nav-item" style="color: #ef4444;">🚪 Cerrar Sesión</a>
+        </div>
+    </aside>
+
+    <main class="main-layout">
+        <header class="header-top">
+            <h2 style="font-weight: 800; margin: 0;">REPORTE DE RIESGO INTEGRAL</h2>
+            
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <!-- CAMPANA DE NOTIFICACIONES -->
+                <div class="notification-container" style="position: relative;">
+                    <button id="btnNotificaciones" class="bell-btn" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; position: relative;">
+                        🔔
+                        <span id="notifCount" class="badge-count" style="display: none; position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; font-size: 0.6rem; padding: 2px 6px; border-radius: 10px; border: 2px solid #0c0a09; font-weight: 800;">0</span>
+                    </button>
+                    
+                    <!-- DROPDOWN DE NOTIFICACIONES -->
+                    <div id="notifDropdown" class="notif-dropdown" style="display: none; position: absolute; top: 40px; right: 0; width: 320px; background: #141210; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; z-index: 1000; box-shadow: 0 10px 25px rgba(0,0,0,0.5); overflow: hidden;">
+                        <div style="padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); font-weight: 800; font-size: 0.9rem; display: flex; justify-content: space-between;">
+                            <span>Notificaciones</span>
+                        </div>
+                        <div id="notifList" style="max-height: 350px; overflow-y: auto;">
+                            <!-- Listado dinámico -->
+                        </div>
+                    </div>
+                </div>
+
+                <a id="btnBack" href="#" style="color: #a8a29e; text-decoration: none; font-size: 0.9rem;">← Volver al Detalle</a>
+            </div>
+        </header>
+
+        <section class="risk-report-container">
+            <div class="report-header-section">
+                <h3 id="v_nombre_completo">...</h3>
+                <p>Radicado: <span id="v_radicado" style="font-weight: 800; color: #22c55e;">---</span></p>
+            </div>
+
+            <!-- SCORE OVERVIEW (TARJETAS) -->
+            <div class="risk-score-grid">
+                <!-- DATACREDITO -->
+                <div class="product-card risk-card-score">
+                    <span class="label-title">DATACRÉDITO</span>
+                    <div id="score_datacredito" class="score-big-number">---</div>
+                    <div id="dictamen_datacredito" class="status-badge">...</div>
+                </div>
+
+                <!-- CIFIN -->
+                <div class="product-card risk-card-score">
+                    <span class="label-title">CIFIN</span>
+                    <div id="score_cifin" class="score-big-number">---</div>
+                    <div id="dictamen_cifin" class="status-badge">...</div>
+                </div>
+
+                <!-- POLICIA -->
+                <div class="product-card risk-card-score">
+                    <span class="label-title">ANTECEDENTES</span>
+                    <div class="score-big-number">⚖️</div>
+                    <div id="resultado_judicial" class="status-badge">...</div>
+                </div>
+            </div>
+
+            <!-- TABLA DE DETALLES TÉCNICOS -->
+            <div class="product-card traceability-table-container">
+                <h4 style="margin-top: 0; color: #22c55e;">🔍 Trazabilidad de Consultas</h4>
+                <table class="trace-table">
+                    <thead>
+                        <tr>
+                            <th>FUENTE</th>
+                            <th>ESTADO EN SOLICITUD</th>
+                            <th>FECHA ÚLTIMA CONSULTA</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Datacrédito (Experian)</td>
+                            <td id="res_solicitud_datacredito">...</td>
+                            <td id="fecha_consulta">...</td>
+                        </tr>
+                        <tr>
+                            <td>CIFIN (TransUnion)</td>
+                            <td id="res_solicitud_cifin">...</td>
+                            <td class="fecha_consulta_cifin">...</td>
+                        </tr>
+                        <tr>
+                            <td>Policía Nacional (Antecedentes)</td>
+                            <td id="res_solicitud_judicial">...</td>
+                            <td id="fecha_judicial">...</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="system-observations-box">
+                    <h5>Observaciones del Sistema</h5>
+                    <p id="observaciones_riesgo">
+                        No se han registrado observaciones manuales en este expediente de riesgo.
+                    </p>
+                </div>
+                <!-- FILA DE DECISIONES FINAL-->
+                <div class="decision-row">
+                    <button id="btnAprobar" class="btn-decision btn-approve">Aprobar Solicitud ✔️</button>
+                    <button id="btnDevolver" class="btn-decision btn-return">Devolver Solicitud 🔙</button>
+                    <button id="btnRechazar" class="btn-decision btn-reject">Rechazar Solicitud ✖️</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="../src/js/notifications-controller.js"></script>
+    <script src="../src/js/director-risk-report.js"></script>
+</body>
+
+</html>

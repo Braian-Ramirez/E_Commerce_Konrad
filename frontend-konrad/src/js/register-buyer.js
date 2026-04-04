@@ -1,3 +1,20 @@
+// Función fuera del try/catch para que sea accesible en todo el scope
+function mostrarModal(exito, titulo, mensaje) {
+    const modal = document.getElementById('modalResultado');
+    document.getElementById('modalIcono').textContent = exito ? '✅' : '❌';
+    document.getElementById('modalTitulo').textContent = titulo;
+    document.getElementById('modalMensaje').textContent = mensaje;
+    const btn = document.getElementById('modalBtn');
+    btn.style.background = exito ? '#3b82f6' : '#ef4444';
+    btn.style.color = 'white';
+    modal.style.display = 'flex';
+
+    btn.onclick = () => {
+        modal.style.display = 'none';
+        if (exito) window.location.href = 'login.html';
+    };
+}
+
 document.getElementById('buyerRegisterForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -24,7 +41,6 @@ document.getElementById('buyerRegisterForm').addEventListener('submit', async (e
 
         const data = await response.json();
 
-
         if (response.ok) {
             mostrarModal(true, '¡Registro Exitoso!', 'Tus credenciales serán enviadas a tu correo. Ya puedes iniciar sesión.');
         } else {
@@ -32,7 +48,6 @@ document.getElementById('buyerRegisterForm').addEventListener('submit', async (e
             mostrarModal(false, 'Error en el Registro', errores);
         }
 
-        // Y el catch:
     } catch (error) {
         mostrarModal(false, 'Error de Conexión', 'No se pudo conectar con el servidor. Verifica que el backend esté corriendo.');
     }

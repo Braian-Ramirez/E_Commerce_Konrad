@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Director Comercial | Konrad Commerce</title>
+    <title>Historial de Solicitudes | Konrad Commerce</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../src/css/style.css">
     <link rel="stylesheet" href="../src/css/dashboard.css">
@@ -12,25 +12,22 @@
 
 <body>
 
-    <!-- 1. BARRA LATERAL (SIDEBAR)-->
     <aside class="sidebar">
         <div class="sidebar-title">Comercial<span style="color: #22c55e;">Konrad</span></div>
         <nav class="nav-menu">
-            <a href="director-dashboard.html" class="nav-item active">💼 Solicitudes Pendientes</a>
-            <a href="director-historial.html" class="nav-item">📜 Historial Solicitudes</a>
+            <a href="director-dashboard.html" class="nav-item">💼 Solicitudes Pendientes</a>
+            <a href="director-historial.html" class="nav-item active">📜 Historial Solicitudes</a>
             <a href="#" class="nav-item">📊 Dashboard BAM</a>
             <a href="#" class="nav-item">👤 Mi Perfil</a>
         </nav>
-
         <div style="margin-top: auto;">
             <a href="../index.html" class="nav-item" style="color: #ef4444;">🚪 Cerrar Sesión</a>
         </div>
     </aside>
 
-    <!-- 2. CONTENIDO PRINCIPAL-->
-    <main class="main-content">
+    <main class="main-layout">
         <header class="header-top">
-            <h2 style="font-weight: 800; margin: 0;">Solicitudes Pendientes</h2>
+            <h2 style="font-weight: 800; margin: 0;">HISTORIAL DE SOLICITUDES</h2>
             
             <div style="display: flex; align-items: center; gap: 20px;">
                 <!-- CAMPANA DE NOTIFICACIONES -->
@@ -44,45 +41,44 @@
                     <div id="notifDropdown" class="notif-dropdown" style="display: none; position: absolute; top: 40px; right: 0; width: 320px; background: #141210; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; z-index: 1000; box-shadow: 0 10px 25px rgba(0,0,0,0.5); overflow: hidden;">
                         <div style="padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); font-weight: 800; font-size: 0.9rem; display: flex; justify-content: space-between;">
                             <span>Notificaciones</span>
-                            <span style="color: #22c55e; cursor: pointer; font-size: 0.75rem;">Limpiar</span>
                         </div>
                         <div id="notifList" style="max-height: 350px; overflow-y: auto;">
                             <!-- Listado dinámico -->
-                            <div style="padding: 20px; text-align: center; color: #a8a29e; font-size: 0.8rem;">
-                                No tienes notificaciones nuevas.
-                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div style="opacity: 0.5;">Panel Administrativo</div>
+                <span style="color: #a8a29e; font-size: 0.9rem;">Panel Administrativo — Historial de Solicitudes </span>
             </div>
         </header>
 
-        <section class="content-body">
-            <h3 style="margin-top: 0; font-weight: 400; color: #a8a29e;">Listado de solicitudes:</h3>
+        <section class="content-body" style="padding: 30px;">
+            <h3 style="margin-top: 0; font-weight: 400; color: #a8a29e;">Registro de Decisiones Comerciales:</h3>
 
-            <!-- BARRA DE FILTROS -->
             <div class="filter-bar">
-                <input type="text" id="searchInput" placeholder="🔍Buscar por Número de Identificación" class="search-mini">
-                <input type="date" id="dateInput" class="btn-filter" style="color-scheme: dark; cursor: pointer;" title="Filtrar por fecha exacta">
+                <input type="text" id="searchInput" placeholder="🔍Buscar por Número Radicado" class="search-mini">
+                <input type="date" id="dateInput" class="btn-filter" style="color-scheme: dark; cursor: pointer;"
+                    title="Filtrar por fecha exacta">
             </div>
 
-            <!-- CABECERA DE TABLA -->
+            <!-- CABECERA DE TABLA (GRID) -->
             <div
-                style="display: grid; grid-template-columns: 1fr 1fr 1.5fr 1fr 1fr; padding: 0 20px 15px; color: #78716c; font-size: 0.85rem; font-weight: 700;">
-                <div># IDENTIFICACIÓN</div>
-                <div>APELLIDOS / NOMBRES</div>
-                <div>CORREO ELECTRÓNICO</div>
-                <div style="text-align: center;">ESTADO</div>
-                <div>FECHA CREACIÓN</div>
+                style="display: grid; grid-template-columns: 1fr 1.5fr 1fr 1fr 1fr; padding: 0 20px 15px; color: #78716c; font-size: 0.85rem; font-weight: 700;">
+                <div># RADICADO</div>
+                <div>VENDEDOR (NOMBRES Y APELLIDOS)</div>
+                <div style="text-align: center;">ESTADO ACTUAL</div>
+                <div>FECHA RESOLUCIÓN</div>
+                <div style="text-align: center;">ACCIÓN</div>
             </div>
-            <div id="solicitudesContainer">
+
+            <div id="historialBody">
+                <div style="color: white; padding: 20px; text-align: center;">Cargando historial...</div>
             </div>
         </section>
     </main>
+
     <script src="../src/js/notifications-controller.js"></script>
-    <script src="../src/js/director-dashboard.js"></script>
+    <script src="../src/js/director-historial.js"></script>
 </body>
 
 </html>

@@ -1,0 +1,7 @@
+Hola {{ nombre }},
+
+Lamentamos informarte que, tras realizar el análisis detallado de tu perfil de riesgo y antecedentes, tu solicitud de ingreso no ha sido aprobada en esta ocasión.
+
+Agradecemos tu interés en formar parte de Comercial Konrad y te deseamos éxito en tus futuros proyectos comerciales.
+
+Equipo Comercial Konrad 🚫

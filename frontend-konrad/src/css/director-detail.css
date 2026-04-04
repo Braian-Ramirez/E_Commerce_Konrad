@@ -1,0 +1,293 @@
+/*Estilos para el detalle del director*/
+/* Top header typography overrides */
+.header-top h2 {
+    font-weight: 800;
+    margin: 0;
+}
+
+.back-link {
+    color: #a8a29e;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.3s ease;
+}
+
+.back-link:hover {
+    color: #fff;
+}
+
+/* Info Panel Core Styles */
+.info-panel-title {
+    margin-top: 0;
+    font-size: 1.4rem;
+    color: #22c55e;
+    margin-bottom: 30px;
+}
+
+.info-panel-title .highlight-id {
+    color: white;
+    font-weight: 800;
+}
+
+.field-value-strong {
+    font-weight: 800;
+}
+
+.doc-actions-section {
+    margin-top: 30px;
+}
+
+.doc-actions-title {
+    font-weight: 700;
+    color: white;
+    margin-bottom: 10px;
+}
+
+.btn-download {
+    background: rgba(34, 197, 94, 0.05);
+    color: #22c55e;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    padding: 18px 25px;
+    border-radius: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 100%;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-family: 'Outfit', sans-serif;
+    letter-spacing: 0.5px;
+}
+
+.btn-download:hover {
+    background: rgba(34, 197, 94, 0.15);
+    border-color: #22c55e;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px -10px rgba(34, 197, 94, 0.4);
+}
+
+.btn-download:active {
+    transform: translateY(-1px);
+}
+
+/* Action Panel Custom Components */
+.action-panel-subtitle {
+    margin: 0;
+    text-align: center;
+    color: #a8a29e;
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+}
+
+.action-panel-divider {
+    border: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin: 20px 0;
+}
+
+.btn-risk-report {
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+    border: 1px solid #22c55e;
+    text-decoration: none;
+    text-align: center;
+    display: block;
+    padding: 12px;
+    border-radius: 12px;
+    font-weight: 800;
+    transition: all 0.3s ease;
+}
+
+.btn-risk-report:hover {
+    background: rgba(34, 197, 94, 0.2);
+    transform: translateY(-2px);
+}
+
+/* =========================================
+   MOCK MODAL (Dark Theme - Datacredito/CIFIN)
+   ========================================= */
+
+.modal-mock-content {
+    max-width: 450px;
+    background: #0c0a09;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.mock-header {
+    margin-bottom: 25px;
+}
+
+.mock-icon {
+    font-size: 3.5rem;
+    margin-bottom: 10px;
+}
+
+.mock-title {
+    font-size: 1.6rem;
+    color: #22c55e;
+    margin: 0;
+    font-weight: 800;
+    letter-spacing: -1px;
+}
+
+.mock-result-box {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 20px;
+    padding: 25px;
+    margin-bottom: 30px;
+    text-align: left;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.mock-label {
+    color: #a8a29e;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.mock-score-value {
+    font-size: 3.5rem;
+    color: white;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -2px;
+    margin-top: 5px;
+}
+
+.mock-calificacion-box {
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: 20px;
+}
+
+.mock-calificacion-value {
+    font-size: 1.6rem;
+    color: #22c55e;
+    font-weight: 800;
+    text-transform: uppercase;
+    margin-top: 5px;
+}
+
+.btn-mock-accept {
+    background: #22c55e;
+    color: white;
+    border: none;
+    padding: 12px 50px;
+    border-radius: 100px;
+    cursor: pointer;
+    font-weight: 800;
+    font-size: 1rem;
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+.btn-mock-accept:hover {
+    background: #16a34a;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
+}
+
+/* =========================================
+   POLICE GOV MOCK MODAL (Light Theme)
+   ========================================= */
+
+.modal-policia-content {
+    max-width: 550px;
+    background: #f8fafc;
+    border: 2px solid #1e293b;
+    color: #1e293b;
+}
+
+.policia-header {
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+.policia-title {
+    margin: 0;
+    color: #1e3a8a;
+    font-weight: 800;
+}
+
+.policia-subtitle {
+    font-size: 0.8rem;
+    color: #64748b;
+    margin: 5px 0 0;
+}
+
+.policia-instruction {
+    text-align: left;
+    font-size: 0.9rem;
+}
+
+.policia-input {
+    width: 100%;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+    box-sizing: border-box;
+}
+
+.btn-policia-execute {
+    background: #1e3a8a;
+    color: white;
+    width: 100%;
+    padding: 15px;
+    border-radius: 8px;
+    border: none;
+    font-weight: 800;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.btn-policia-execute:hover {
+    background: #172554;
+}
+
+.policia-result-area {
+    display: none;
+    text-align: left;
+    background: white;
+    border: 1px dashed #cbd5e1;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.cert-label {
+    color: #64748b;
+    font-size: 0.8rem;
+    margin: 0;
+}
+
+.cert-name {
+    margin: 10px 0;
+    font-size: 1.2rem;
+}
+
+.cert-status {
+    padding: 10px;
+    border-radius: 6px;
+    font-weight: 800;
+    text-align: center;
+    margin-top: 10px;
+}
+
+.btn-policia-close {
+    margin-top: 20px;
+    background: transparent;
+    color: #64748b;
+    border: none;
+    font-size: 0.8rem;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.btn-policia-close:hover {
+    color: #1e293b;
+}

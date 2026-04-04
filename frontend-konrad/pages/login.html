@@ -9,38 +9,14 @@
     <link rel="stylesheet" href="../src/css/style.css" />
 </head>
 
-<body
-    style="min-height: 100vh; overflow-x: hidden; background: #0c0a09; margin: 0; padding-top: 100px;">
+<body style="display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; overflow-x: hidden; background: #0c0a09; margin: 0; padding: 20px; box-sizing: border-box;">
 
-    <!-- HEADER: Navegación Principal -->
-    <header class="navbar glass-effect" style="position: fixed; top: 0; width: 100%; z-index: 1000; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; padding: 15px 5%;">
-        <div class="nav-brand">
-            <a href="../index.html" style="text-decoration: none;">
-                <h1 style="font-size: 1.5rem; color: var(--text-light); font-weight: 800; margin:0;">🛍️Comercial<span style="color: var(--primary);">Konrad</span></h1>
-            </a>
-        </div>
-
-        <nav class="nav-links" style="display: flex; gap: 20px; align-items: center;">
-            <a href="/pages/register.html" class="nav-item tooltip-btn">
-                <span class="icon">📝</span>
-                <span class="hover-text">Registrarse</span>
-            </a>
-            <a href="/pages/check-status.html" class="nav-item tooltip-btn">
-                <span class="icon">📋</span>
-                <span class="hover-text">Consultar Solicitud</span>
-            </a>
-            <a href="../index.html" class="nav-item">🏠 Inicio</a>
-        </nav>
-    </header>
-
-    <div style="display: flex; justify-content: center; align-items: center; min-height: 80vh;">
-
-    <!-- Bolas de neón de fondo -->
-    <div class="floating-orb orb-1" style="width: 400px; height: 400px; top: 10%; right: 10%;"></div>
-    <div class="floating-orb orb-2" style="width: 500px; height: 500px; bottom: 0; left: -5%;"></div>
+    <!-- Bolas de neón de fondo corregidas para móvil -->
+    <div class="floating-orb orb-1" style="width: min(400px, 80vw); height: min(400px, 80vw); top: 5%; right: -5%;"></div>
+    <div class="floating-orb orb-2" style="width: min(500px, 90vw); height: min(500px, 90vw); bottom: -10%; left: -5%;"></div>
 
     <!-- TARJETA DE LOGIN -->
-    <div class="product-card" style="width: 90%; max-width: 400px; z-index: 10; padding: 40px;">
+    <div class="product-card" style="width: 100%; max-width: 400px; z-index: 10; padding: 40px; box-sizing: border-box;">
         <div style="text-align: center; margin-bottom: 30px;">
             <a href="../index.html" style="text-decoration: none;">
                 <h1 style="font-size: 2rem; color: var(--text-light); font-weight: 800;">🛍️ Comercial <span

@@ -8,14 +8,20 @@
 body {
     margin: 0;
     font-family: 'Outfit', sans-serif;
-    background: var(--content-bg);
     color: white;
     display: flex;
     height: 100vh;
     overflow: hidden;
+    /* DESTILLOS KONRAD: Azul + Fucsia + VERDE DIRECTOR */
+    background-image:
+        radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.1) 0%, transparent 25%),
+        radial-gradient(circle at 85% 15%, rgba(34, 197, 94, 0.12) 0%, transparent 25%),
+        /* ¡VERDE AQUÍ! */
+        radial-gradient(circle at 90% 80%, rgba(236, 72, 153, 0.1) 0%, transparent 25%) !important;
+    background-attachment: fixed !important;
 }
 
-/* SIDEBAR 🛡️ */
+/* SIDEBAR */
 .sidebar {
     width: 280px;
     background: var(--sidebar-bg);
@@ -62,7 +68,7 @@ body {
     border-color: rgba(34, 197, 94, 0.3);
 }
 
-/* ÁREA PRINCIPAL 🚀 */
+/* ÁREA PRINCIPAL */
 .main-content {
     flex: 1;
     display: flex;
@@ -82,7 +88,7 @@ body {
     padding: 40px;
 }
 
-/* FILTROS 🔍 */
+/* FILTROS */
 .filter-bar {
     display: flex;
     gap: 15px;
@@ -106,7 +112,7 @@ body {
     border-radius: 10px;
 }
 
-/* TARJETAS DE SOLICITUD 👀 */
+/* TARJETAS DE SOLICITUD */
 .solicitud-card {
     background: #141210;
     border: 1px solid var(--card-border);
@@ -131,7 +137,26 @@ body {
     font-weight: 800;
 }
 
-.status-pendiente { background: rgba(249, 115, 22, 0.1); color: #f97316; }
+.status-pendiente {
+    background: rgba(249, 234, 22, 0.1);
+    color: #f9f516;
+}
+
+.status-aprobada {
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+}
+
+.status-rechazada {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.status-devuelta {
+    background: rgba(234, 88, 12, 0.1);
+    /* Darker Orange */
+    color: #ea580c;
+}
 
 /* --- NUEVOS ESTILOS PARA VISTA DE DETALLE --- */
 .main-layout {
@@ -160,14 +185,18 @@ body {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 15px;
-    border-bottom: 1px solid rgba(255,255,255,0.02);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.02);
     padding-bottom: 10px;
 }
 
-.field-label { color: #a8a29e; font-size: 0.9rem; }
+.field-label {
+    color: #a8a29e;
+    font-size: 0.9rem;
+}
+
 .field-value {
     background: #1c1a18;
-    border: 1px solid rgba(255,255,255,0.05);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     padding: 8px 15px;
     border-radius: 8px;
     width: 60%;
@@ -195,30 +224,65 @@ body {
     transition: 0.3s;
 }
 
-.btn-action:hover { background: white; color: black; }
-
-.btn-download {
-    background: #1c1a18;
-    border: 1px solid #f97316;
-    color: white;
-    padding: 12px;
-    border-radius: 8px;
-    width: 100%;
-    cursor: pointer;
+.btn-action:hover {
+    background: white;
+    color: black;
 }
-/* --- MEDIA QUERIES PARA RESPONSIVIDAD 📱 --- */
+
+/* Estilos de botones movidos a sus respectivos archivos de vista para evitar colisiones */
+
+
+/* --- MEDIA QUERIES PARA RESPONSIVIDAD --- */
 
 /* TABLETS Y MÓVILES (Menos de 1024px) */
 @media (max-width: 1024px) {
     .detail-view-container {
-        grid-template-columns: 1fr; /* Una sola columna en el detalle */
+        grid-template-columns: 1fr;
+        /* Una sola columna en el detalle */
+    }
+}
+
+/* --- MODALES DASHBOARD (DATACRÉDITO / CIFIN) --- */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 10000;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(12px);
+    padding: 20px;
+}
+
+.modal-content {
+    background: #0c0a09;
+    border: 1px solid rgba(34, 197, 94, 0.4);
+    border-radius: 32px;
+    padding: 40px;
+    text-align: center;
+    box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.9);
+    position: relative;
+    animation: modalSlide 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes modalSlide {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
     }
 }
 
 /* SMARTPHONES (Menos de 768px) */
 @media (max-width: 768px) {
     body {
-        flex-direction: column; /* Sidebar arriba o colapsado */
+        flex-direction: column;
+        /* Sidebar arriba o colapsado */
         height: auto;
         overflow-y: auto;
     }
@@ -230,35 +294,50 @@ body {
         border-bottom: 1px solid var(--card-border);
     }
 
-    .sidebar-title { margin-bottom: 20px; }
-    
+    .sidebar-title {
+        margin-bottom: 20px;
+    }
+
     .nav-menu {
-        flex-direction: row; /* Menú en fila para móviles */
+        flex-direction: row;
+        /* Menú en fila para móviles */
         overflow-x: auto;
         padding-bottom: 10px;
     }
 
-    .nav-item { white-space: nowrap; padding: 10px 15px; font-size: 0.8rem; }
+    .nav-item {
+        white-space: nowrap;
+        padding: 10px 15px;
+        font-size: 0.8rem;
+    }
 
     .solicitud-card {
-        grid-template-columns: 1fr; /* Lista vertical */
+        grid-template-columns: 1fr;
+        /* Lista vertical */
         gap: 10px;
     }
 
-    .header-top { 
-        padding: 15px 20px; 
-        flex-direction: column; 
+    .header-top {
+        padding: 15px 20px;
+        flex-direction: column;
         align-items: flex-start;
         gap: 10px;
     }
 
-    .content-body { padding: 20px; }
+    .content-body {
+        padding: 20px;
+    }
 
-    .filter-bar { flex-direction: column; }
-    .search-mini { width: 100%; }
+    .filter-bar {
+        flex-direction: column;
+    }
+
+    .search-mini {
+        width: 100%;
+    }
 
     /* Ocultamos cabecera de tabla en móvil */
-    .content-body > div[style*="grid-template-columns"] {
+    .content-body>div[style*="grid-template-columns"] {
         display: none !important;
     }
 }

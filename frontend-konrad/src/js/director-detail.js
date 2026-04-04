@@ -4,47 +4,77 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const urlParams = new URLSearchParams(window.location.search);
     const solId = urlParams.get('id');
+    const modoHistorial = urlParams.get('modo') === 'historial';
 
     if (!solId) {
         alert("ID de solicitud no encontrado en la URL");
         return;
     }
 
+    // --- MODO SOLO LECTURA (viene del Historial) ---
+    if (modoHistorial) {
+        // Ocultar todos los botones de acción
+        ['btnDescargarZIP', 'btnDatacredito', 'btnCifin',
+            'btnPolicia'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = 'none';
+            });
+    }
+
     // 1. CARGAR DATOS DE LA SOLICITUD
-    fetch(`http://127.0.0.1:8000/api/v1/vendors/solicitudes/${solId}/`, {
+    const riskUrl = modoHistorial ? `director-risk-report.html?id=${solId}&modo=historial` : `director-risk-report.html?id=${solId}`;
+    document.getElementById('lnkReporteRiesgo').href = riskUrl;
+
+    fetch(`http://127.0.0.1:8000/api/v1/directors/solicitudes/${solId}/`, {
         headers: { 'Authorization': `Bearer ${token}` }
     })
-    .then(res => {
-        if (!res.ok) throw new Error("Error al cargar detalle");
-        return res.json();
-    })
-    .then(sol => {
-        console.log("Detalle de solicitud cargado:", sol);
-        
-        // Rellenar los campos con los datos REALES
-        document.getElementById('radicadoTitle').textContent = sol.numero_solicitud || 'SIN RADICADO';
-        document.getElementById('v_nombres').textContent = sol.nombres || 'No disponible';
-        document.getElementById('v_apellidos').textContent = sol.apellidos || 'No disponible';
-        document.getElementById('v_email').textContent = sol.email || 'No disponible';
-        document.getElementById('v_id').textContent = sol.identificacion || 'No disponible';
-        document.getElementById('v_telefono').textContent = sol.telefono || 'N/A';
-        document.getElementById('v_estado').textContent = sol.estado;
+        .then(res => {
+            if (!res.ok) throw new Error("Error al cargar detalle");
+            return res.json();
+        })
+        .then(sol => {
+            console.log("Detalle de solicitud cargado:", sol);
 
-        // Color del estado
-        const estadoEl = document.getElementById('v_estado');
-        if (sol.estado === 'PENDIENTE') estadoEl.style.color = '#f97316';
-        if (sol.estado === 'APROBADA') estadoEl.style.color = '#22c55e';
-    })
-    .catch(err => console.error(err));
+            // Rellenar los campos con los datos REALES
+            document.getElementById('radicadoTitle').textContent = sol.numero_solicitud || 'SIN RADICADO';
+            document.getElementById('v_nombres').textContent = sol.nombres || 'No disponible';
+            document.getElementById('v_apellidos').textContent = sol.apellidos || 'No disponible';
+            document.getElementById('v_email').textContent = sol.email || 'No disponible';
+            document.getElementById('v_id').textContent = sol.identificacion || 'No disponible';
+            document.getElementById('v_telefono').textContent = sol.telefono || 'N/A';
+            document.getElementById('v_estado').textContent = sol.estado;
+
+            // Color del estado (Lógica Visual Dinámica)
+            const estadoEl = document.getElementById('v_estado');
+            if (sol.estado === 'PENDIENTE') estadoEl.style.color = '#fef08a'; // Amarillo Suave
+            if (sol.estado === 'APROBADA') estadoEl.style.color = '#22c55e';  // Verde Konrad
+            if (sol.estado === 'RECHAZADA') estadoEl.style.color = '#ef4444';  // Rojo Intenso
+            if (sol.estado === 'DEVUELTA') estadoEl.style.color = '#f97316';   // Naranja Vibrante
+            
+            // Si ya no está PENDIENTE, deshabilitar funcionalidad de riesgo
+            if (sol.estado !== 'PENDIENTE') {
+                ['btnDatacredito', 'btnCifin', 'btnPolicia'].forEach(id => {
+                    const btn = document.getElementById(id);
+                    if (btn) {
+                        btn.disabled = true;
+                        btn.style.opacity = '0.5';
+                        btn.style.cursor = 'not-allowed';
+                        btn.title = "La solicitud ya ha sido procesada de forma definitiva.";
+                        // Opcional: Cambiarle el texto si queremos ser más verbosos
+                    }
+                });
+            }
+        })
+        .catch(err => console.error(err));
 
     // 2. LOGICA DE BOTONES (APROBAR / RECHAZAR)
     const updateEstado = async (nuevoEstado) => {
         try {
-            const res = await fetch(`http://127.0.0.1:8000/api/v1/vendors/solicitudes/${solId}/cambiar-estado/`, {
+            const res = await fetch(`http://127.0.0.1:8000/api/v1/directors/solicitudes/${solId}/cambiar-estado/`, {
                 method: 'PATCH',
-                headers: { 
+                headers: {
                     'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json' 
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ estado: nuevoEstado })
             });
@@ -62,7 +92,214 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    document.getElementById('btnAprobar').addEventListener('click', () => updateEstado('APROBADA'));
-    document.getElementById('btnDevolver').addEventListener('click', () => updateEstado('DEVUELTA'));
-    document.getElementById('btnRechazar').addEventListener('click', () => updateEstado('RECHAZADA'));
+    const btnAprobar = document.getElementById('btnAprobar');
+    if (btnAprobar) btnAprobar.addEventListener('click', () => updateEstado('APROBADA'));
+
+    const btnDevolver = document.getElementById('btnDevolver');
+    if (btnDevolver) btnDevolver.addEventListener('click', () => updateEstado('DEVUELTA'));
+
+    const btnRechazar = document.getElementById('btnRechazar');
+    if (btnRechazar) btnRechazar.addEventListener('click', () => updateEstado('RECHAZADA'));
+
+    // 3. CONSULTAR DATACRÉDITO (MOCK)
+    const btnDatacredito = document.getElementById('btnDatacredito');
+    const modalMock = document.getElementById('modalMock');
+
+    btnDatacredito.addEventListener('click', async () => {
+        btnDatacredito.textContent = "Consultando... ⏳";
+        btnDatacredito.disabled = true;
+
+        try {
+            const res = await fetch(`http://127.0.0.1:8000/api/v1/directors/solicitudes/${solId}/mock_datacredito/`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+
+                // Rellenamos el Modal con los datos del Mock
+                document.getElementById('mockScore').textContent = data.score_datacredito;
+                document.getElementById('mockCalificacion').textContent = data.calificacion;
+                document.getElementById('mockTitle').textContent = "DATACRÉDITO (EXPERIAN)";
+
+                // Ajustamos colores según la calificación
+                const califEl = document.getElementById('mockCalificacion');
+                const scoreEl = document.getElementById('mockScore');
+                const iconEl = document.getElementById('mockIcon');
+
+                if (data.calificacion === 'ALTA') {
+                    califEl.style.color = '#22c55e'; // Verde
+                    iconEl.textContent = "📈";
+                } else if (data.calificacion === 'ADVERTENCIA') {
+                    califEl.style.color = '#f97316'; // Naranja
+                    iconEl.textContent = "⚠️";
+                } else {
+                    califEl.style.color = '#ef4444'; // Rojo
+                    iconEl.textContent = "📉";
+                }
+
+                // Mostramos el modal
+                modalMock.style.display = 'flex';
+
+            } else {
+                alert("Error en el servidor al consultar Datacredito");
+            }
+        } catch (error) {
+            console.error(error);
+            alert("No se pudo conectar con el Mock de Datacredito");
+        } finally {
+            btnDatacredito.textContent = "Consultar Datacredito";
+            btnDatacredito.disabled = false;
+        }
+    });
+
+    // 4. CONSULTAR CIFIN (MOCK)
+    const btnCifin = document.getElementById('btnCifin');
+
+    btnCifin.addEventListener('click', async () => {
+        btnCifin.textContent = "Consultando... ⏳";
+        btnCifin.disabled = true;
+
+        try {
+            const res = await fetch(`http://127.0.0.1:8000/api/v1/directors/solicitudes/${solId}/mock_cifin/`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+
+                // Rellenamos el Modal con los datos del Mock
+                document.getElementById('mockScore').textContent = data.score_cifin;
+                document.getElementById('mockCalificacion').textContent = data.calificacion;
+                document.getElementById('mockTitle').textContent = "CIFIN (TRANSUNION)";
+
+                // Ajustamos colores según la calificación
+                const califEl = document.getElementById('mockCalificacion');
+                const scoreEl = document.getElementById('mockScore');
+                const iconEl = document.getElementById('mockIcon');
+
+                if (data.calificacion === 'ALTA') {
+                    califEl.style.color = '#22c55e'; // Verde
+                    iconEl.textContent = "📈";
+                } else if (data.calificacion === 'ADVERTENCIA') {
+                    califEl.style.color = '#f97316'; // Naranja
+                    iconEl.textContent = "⚠️";
+                } else {
+                    califEl.style.color = '#ef4444'; // Rojo
+                    iconEl.textContent = "📉";
+                }
+
+                // Mostramos el modal
+                modalMock.style.display = 'flex';
+
+            } else {
+                alert("Error en el servidor al consultar CIFIN");
+            }
+        } catch (error) {
+            console.error(error);
+            alert("No se pudo conectar con el Mock de CIFIN");
+        } finally {
+            btnCifin.textContent = "Consultar CIFIN";
+            btnCifin.disabled = false;
+        }
+    });
+    // 5. SIMULADOR POLICÍA (ANTECEDENTES)
+    const btnPolicia = document.getElementById('btnPolicia');
+    const modalPolicia = document.getElementById('modalPolicia');
+
+    // Abre el modal y reinicia la vista
+    btnPolicia.addEventListener('click', () => {
+        document.getElementById('policiaSearchArea').style.display = 'block';
+        document.getElementById('policiaResultArea').style.display = 'none';
+        document.getElementById('inputCedulaPolicia').value = ''; // Limpiar el input
+        modalPolicia.style.display = 'flex';
+    });
+
+    // Realiza la búsqueda "institucional"
+    document.getElementById('btnEjecutarBusquedaPolicia').addEventListener('click', async () => {
+        const cedula = document.getElementById('inputCedulaPolicia').value;
+        if (!cedula) { alert("Debe ingresar una cédula"); return; }
+
+        const btnBusqueda = document.getElementById('btnEjecutarBusquedaPolicia');
+        btnBusqueda.textContent = "Buscando en Base de Datos... ⚖️";
+        btnBusqueda.disabled = true;
+
+        try {
+            const res = await fetch(`http://127.0.0.1:8000/api/v1/directors/solicitudes/${solId}/consultar-antecedentes/`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ numero_identificacion: cedula })
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+
+                // 1. Ocultar el formulario y mostrar certificado
+                document.getElementById('policiaSearchArea').style.display = 'none';
+                document.getElementById('policiaResultArea').style.display = 'block';
+
+                // 2. Rellenar datos del "Certificado"
+                document.getElementById('certId').textContent = Math.floor(Math.random() * 900000) + 100000;
+                document.getElementById('certNombre').textContent = `Persona Identificada: ${cedula}`;
+
+                const certStatus = document.getElementById('certStatus');
+                certStatus.textContent = data.estado === "NO_REQUERIDO" ? "LIBRE DE ANTECEDENTES ✅" : "REQUERIDO POR LA JUSTICIA ⚠️";
+
+                // Colores institucionales
+                certStatus.style.background = data.estado === "NO_REQUERIDO" ? "#dcfce7" : "#fee2e2";
+                certStatus.style.color = data.estado === "NO_REQUERIDO" ? "#166534" : "#991b1b";
+
+            } else {
+                alert("Error al conectar con el servidor de la Policía.");
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Falla técnica en la consulta judicial.");
+        } finally {
+            btnBusqueda.textContent = "GENERAR CERTIFICADO ⚖️";
+            btnBusqueda.disabled = false;
+        }
+    });
+
+    // 6. DESCARGAR EXPEDIENTE (ZIP) 
+    const btnZIP = document.getElementById('btnDescargarZIP');
+    if (btnZIP) {
+        btnZIP.addEventListener('click', async () => {
+            btnZIP.textContent = "Generando ZIP... ⏳";
+            btnZIP.disabled = true;
+
+            try {
+                const response = await fetch(`http://127.0.0.1:8000/api/v1/directors/solicitudes/${solId}/descargar-expediente/`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    // Usamos el radicado para el nombre del archivo
+                    const radicado = document.getElementById('radicadoTitle').textContent;
+                    a.download = `EXPEDIENTE_${radicado}.zip`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                } else {
+                    const err = await response.json();
+                    alert("Error: " + (err.error || "No se pudo generar el ZIP"));
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Error al conectar con el servidor para la descarga.");
+            } finally {
+                btnZIP.textContent = "Descargar Paquete de Documentos (ZIP) 📥";
+                btnZIP.disabled = false;
+            }
+        });
+    }
+
 });
