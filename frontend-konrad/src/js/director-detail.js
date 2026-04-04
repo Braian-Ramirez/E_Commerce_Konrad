@@ -4,16 +4,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const urlParams = new URLSearchParams(window.location.search);
     const solId = urlParams.get('id');
+    const modoHistorial = urlParams.get('modo') === 'historial';
 
     if (!solId) {
         alert("ID de solicitud no encontrado en la URL");
         return;
     }
 
+    // --- MODO SOLO LECTURA (viene del Historial) ---
+    if (modoHistorial) {
+        // Ocultar todos los botones de acción
+        ['btnDescargarZIP', 'btnConsultarDatacredito', 'btnConsultarCifin',
+            'btnConsultarAntecedentes'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = 'none';
+            });
+    }
+
     // 1. CARGAR DATOS DE LA SOLICITUD
-    document.getElementById('lnkReporteRiesgo').href = `director-risk-report.html?id=${solId}`;
-    
-    fetch(`http://127.0.0.1:8000/api/v1/vendors/solicitudes/${solId}/`, {
+    const riskUrl = modoHistorial ? `director-risk-report.html?id=${solId}&modo=historial` : `director-risk-report.html?id=${solId}`;
+    document.getElementById('lnkReporteRiesgo').href = riskUrl;
+
+    fetch(`http://127.0.0.1:8000/api/v1/directors/solicitudes/${solId}/`, {
         headers: { 'Authorization': `Bearer ${token}` }
     })
         .then(res => {
@@ -42,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 2. LOGICA DE BOTONES (APROBAR / RECHAZAR)
     const updateEstado = async (nuevoEstado) => {
         try {
-            const res = await fetch(`http://127.0.0.1:8000/api/v1/vendors/solicitudes/${solId}/cambiar-estado/`, {
+            const res = await fetch(`http://127.0.0.1:8000/api/v1/directors/solicitudes/${solId}/cambiar-estado/`, {
                 method: 'PATCH',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -64,9 +76,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    document.getElementById('btnAprobar').addEventListener('click', () => updateEstado('APROBADA'));
-    document.getElementById('btnDevolver').addEventListener('click', () => updateEstado('DEVUELTA'));
-    document.getElementById('btnRechazar').addEventListener('click', () => updateEstado('RECHAZADA'));
+    const btnAprobar = document.getElementById('btnAprobar');
+    if (btnAprobar) btnAprobar.addEventListener('click', () => updateEstado('APROBADA'));
+
+    const btnDevolver = document.getElementById('btnDevolver');
+    if (btnDevolver) btnDevolver.addEventListener('click', () => updateEstado('DEVUELTA'));
+
+    const btnRechazar = document.getElementById('btnRechazar');
+    if (btnRechazar) btnRechazar.addEventListener('click', () => updateEstado('RECHAZADA'));
 
     // 3. CONSULTAR DATACRÉDITO (MOCK)
     const btnDatacredito = document.getElementById('btnDatacredito');
@@ -77,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnDatacredito.disabled = true;
 
         try {
-            const res = await fetch(`http://127.0.0.1:8000/api/v1/vendors/solicitudes/${solId}/mock_datacredito/`, {
+            const res = await fetch(`http://127.0.0.1:8000/api/v1/directors/solicitudes/${solId}/mock_datacredito/`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
@@ -128,7 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnCifin.disabled = true;
 
         try {
-            const res = await fetch(`http://127.0.0.1:8000/api/v1/vendors/solicitudes/${solId}/mock_cifin/`, {
+            const res = await fetch(`http://127.0.0.1:8000/api/v1/directors/solicitudes/${solId}/mock_cifin/`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
@@ -192,7 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnBusqueda.disabled = true;
 
         try {
-            const res = await fetch(`http://127.0.0.1:8000/api/v1/vendors/solicitudes/${solId}/consultar-antecedentes/`, {
+            const res = await fetch(`http://127.0.0.1:8000/api/v1/directors/solicitudes/${solId}/consultar-antecedentes/`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -239,7 +256,7 @@ document.addEventListener('DOMContentLoaded', () => {
             btnZIP.disabled = true;
 
             try {
-                const response = await fetch(`http://127.0.0.1:8000/api/v1/vendors/solicitudes/${solId}/descargar-expediente/`, {
+                const response = await fetch(`http://127.0.0.1:8000/api/v1/directors/solicitudes/${solId}/descargar-expediente/`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 

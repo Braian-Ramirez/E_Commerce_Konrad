@@ -13,14 +13,10 @@ def enviar_notificacion_solicitud(sender, instance, created, **kwargs):
      
         # --- LÓGICA DE RECHAZO ---
         if instance.estado == 'RECHAZADA':
-            asunto = 'Comercial Konrad - Novedad Solicitud'
-            mensaje = f'Hola {instance.persona.nombre}, lo sentimos. Tu solicitud fue rechazada por antecedentes o datacrédito.'
-            
-            send_mail(asunto, mensaje, settings.DEFAULT_FROM_EMAIL, [correo_destino], fail_silently=False)
+            from .services import enviar_correo_rechazo
+            enviar_correo_rechazo(instance.persona)
             
         # --- LÓGICA DE DEVOLUCIÓN ---
         elif instance.estado == 'DEVUELTA':
-            asunto = 'Comercial Konrad - Solicitud en Pausa'
-            mensaje = f'Hola {instance.persona.nombre}, solicitud DEVUELTA. Tu vida crediticia esta en advertencia, podrás iniciar un nuevo proceso cuando tu calificación sea alta.'
-            
-            send_mail(asunto, mensaje, settings.DEFAULT_FROM_EMAIL, [correo_destino], fail_silently=False)
+            from .services import enviar_correo_devolucion
+            enviar_correo_devolucion(instance.persona)

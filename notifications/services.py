@@ -5,15 +5,16 @@ from django.conf import settings
 from django.template.loader import render_to_string
 from .models import CorreoEnviado
 
-
 def _registrar_auditoria_correo(persona, asunto, cuerpo):
     """
     Genera el estampado de tiempo (hash SHA-256) y registra
     el correo en la base de datos ANTES de intentar enviarlo.
     """
+    # Generar el Hash único (Huella Digital Legal)
     timestamp_raw = f"{persona.email}-{asunto}-{time.time()}"
     timestamp_hash = hashlib.sha256(timestamp_raw.encode()).hexdigest()
 
+    # Guardar en la DB de Notificaciones
     CorreoEnviado.objects.create(
         destinatario=persona,
         asunto=asunto,

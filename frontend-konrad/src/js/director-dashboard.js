@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     console.log("Iniciando carga de solicitudes con token:", token.substring(0, 10) + "...");
 
-    fetch('http://127.0.0.1:8000/api/v1/vendors/solicitudes/', {
+    fetch('http://127.0.0.1:8000/api/v1/directors/solicitudes/', {
         headers: { 'Authorization': `Bearer ${token}` }
     })
     .then(res => {
@@ -25,7 +25,10 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log("Datos recibidos del servidor:", data);
         
         // Manejamos si Django envía una lista directa o un objeto paginado {results: [...]}
-        const solicitudes = Array.isArray(data) ? data : (data.results || []);
+        let solicitudes = Array.isArray(data) ? data : (data.results || []);
+        
+        // --- FILTRO: Mostrar SÓLO las pendientes ---
+        solicitudes = solicitudes.filter(sol => sol.estado === 'PENDIENTE');
         
         const container = document.getElementById('solicitudesContainer');
         container.innerHTML = ''; // ¡Aquí borramos los datos quemados!

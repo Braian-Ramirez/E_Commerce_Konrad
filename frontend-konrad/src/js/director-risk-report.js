@@ -4,17 +4,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const urlParams = new URLSearchParams(window.location.search);
     const solId = urlParams.get('id');
+    const modoHistorial = urlParams.get('modo') === 'historial';
 
     if (!solId) {
         alert("ID de solicitud no encontrado en la URL");
         return;
     }
 
-    // Botón de Volver
-    document.getElementById('btnBack').href = `director-detail.html?id=${solId}`;
+    // Botón de Volver pasa el modo si existe
+    const backUrl = modoHistorial ? `director-detail.html?id=${solId}&modo=historial` : `director-detail.html?id=${solId}`;
+    document.getElementById('btnBack').href = backUrl;
+
+    // --- MODO SOLO LECTURA ---
+    if (modoHistorial) {
+        const btnContainer = document.querySelector('.decision-row');
+        if (btnContainer) btnContainer.style.display = 'none';
+        
+        ['btnAprobar', 'btnDevolver', 'btnRechazar'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        });
+    }
 
     // CARGAR DATOS COMPLETOS DE RIESGO
-    fetch(`http://127.0.0.1:8000/api/v1/vendors/solicitudes/${solId}/`, {
+    fetch(`http://127.0.0.1:8000/api/v1/directors/solicitudes/${solId}/`, {
         headers: { 'Authorization': `Bearer ${token}` }
     })
         .then(res => res.json())
@@ -69,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const updateEstado = async (nuevoEstado) => {
         try {
-            const res = await fetch(`http://127.0.0.1:8000/api/v1/vendors/solicitudes/${solId}/cambiar-estado/`, {
+            const res = await fetch(`http://127.0.0.1:8000/api/v1/directors/solicitudes/${solId}/cambiar-estado/`, {
                 method: 'PATCH',
                 headers: {
                     'Authorization': `Bearer ${token}`,
