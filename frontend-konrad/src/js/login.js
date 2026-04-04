@@ -37,7 +37,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 
             // Redirigimos al Dashboard correcto basado en el rol con protección de fallos
             const r = String(data.rol).toUpperCase();
-            if (r === 'DIRECTOR' || r === 'ADMIN') {
+            if (r === 'DIRECTOR_COMERCIAL' || r === 'DIRECTOR' || r === 'ADMIN') {
                 window.location.href = 'director-dashboard.html';
             } else if (r === 'VENDEDOR') {
                 window.location.href = 'vendor-dashboard.html';

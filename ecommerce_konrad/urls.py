@@ -38,10 +38,17 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         
         if hasattr(user, 'persona_profile') and user.persona_profile:
             persona = user.persona_profile
-            if hasattr(persona, 'vendedor_profile'):
+            # Verificación de roles basada en perfiles relacionados
+            if hasattr(persona, 'director_profile'):
+                rol = 'DIRECTOR_COMERCIAL'
+            elif hasattr(persona, 'vendedor_profile'):
                 rol = 'VENDEDOR'
             elif hasattr(persona, 'perfil_comprador'):
                 rol = 'COMPRADOR'
+            else:
+                # Si es un superusuario sin perfil específico, se le asigna rol administrativo
+                if user.is_superuser:
+                    rol = 'DIRECTOR_COMERCIAL'
             
         data['rol'] = rol
         return data
