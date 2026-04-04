@@ -14,8 +14,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- MODO SOLO LECTURA (viene del Historial) ---
     if (modoHistorial) {
         // Ocultar todos los botones de acción
-        ['btnDescargarZIP', 'btnConsultarDatacredito', 'btnConsultarCifin',
-            'btnConsultarAntecedentes'].forEach(id => {
+        ['btnDescargarZIP', 'btnDatacredito', 'btnCifin',
+            'btnPolicia'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.style.display = 'none';
             });
@@ -44,10 +44,26 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('v_telefono').textContent = sol.telefono || 'N/A';
             document.getElementById('v_estado').textContent = sol.estado;
 
-            // Color del estado
+            // Color del estado (Lógica Visual Dinámica)
             const estadoEl = document.getElementById('v_estado');
-            if (sol.estado === 'PENDIENTE') estadoEl.style.color = '#f97316';
-            if (sol.estado === 'APROBADA') estadoEl.style.color = '#22c55e';
+            if (sol.estado === 'PENDIENTE') estadoEl.style.color = '#fef08a'; // Amarillo Suave
+            if (sol.estado === 'APROBADA') estadoEl.style.color = '#22c55e';  // Verde Konrad
+            if (sol.estado === 'RECHAZADA') estadoEl.style.color = '#ef4444';  // Rojo Intenso
+            if (sol.estado === 'DEVUELTA') estadoEl.style.color = '#f97316';   // Naranja Vibrante
+            
+            // Si ya no está PENDIENTE, deshabilitar funcionalidad de riesgo
+            if (sol.estado !== 'PENDIENTE') {
+                ['btnDatacredito', 'btnCifin', 'btnPolicia'].forEach(id => {
+                    const btn = document.getElementById(id);
+                    if (btn) {
+                        btn.disabled = true;
+                        btn.style.opacity = '0.5';
+                        btn.style.cursor = 'not-allowed';
+                        btn.title = "La solicitud ya ha sido procesada de forma definitiva.";
+                        // Opcional: Cambiarle el texto si queremos ser más verbosos
+                    }
+                });
+            }
         })
         .catch(err => console.error(err));
 

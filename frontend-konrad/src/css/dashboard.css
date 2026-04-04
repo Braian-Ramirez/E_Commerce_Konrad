@@ -138,8 +138,24 @@ body {
 }
 
 .status-pendiente {
-    background: rgba(249, 115, 22, 0.1);
-    color: #f97316;
+    background: rgba(249, 234, 22, 0.1);
+    color: #f9f516;
+}
+
+.status-aprobada {
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+}
+
+.status-rechazada {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.status-devuelta {
+    background: rgba(234, 88, 12, 0.1);
+    /* Darker Orange */
+    color: #ea580c;
 }
 
 /* --- NUEVOS ESTILOS PARA VISTA DE DETALLE --- */
@@ -213,15 +229,8 @@ body {
     color: black;
 }
 
-.btn-download {
-    background: #1c1a18;
-    border: 1px solid #f97316;
-    color: white;
-    padding: 12px;
-    border-radius: 8px;
-    width: 100%;
-    cursor: pointer;
-}
+/* Estilos de botones movidos a sus respectivos archivos de vista para evitar colisiones */
+
 
 /* --- MEDIA QUERIES PARA RESPONSIVIDAD --- */
 
@@ -235,31 +244,38 @@ body {
 
 /* --- MODALES DASHBOARD (DATACRÉDITO / CIFIN) --- */
 .modal-overlay {
-    display: none; 
-    position: fixed; 
-    inset: 0; 
-    background: rgba(0,0,0,0.85); 
-    z-index: 10000; 
-    justify-content: center; 
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 10000;
+    justify-content: center;
     align-items: center;
     backdrop-filter: blur(12px);
     padding: 20px;
 }
 
 .modal-content {
-    background: #0c0a09; 
-    border: 1px solid rgba(34, 197, 94, 0.4); 
-    border-radius: 32px; 
-    padding: 40px; 
-    text-align: center; 
+    background: #0c0a09;
+    border: 1px solid rgba(34, 197, 94, 0.4);
+    border-radius: 32px;
+    padding: 40px;
+    text-align: center;
     box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.9);
     position: relative;
     animation: modalSlide 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @keyframes modalSlide {
-    from { transform: translateY(30px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 /* SMARTPHONES (Menos de 768px) */
