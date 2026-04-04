@@ -28,8 +28,29 @@
 
     <main class="main-layout">
         <header class="header-top">
-            <h2>Detalle Solicitud</h2>
-            <a href="director-dashboard.html" class="back-link">← Volver al Listado</a>
+            <h2 style="font-weight: 800; margin: 0;">Detalle Solicitud</h2>
+            
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <!-- CAMPANA DE NOTIFICACIONES -->
+                <div class="notification-container" style="position: relative;">
+                    <button id="btnNotificaciones" class="bell-btn" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; position: relative;">
+                        🔔
+                        <span id="notifCount" class="badge-count" style="display: none; position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; font-size: 0.6rem; padding: 2px 6px; border-radius: 10px; border: 2px solid #0c0a09; font-weight: 800;">0</span>
+                    </button>
+                    
+                    <!-- DROPDOWN DE NOTIFICACIONES -->
+                    <div id="notifDropdown" class="notif-dropdown" style="display: none; position: absolute; top: 40px; right: 0; width: 320px; background: #141210; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; z-index: 1000; box-shadow: 0 10px 25px rgba(0,0,0,0.5); overflow: hidden;">
+                        <div style="padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); font-weight: 800; font-size: 0.9rem; display: flex; justify-content: space-between;">
+                            <span>Notificaciones</span>
+                        </div>
+                        <div id="notifList" style="max-height: 350px; overflow-y: auto;">
+                            <!-- Listado dinámico -->
+                        </div>
+                    </div>
+                </div>
+
+                <a href="director-dashboard.html" class="back-link">← Volver al Listado</a>
+            </div>
         </header>
 
         <section class="detail-view-container">
@@ -148,6 +169,7 @@
 
 
     <!-- SCRIPT DE CONEXIÓN -->
+    <script src="../src/js/notifications-controller.js"></script>
     <script src="../src/js/director-detail.js"></script>
 </body>
 
