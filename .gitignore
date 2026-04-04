@@ -9,3 +9,6 @@ db.sqlite3
 # Archivos de entorno y secretos
 *.pyc
 __pycache__/
+
+# Archivos de medios (uploads)
+media/
