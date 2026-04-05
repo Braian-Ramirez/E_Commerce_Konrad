@@ -153,11 +153,17 @@ class SolicitudVendedorRegistrationSerializer(serializers.ModelSerializer):
                     url_archivo=archivo
                 )
 
-            # 5. Notificación automática del sistema para auditoría
+            # 5. Notificación automática del sistema para el Director Comercial
+            # Buscamos al Director Comercial en la base de datos (administrador del sistema)
+            director = Persona.objects.filter(user__is_staff=True).first()
+            
+            # Si no hay un staff asignado como Persona, devolvemos a la persona original como fallback
+            notificar_a = director if director else persona
+
             Notificacion.objects.create(
-                persona=persona,
+                persona=notificar_a,
                 tipo='SOLICITUD',
-                mensaje=f"Nueva aplicación de vendedor: {persona.nombre} {persona.apellido}. Radicado: {solicitud.numero_solicitud}. Estado: PENDIENTE."
+                mensaje=f"🔔 Nueva solicitud de registro: {persona.nombre} {persona.apellido}. Radicado: {solicitud.numero_solicitud}. Pendiente por revisar."
             )
 
             return solicitud

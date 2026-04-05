@@ -85,7 +85,7 @@ body {
 }
 
 .content-body {
-    padding: 40px;
+    padding: 20px 40px;
 }
 
 /* FILTROS */
@@ -169,8 +169,8 @@ body {
 .detail-view-container {
     display: grid;
     grid-template-columns: 1fr 320px;
-    padding: 30px;
-    gap: 25px;
+    padding: 15px 30px;
+    gap: 20px;
 }
 
 .info-panel {
