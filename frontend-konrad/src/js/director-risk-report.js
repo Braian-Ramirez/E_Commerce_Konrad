@@ -73,6 +73,21 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('res_solicitud_judicial').textContent = sol.resultado_judicial;
             document.getElementById('fecha_judicial').textContent = sol.fecha_consulta_judicial ? new Date(sol.fecha_consulta_judicial).toLocaleString() : '---';
 
+            // --- REGLA DE SEGURIDAD: DESHABILITAR BOTONES SI NO ESTÁ PENDIENTE ---
+            if (sol.estado !== 'PENDIENTE') {
+                console.log("⚠️ Registro no pendiente. Deshabilitando acciones.");
+                ['btnAprobar', 'btnDevolver', 'btnRechazar'].forEach(id => {
+                    const btn = document.getElementById(id);
+                    if (btn) {
+                        btn.disabled = true;
+                        btn.style.opacity = '0.3';
+                        btn.style.cursor = 'not-allowed';
+                        btn.style.filter = 'grayscale(1)';
+                        btn.title = "Esta solicitud ya tiene una decisión tomada.";
+                    }
+                });
+            }
+
         })
         .catch(err => console.error(err));
 
@@ -81,6 +96,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // -----------------------------------------------------------
 
     const updateEstado = async (nuevoEstado) => {
+        // Bloqueo adicional por seguridad
+        const btn = document.getElementById('btnAprobar');
+        if (btn && btn.disabled) return;
+
         try {
             const res = await fetch(`http://127.0.0.1:8000/api/v1/directors/solicitudes/${solId}/cambiar-estado/`, {
                 method: 'PATCH',
