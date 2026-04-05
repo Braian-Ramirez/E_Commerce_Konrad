@@ -20,12 +20,20 @@ function getUserKey() {
 }
 function getCartItems() {
     const key = `cart_${getUserKey()}`;
-    return JSON.parse(localStorage.getItem(key) || '[]');
+    return JSON.parse(localStorage.getItem(key) || localStorage.getItem('konrad_cart_v99') || '[]');
 }
 function updateBadge() {
     const b = document.getElementById('cartCount');
     if (b) b.textContent = getCartItems().length;
 }
+
+// LOGOUT PERSISTENTE
+window.handleLogout = () => {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    localStorage.removeItem("user_data");
+    window.location.href = "/pages/login.html";
+};
 
 async function cargarPedidos() {
     const list = document.getElementById("ordersList");
@@ -39,20 +47,16 @@ async function cargarPedidos() {
             signal: AbortSignal.timeout(5000),
             headers: { 'Authorization': `Bearer ${token}` }
         });
-        if (res.status === 401) {
-            console.warn("La sesión del backend parece haber expirado.");
-            localStorage.removeItem('access_token');
-            localStorage.removeItem('refresh_token');
-            window.location.href = '/pages/login.html';
-            return;
-        }
+        
         if (res.ok) {
             const data = await res.json();
             orders = Array.isArray(data) ? data : (data.results || []);
+        } else if (res.status === 401) {
+            console.warn("Sesión de pedidos (backend) no válida, continuando con simulados.");
+            // NO redirigimos al login, solo informamos en consola para no molestar al usuario
         }
     } catch (err) {
         console.warn("Backend no disponible, usando órdenes simuladas.");
-        usandoSimulados = true;
     }
 
     // Combinar reales + simuladas del localStorage
@@ -63,11 +67,11 @@ async function cargarPedidos() {
 
     if (!orders || orders.length === 0) {
         list.innerHTML = `
-            <div style="text-align:center; padding:100px 20px;">
-                <div style="font-size:5rem; margin-bottom:20px;">📦</div>
-                <h3 style="color:white; margin-bottom:10px;">Aún no tienes pedidos</h3>
-                <p style="color:#94a3b8; margin-bottom:30px;">¡Explora nuestro catálogo y realiza tu primera compra!</p>
-                <button class="cta-primary" onclick="window.location.href='/pages/catalog.html'">Ir al Catálogo</button>
+            <div style="grid-column: 1/-1; text-align:center; padding:100px; color:#64748b; animation: fadeIn 0.5s ease both;">
+                <div style="font-size:5rem;margin-bottom:20px;">📦</div>
+                <h3 style="color:white;font-size:1.8rem;margin-bottom:10px;font-weight:800;">Aún no tienes pedidos registrados</h3>
+                <p style="font-size:1.1rem;margin-bottom:35px;max-width:400px;margin-left:auto;margin-right:auto;">¡Explora nuestra comunidad y realiza tu primera compra hoy mismo!</p>
+                <a href="/pages/catalog.html" class="cta-primary" style="padding:18px 50px;text-decoration:none;display:inline-block;font-weight:800;border-radius:15px;box-shadow:0 10px 25px rgba(99,102,241,0.3);">🚀 Explorar Catálogo</a>
             </div>`;
         return;
     }
@@ -85,7 +89,6 @@ async function cargarPedidos() {
     list.innerHTML = orders.map(o => {
         if (o.estado === 'CARRITO') return '';
 
-        // Compatibilidad: campos reales del backend + campos simulados
         const fechaRaw = o.fecha || o.creado_en || o.fecha_simulada || new Date().toISOString();
         const fecha = new Date(fechaRaw).toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
         const totalNum = parseFloat(o.total_final || o.total_pedido || 0);
@@ -95,7 +98,6 @@ async function cargarPedidos() {
         if (estado === 'PENDIENTE') estado = 'PAGADA';
         
         const cfg = estadoConfig[estado] || { color: '#94a3b8', icon: '📦' };
-        const esSimulado = ''; // Removido por requerimiento
 
         return `
         <div class="order-card" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:25px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;transition:border-color 0.2s;" onmouseenter="this.style.borderColor='rgba(139,92,246,0.3)'" onmouseleave="this.style.borderColor='rgba(255,255,255,0.08)'">
@@ -113,8 +115,19 @@ async function cargarPedidos() {
             </div>
         </div>`;
     }).join('');
+
+    // Si después de filtrar CARRITO no queda nada visible, mostrar estado vacío
+    if (!list.innerHTML.trim()) {
+        list.innerHTML = `
+            <div style="grid-column:1/-1;text-align:center;padding:100px;color:#64748b;animation:fadeIn 0.5s ease both;">
+                <div style="font-size:5rem;margin-bottom:20px;">📦</div>
+                <h3 style="color:white;font-size:1.8rem;margin-bottom:10px;font-weight:800;">Aún no tienes pedidos registrados</h3>
+                <p style="font-size:1.1rem;margin-bottom:35px;max-width:400px;margin-left:auto;margin-right:auto;">¡Explora nuestra comunidad y realiza tu primera compra hoy mismo!</p>
+                <a href="/pages/catalog.html" class="cta-primary" style="padding:18px 50px;text-decoration:none;display:inline-block;font-weight:800;border-radius:15px;box-shadow:0 10px 25px rgba(99,102,241,0.3);">🚀 Explorar Catálogo</a>
+            </div>`;
+    }
     
-    currentOrders = orders; // Sincronizar con el global
+    currentOrders = orders;
 }
 
 
@@ -122,8 +135,11 @@ async function cargarPedidos() {
 window.openOrderDetails = async (id) => {
     let orderData = currentOrders.find(o => String(o.id) === String(id));
     
+    // Refresh token just in case
+    const token = localStorage.getItem("access_token");
+    
     const modal   = document.getElementById('orderDetailModal');
-    const content = document.getElementById('orderDetailContent');
+    const content = document.getElementById('orderModalContent'); // EL ID CORRECTO
     const closeBtn = document.getElementById('closeOrderModal');
     if (closeBtn) closeBtn.onclick = () => modal.style.display = 'none';
     content.innerHTML = `<p style="text-align:center;color:#94a3b8;padding:20px;">⏳ Cargando detalles...</p>`;

@@ -6,29 +6,30 @@
     <title>Mi Perfil | Comercial Konrad</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/src/css/style.css">
-    <style>
-        .profile-container { max-width: 900px; margin: 40px auto; padding: 40px; }
-        .avatar-section { display: flex; flex-direction: column; align-items: center; gap: 20px; margin-bottom: 40px; }
-        .avatar-circle { width: 140px; height: 140px; border-radius: 50%; background: var(--primary-gradient); border: 4px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 3.5rem; font-weight: 800; color: white; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
-        .avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
-        .file-upload-btn { background: rgba(255,255,255,0.05); color: white; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-size: 0.9rem; border: 1px solid rgba(255,255,255,0.1); transition: all 0.3s; }
-        .file-upload-btn:hover { background: var(--primary); transform: translateY(-2px); }
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
-    </style>
+    <link rel="stylesheet" href="/src/css/buyer-common.css">
+    <link rel="stylesheet" href="/src/css/profile.css">
 </head>
 <body>
-    <header class="navbar glass-effect">
+    <header class="navbar">
         <div class="nav-brand">
-            <h1>🛍️Comercial<span>Konrad</span></h1>
+            <a href="/index.html" style="text-decoration: none;">
+                <h1>🛍️Comercial<span style="color: var(--primary);">Konrad</span></h1>
+            </a>
+        </div>
+        <div class="search-container" style="visibility: hidden;">
+            <div class="search-wrapper">
+                <span>🔍</span>
+                <input type="text" placeholder="Buscar productos... (ej: Sony, Mac)">
+            </div>
         </div>
         <nav class="nav-links">
-            <a href="/index.html" class="nav-item">🏠 Inicio</a>
-            <a href="/pages/catalog.html" class="nav-item">💎 Catálogo</a>
-            <button class="cart-btn" onclick="window.location.href='/pages/cart.html'">🛒 Carrito <span id="cartCount" class="badge">0</span></button>
+            <a href="/pages/buyer-dashboard.html" class="nav-item">🏠 <span>Inicio</span></a>
+            <a href="/pages/catalog.html" class="nav-item">💎 <span>Catálogo</span></a>
+            <button class="cart-btn" onclick="window.location.href='/pages/cart.html'">🛒 <span>Carrito</span> <span id="cartCount" class="badge">0</span></button>
         </nav>
     </header>
 
-    <div class="dashboard-container" style="margin-top: 100px;">
+    <div class="dashboard-container">
         <aside class="sidebar-nav">
           <div class="sidebar-section">
             <p class="section-title">Navegación</p>
@@ -38,11 +39,11 @@
             <a href="/pages/payment-methods.html" class="sidebar-item"><span class="icon">💳</span> Medios de Pago</a>
             <a href="/pages/profile.html" class="sidebar-item active"><span class="icon">👤</span> Mi Perfil</a>
           </div>
-          <button onclick="localStorage.clear(); window.location.href='/pages/login.html'" class="logout-btn" style="width: 100%; margin-top: auto; background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); padding: 12px; border-radius: 10px; cursor: pointer; font-weight: 600;">🚪 Cerrar Sesión</button>
+          <button onclick="handleLogout()" class="logout-btn">🚪 Cerrar Sesión</button>
         </aside>
 
         <main class="main-content">
-            <div class="profile-container glass-effect" style="border-radius: 30px; border: 1px solid rgba(255,255,255,0.05);">
+            <div class="profile-container glass-effect">
                 <div class="avatar-section">
                     <div id="avatarCircle" class="avatar-circle">V</div>
                     <label class="file-upload-btn">
@@ -51,46 +52,47 @@
                     </label>
                 </div>
 
-                <form id="profileForm">
+                <!-- FORMULARIO DE PERFIL PROFESIONAL -->
+                <form id="profileForm" class="profile-main-form">
                     <div class="form-grid">
                         <div class="input-group">
-                            <label>Nombre</label>
+                            <label>Nombre Completo</label>
                             <input type="text" id="nombre" value="Viviana" required>
                         </div>
                         <div class="input-group">
-                            <label>Apellido</label>
+                            <label>Apellidos</label>
                             <input type="text" id="apellido" value="García" required>
                         </div>
                         <div class="input-group">
-                            <label>Email (No editable)</label>
-                            <input type="email" id="email" disabled style="opacity: 0.5;">
+                            <label>Email de Contacto</label>
+                            <input type="email" id="email" disabled>
                         </div>
                         <div class="input-group">
-                            <label>Teléfono</label>
+                            <label>Teléfono Móvil</label>
                             <input type="text" id="telefono">
                         </div>
                         <div class="input-group">
-                            <label>País</label>
+                            <label>País / Región</label>
                             <input type="text" id="pais" placeholder="Colombia">
                         </div>
                         <div class="input-group">
-                            <label>Ciudad</label>
+                            <label>Ciudad / Estado</label>
                             <input type="text" id="ciudad" placeholder="Bogotá">
                         </div>
                         <div class="input-group">
-                            <label>Dirección</label>
+                            <label>Dirección de Residencia</label>
                             <input type="text" id="direccion" placeholder="Calle ...">
                         </div>
                         <div class="input-group">
-                            <label>Instagram</label>
+                            <label>Nombre de Usuario @Instagram</label>
                             <input type="text" id="instagram" placeholder="@user">
                         </div>
                     </div>
-                    <button type="submit" class="cta-primary" style="margin-top: 40px; width: 100%; padding: 18px;">✅ Guardar Cambios del Perfil</button>
+                    <button type="submit" class="cta-primary profile-save-btn">✅ Guardar Cambios del Perfil</button>
                 </form>
 
-                <div style="margin-top: 50px; padding-top: 40px; border-top: 1px solid rgba(255,255,255,0.1);">
-                    <h3 style="margin-bottom: 25px; font-size: 1.5rem; display: flex; align-items: center; gap: 10px;">🔐 Seguridad y Contraseña</h3>
+                <div class="security-divider">
+                    <h3 class="security-title">🔐 Seguridad y Contraseña</h3>
                     <div class="form-grid">
                         <div class="input-group">
                             <label>Nueva Contraseña</label>
@@ -100,14 +102,21 @@
                             <label>Confirmar Contraseña</label>
                             <input type="password" id="confirm_password" placeholder="••••••••">
                         </div>
+                        <!-- MENSAJE INFORMATIVO DE SEGURIDAD -->
+                        <div class="security-info-box">
+                            <p>💡 <b>Consejo de Seguridad:</b> Tu contraseña debe ser de al menos <b>8 caracteres</b> para garantizar la protección de tu cuenta Konrad.</p>
+                        </div>
                     </div>
-                    <button id="changePassBtn" class="cta-primary" style="margin-top: 20px; width: 100%; padding: 15px; background: rgba(59, 130, 246, 0.2); border: 1px solid var(--primary);">Actualizar Seguridad</button>
-                    
-                    <button onclick="localStorage.clear(); window.location.href='/pages/login.html'" style="margin-top: 40px; width: 100%; padding: 18px; border-radius: 15px; background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid #ef4444; font-weight: 800; cursor: pointer;">🚪 Cerrar Sesión Segura</button>
+                    <div style="display: flex; justify-content: center; width: 100%; margin-top: 25px;">
+                        <button id="changePassBtn" class="cta-primary security-btn" style="width: auto; min-width: 300px;">Actualizar Seguridad</button>
+                    </div>
                 </div>
             </div>
         </main>
     </div>
+
+    <script type="module" src="/src/js/profile.js"></script>
+</body>
 
     <script type="module" src="/src/js/profile.js"></script>
 </body>

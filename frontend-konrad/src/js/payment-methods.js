@@ -5,6 +5,14 @@ if (!token) { window.location.href = "/pages/login.html"; }
 
 let editingId = null;
 
+// LOGOUT PERSISTENTE
+window.handleLogout = () => {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    localStorage.removeItem("user_data");
+    window.location.href = "/pages/login.html";
+};
+
 document.addEventListener("DOMContentLoaded", () => {
     cargarMediosPago();
     setupPaymentLogic();
@@ -24,67 +32,105 @@ async function cargarMediosPago() {
     const list = document.getElementById("paymentsList");
     if (!list) return;
 
+    list.innerHTML = `<div style="text-align:center;padding:30px;color:#64748b;">Cargando medios de pago...</div>`;
+
     try {
-        const res = await fetch(API_MEDIOS, { headers: { 'Authorization': `Bearer ${token}` } });
-        
-        if (res.status === 401) { 
-            console.warn("Sesión expirada en backend, operando en modo lectura.");
-            return; 
+        const currentToken = localStorage.getItem("access_token");
+        const res = await fetch(API_MEDIOS, { headers: { 'Authorization': `Bearer ${currentToken}` } });
+        console.log("Medios pago status:", res.status);
+
+        if (res.status === 401) {
+            list.innerHTML = `<div style="text-align:center;color:#94a3b8;padding:40px;">
+                <p>Sesión vencida. <a href="/pages/login.html" style="color:var(--primary)">Inicia sesión</a> para ver tus medios.</p>
+            </div>`;
+            return;
         }
-        
-        const data = await res.json();
-        list.innerHTML = data && data.length > 0 ? data.map(m => `
-            <div class="payment-card" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:20px; padding:20px; display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                <div style="display:flex; align-items:center; gap:15px;">
-                    <div style="font-size:1.5rem;">💳</div>
-                    <div>
-                        <p style="font-weight:800; color:white; font-size:1rem;">${m.banco_nombre}</p>
-                        <p style="color:#64748b; font-family:monospace; font-size:0.8rem;">**** ${String(m.numero_cuenta_tarjeta).slice(-4)}</p>
+
+        const rawData = await res.json();
+        console.log("Medios data:", rawData);
+        // Handle both array and paginated {results:[]} responses
+        const data = Array.isArray(rawData) ? rawData : (rawData.results || []);
+
+        if (data.length > 0) {
+            const iconMap = { 'TARJETA': '💳', 'PSE': '📱', 'CONSIGNACION': '🏦', 'BILLETERA': '📱' };
+            list.innerHTML = data.map(m => `
+                <div class="payment-card" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:20px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                    <div style="display:flex;align-items:center;gap:15px;">
+                        <div style="font-size:1.8rem;">${iconMap[m.tipo] || '💳'}</div>
+                        <div>
+                            <p style="font-weight:800;color:white;font-size:1rem;margin:0 0 4px;">${m.banco_nombre}</p>
+                            <p style="color:#64748b;font-family:monospace;font-size:0.8rem;margin:0;">**** ${String(m.numero_cuenta_tarjeta || '').slice(-4)} · ${m.tipo || 'TARJETA'}</p>
+                        </div>
                     </div>
-                </div>
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <button onclick='abrirEdicion(${JSON.stringify(m).replace(/'/g, "&apos;")})' style="background:rgba(255,255,255,0.05); border:none; color:white; width:30px; height:30px; border-radius:50%; cursor:pointer;">✏️</button>
-                    <button onclick="eliminarMedio(${m.id})" style="background:rgba(239, 68, 68, 0.1); border:none; color:#ef4444; width:30px; height:30px; border-radius:50%; cursor:pointer;">🗑️</button>
-                </div>
-            </div>
-        `).join('') : `<div style="text-align:center; color:#64748b; padding:40px;">No hay medios vinculados.</div>`;
-    } catch (err) { console.warn("Error carga."); }
+                    <div style="display:flex;gap:10px;">
+                        <button onclick='abrirEdicion(${JSON.stringify(m).replace(/'/g,"&apos;")})' style="background:rgba(255,255,255,0.05);border:none;color:white;width:34px;height:34px;border-radius:50%;cursor:pointer;">✏️</button>
+                        <button onclick="eliminarMedio(${m.id})" style="background:rgba(239,68,68,0.1);border:none;color:#ef4444;width:34px;height:34px;border-radius:50%;cursor:pointer;">🗑️</button>
+                    </div>
+                </div>`).join('');
+        } else {
+            list.innerHTML = `<div style="text-align:center;color:#64748b;padding:50px;">
+                <div style="font-size:3rem;margin-bottom:15px;">💳</div>
+                <p style="font-size:1rem;">No hay medios vinculados. ¡Agrega uno arriba!</p>
+            </div>`;
+        }
+    } catch (err) {
+        console.error("Error carga medios:", err);
+        list.innerHTML = `<div style="text-align:center;color:#ef4444;padding:40px;">Error al conectar con el servidor.</div>`;
+    }
 }
 
 window.abrirEdicion = (m) => {
     editingId = m.id;
     const modal = document.getElementById("addPaymentModal");
     if (!modal) return;
-    document.getElementById("tipo_pago").value = m.tipo;
-    document.getElementById("banco_nombre").value = m.banco_nombre;
-    document.getElementById("titular_nombre").value = m.titular_nombre;
-    document.getElementById("numero_cuenta_tarjeta").value = m.numero_cuenta_tarjeta;
-    const h3 = modal.querySelector("h3"); if (h3) h3.textContent = "Editar Medio de Pago";
+    document.getElementById("cardType").value = m.tipo;
+    document.getElementById("bankName").value = m.banco_nombre;
+    document.getElementById("cardHolder").value = m.titular_nombre;
+    document.getElementById("cardNumber").value = m.numero_cuenta_tarjeta;
+    const h2 = modal.querySelector("h2"); if (h2) h2.textContent = "Editar Medio de Pago";
     modal.style.display = "flex";
 };
 
 function setupPaymentLogic() {
     const modal = document.getElementById("addPaymentModal");
     const openBtn = document.getElementById("openModalBtn");
-    const cancelBtn = document.getElementById("cancelBtn");
+    // Correct IDs matching the HTML
+    const cancelBtn = document.getElementById("cancelPayment");
+    const closeBtn = document.getElementById("closePaymentModal");
     const form = document.getElementById("paymentForm");
-    if (openBtn) openBtn.onclick = () => { editingId = null; if (form) form.reset(); modal.style.display = "flex"; };
-    if (cancelBtn) cancelBtn.onclick = () => { modal.style.display = "none"; };
+
+    const closeModal = () => { modal.style.display = "none"; editingId = null; if(form) form.reset(); };
+
+    if (openBtn) openBtn.onclick = () => { 
+        editingId = null; 
+        if (form) form.reset(); 
+        const h2 = modal.querySelector("h2"); 
+        if (h2) h2.textContent = "Vincular Medio de Pago";
+        modal.style.display = "flex"; 
+    };
+    if (cancelBtn) cancelBtn.onclick = closeModal;
+    if (closeBtn) closeBtn.onclick = closeModal;
+    // Also close on backdrop click
+    modal?.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
     form?.addEventListener("submit", async (e) => {
         e.preventDefault();
+        // Correct field IDs matching the HTML
         const payload = {
-            tipo: document.getElementById('tipo_pago').value,
-            banco_nombre: document.getElementById("banco_nombre").value,
-            titular_nombre: document.getElementById("titular_nombre").value,
-            numero_cuenta_tarjeta: document.getElementById("numero_cuenta_tarjeta").value,
+            tipo: document.getElementById('cardType')?.value || 'TARJETA',
+            banco_nombre: document.getElementById("bankName").value,
+            titular_nombre: document.getElementById("cardHolder").value,
+            numero_cuenta_tarjeta: document.getElementById("cardNumber").value,
             token_seguridad: "000"
         };
         const method = editingId ? "PUT" : "POST";
         const url = editingId ? `${API_MEDIOS}${editingId}/` : API_MEDIOS;
         try {
-            const res = await fetch(url, { method, headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` }, body: JSON.stringify(payload) });
-            if (res.ok) { modal.style.display = "none"; cargarMediosPago(); showToast(editingId ? "✏️ Editado!" : "✅ Vinculado!"); }
+            const currentToken = localStorage.getItem("access_token");
+            const res = await fetch(url, { method, headers: { "Content-Type": "application/json", "Authorization": `Bearer ${currentToken}` }, body: JSON.stringify(payload) });
+            if (res.ok) { closeModal(); cargarMediosPago(); showToast(editingId ? "✏️ Editado!" : "✅ Vinculado!"); }
             else if (res.status === 401) { showToast("🚨 Sesión vencida.", true); }
+            else { const err = await res.json(); showToast("Error: " + JSON.stringify(err), true); }
         } catch (err) { showToast("Error de red.", true); }
     });
 }
@@ -92,7 +138,8 @@ function setupPaymentLogic() {
 window.eliminarMedio = async (id) => {
     if (!confirm("¿Eliminar?")) return;
     try {
-        const res = await fetch(`${API_MEDIOS}${id}/`, { method: "DELETE", headers: { 'Authorization': `Bearer ${token}` } });
+        const currentToken = localStorage.getItem("access_token");
+        const res = await fetch(`${API_MEDIOS}${id}/`, { method: "DELETE", headers: { 'Authorization': `Bearer ${currentToken}` } });
         if (res.ok) { showToast("🗑️ Eliminado."); cargarMediosPago(); }
     } catch (e) { showToast("Error al borrar.", true); }
 };
