@@ -1,0 +1,97 @@
+/* ESTILOS ESPECÍFICOS DEL CATÁLOGO */
+
+.catalog-header {
+    margin-bottom: 40px;
+}
+
+.catalog-header h2 {
+    font-size: 2.8rem;
+    font-weight: 800;
+    margin-bottom: 10px;
+}
+
+.catalog-header p {
+    color: #94a3b8;
+    font-size: 1.1rem;
+}
+
+/* FILTROS EN SIDEBAR */
+.filter-group-v {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.filter-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.95rem;
+    color: #cbd5e1;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.filter-option:hover {
+    color: var(--primary);
+}
+
+.filter-option input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary);
+    cursor: pointer;
+}
+
+/* RANGO DE PRECIO */
+.price-filter-container {
+    padding: 0 10px;
+}
+
+.price-range-input {
+    width: 100%;
+    accent-color: var(--primary);
+    margin-top: 10px;
+}
+
+.price-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    margin-top: 10px;
+    color: #94a3b8;
+}
+
+.price-current {
+    color: var(--primary);
+    font-weight: 800;
+}
+
+/* LOGIN PROMPT EN SIDEBAR (Para usuarios no logueados) */
+.login-prompt {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.login-prompt-icon {
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+.login-prompt .cta-primary {
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+}
+
+.register-link {
+    display: block;
+    text-align: center;
+    color: #94a3b8;
+    text-decoration: none;
+    font-size: 0.82rem;
+}

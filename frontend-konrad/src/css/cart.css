@@ -1,0 +1,305 @@
+/* ESTILOS ESPECÍFICOS DEL CARRITO / CHECKOUT */
+
+.cart-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr 400px; /* Sidebar | Items | Summary */
+    gap: 0;
+    max-width: 1650px; /* Límite para que no se "desparrame" en Mac */
+    margin: 0 auto;
+    width: 100%;
+}
+
+.cart-layout .main-content {
+    margin-left: 0;
+    width: 100%;
+    padding: 30px 40px;
+    min-width: 0; /* Evita que el flex/grid se rompa */
+}
+
+.cart-main-content {
+    padding: 0;
+}
+
+/* ENCABEZADO DE PASOS */
+.cart-page-title {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 40px;
+}
+
+.cart-page-title .icon-box {
+    width: 45px;
+    height: 45px;
+    background: var(--primary);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.cart-page-title h2 {
+    font-size: 2.2rem;
+    font-weight: 800;
+    margin: 0;
+    letter-spacing: -1px;
+}
+
+/* PASOS DEL CHECKOUT */
+.checkout-step {
+    margin-bottom: 35px;
+    background: rgba(255, 255, 255, 0.02);
+    padding: 30px;
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* CONTENEDOR DE ITEMS */
+.cart-scroll-area {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 30px;
+}
+
+/* TARJETA DE PRODUCTO EN CARRITO */
+.cart-item-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 15px;
+    display: flex;
+    gap: 18px;
+    align-items: center;
+    transition: 0.3s ease;
+    animation: fadeInUp 0.4s ease both;
+}
+
+.cart-item-card:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(99, 102, 241, 0.2);
+    transform: translateX(5px);
+}
+
+.cart-item-img-box {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 8px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.cart-item-img-box:hover {
+    background: rgba(99, 102, 241, 0.15);
+    transform: scale(1.05);
+}
+
+.cart-item-name {
+    cursor: pointer;
+    font-weight: 800;
+    color: white;
+    font-size: 1.05rem;
+    margin-bottom: 2px;
+    transition: 0.3s;
+}
+
+.cart-item-name:hover {
+    color: var(--primary);
+}
+
+.qty-pill {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 50px;
+    padding: 2px 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.qty-val {
+    font-weight: 900;
+    min-width: 30px;
+    text-align: center;
+    color: var(--primary);
+}
+
+.step-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 25px;
+}
+
+.step-number {
+    background: rgba(37, 99, 235, 0.1);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    border: 1px solid rgba(37, 99, 235, 0.2);
+    color: var(--primary);
+}
+
+/* RESUMEN DE ORDEN (LATERAL) */
+.order-summary-panel {
+    padding-top: 40px;
+    padding-right: 40px;
+}
+
+.summary-sticky {
+    padding: 30px;
+    border-radius: 25px;
+    position: sticky;
+    top: 110px;
+    background: rgba(25, 25, 25, 0.4);
+    border: 1px solid var(--glass-border);
+}
+
+.summary-line {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    color: #94a3b8;
+    font-size: 0.95rem;
+}
+
+.summary-line span:last-child {
+    color: white;
+    font-weight: 600;
+}
+
+.summary-total {
+    margin-top: 15px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    font-weight: 800;
+    font-size: 1.4rem;
+    display: flex;
+    justify-content: space-between;
+}
+
+/* OPCIONES DE PAGO */
+.payment-options-grid {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.payment-opt {
+    flex: 1;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 18px;
+    border-radius: 16px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s ease;
+    font-weight: 600;
+}
+
+.payment-opt:has(input:checked) {
+    border-color: var(--primary);
+    background: rgba(37, 117, 235, 0.1);
+}
+
+/* Estilos del sidebar auth en el carrito */
+.auth-link {
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    padding: 14px;
+    border-radius: 12px;
+}
+
+.register-link {
+    display: block;
+    text-align: center;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.85rem;
+    margin-top: 20px;
+}
+
+.register-highlight {
+    color: var(--primary);
+    font-weight: 700;
+}
+
+/* Títulos de pasos */
+.checkout-step-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.delivery-input-group {
+    margin-bottom: 25px;
+}
+
+.branch-section-hidden {
+    display: none;
+}
+
+.pickup-input-group {
+    margin-top: 20px;
+}
+
+.branch-select {
+    width: 100% !important;
+}
+
+.pickup-disclaimer {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 10px;
+    font-style: italic;
+}
+
+.card-selector {
+    margin-bottom: 15px;
+}
+
+.link-btn-payment {
+    background: transparent;
+    border: none;
+    color: var(--primary);
+    font-size: 0.9rem;
+    font-weight: 800;
+    cursor: pointer;
+    padding: 10px 0;
+    transition: 0.3s;
+}
+
+.link-btn-payment:hover {
+    text-decoration: underline;
+    opacity: 0.8;
+}
+
+/* Panel de Resumen */
+.summary-title {
+    margin-bottom: 30px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+
+.shipping-line {
+    margin-bottom: 25px !important;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.total-text {
+    color: var(--primary);
+    text-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+}
+
+.checkout-action-btn {
+    width: 100%;
+    padding: 22px !important;
+    font-size: 1.15rem;
+    margin-top: 30px;
+}
+

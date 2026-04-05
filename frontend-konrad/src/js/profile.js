@@ -6,9 +6,19 @@ if (!token) window.location.href = "/pages/login.html";
 document.addEventListener("DOMContentLoaded", () => {
     cargarDatos();
     setupForm();
+    setupSecurity(); // CONECTADO Botón de seguridad
     setupAvatar();
     updateBadge();
 });
+
+// FUNCIÓN DE CIERRE DE SESIÓN SELECTIVA (NO BORRA CARRITO NI FAVORITOS)
+window.handleLogout = () => {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    localStorage.removeItem("user_data");
+    // Conservamos las llaves de cart_ e id_ para persistencia entre sesiones
+    window.location.href = "/pages/login.html";
+};
 
 function getUserKey() { 
     const u = JSON.parse(localStorage.getItem('user_data') || '{}');
@@ -94,6 +104,47 @@ function setupAvatar() {
     });
 }
 
+function setupSecurity() {
+    const changeBtn = document.getElementById("changePassBtn");
+    changeBtn?.addEventListener("click", async () => {
+        const pass = document.getElementById('new_password').value;
+        const confirm = document.getElementById('confirm_password').value;
+
+        if (!pass || pass.length < 8) {
+            return showToast("❌ La contraseña debe tener al menos 8 caracteres.", true);
+        }
+
+        if (pass !== confirm) {
+            return showToast("❌ Las contraseñas no coinciden.", true);
+        }
+
+        try {
+            const res = await fetch('http://127.0.0.1:8000/api/v1/buyers/compradores/me/cambiar_password/', {
+                method: "POST",
+                headers: { 
+                    "Content-Type": "application/json", 
+                    "Authorization": `Bearer ${token}` 
+                },
+                body: JSON.stringify({ nueva_password: pass })
+            });
+
+            if (res.ok) {
+                showToast("✅ ¡Contraseña actualizada! Por seguridad, vuelve a iniciar sesión.");
+                setTimeout(window.handleLogout, 2000);
+            } else if (res.status === 401) {
+                handleTokenError();
+            } else {
+                showToast("❌ Error al actualizar contraseña.", true);
+            }
+        } catch (e) { showToast("❌ Error de comunicación.", true); }
+    });
+}
+
+function handleTokenError() {
+    showToast("⚠️ Tu sesión ha expirado. Por favor, ingresa de nuevo.", true);
+    setTimeout(window.handleLogout, 2000);
+}
+
 function setupForm() {
     const form = document.getElementById("profileForm");
     form?.addEventListener("submit", async (e) => {
@@ -124,6 +175,8 @@ function setupForm() {
                 const oldData = JSON.parse(localStorage.getItem('user_data') || '{}');
                 localStorage.setItem('user_data', JSON.stringify({...oldData, ...newData}));
                 showToast("✅ ¡Perfil guardado con éxito! 💎");
+            } else if (res.status === 401) {
+                handleTokenError();
             } else {
                 const err = await res.json();
                 console.error("Error backend:", err);

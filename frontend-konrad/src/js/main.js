@@ -20,10 +20,12 @@ function saveCartItems(items) {
 }
 
 function getFavorites() {
-    return JSON.parse(localStorage.getItem('konrad_favs_v99') || '[]');
+    const key = `favs_${getUserKey()}`;
+    return JSON.parse(localStorage.getItem(key) || localStorage.getItem('konrad_favs_v99') || '[]');
 }
 function saveFavorites(items) {
-    localStorage.setItem('konrad_favs_v99', JSON.stringify(items));
+    const key = `favs_${getUserKey()}`;
+    localStorage.setItem(key, JSON.stringify(items));
 }
 
 function isFav(id) { return getFavorites().includes(String(id)); }
@@ -522,11 +524,14 @@ window.openProductDetail = (p) => {
             <div style="margin-bottom:15px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.03);">
                 <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
                     <span style="color:white;font-weight:700;font-size:0.85rem;">${r.comprador_nombre}</span>
-                    <span style="color:#fbbf24;font-size:0.7rem;">${'★'.repeat(Math.round(r.calificacion/2))}</span>
+                    <span style="color:#fbbf24;font-size:0.7rem;">${'★'.repeat(r.calificacion || 10)}${'☆'.repeat(10 - (r.calificacion || 10))}</span>
                 </div>
                 <p style="color:#94a3b8;font-size:0.75rem;line-height:1.4;margin:0;">${r.comentario}</p>
             </div>`).join('')
         : '<p style="color:#64748b;font-size:0.8rem;">Aún no hay reseñas de este producto.</p>';
+
+    const sellerId = p.vendedor || 1;
+    const sellerName = p.vendedor_nombre || 'Konrad Shop Oficial';
 
     c.innerHTML = `
     <div style="display:grid;grid-template-columns:1fr 1.2fr;gap:40px;padding:5px;">
@@ -539,12 +544,23 @@ window.openProductDetail = (p) => {
                 <button onclick="moveGallery(1)" style="position:absolute;right:15px;z-index:20;background:rgba(0,0,0,0.6);border:none;color:white;width:40px;height:40px;border-radius:50%;cursor:pointer;">›</button>
             </div>
             
-            <div style="margin-top:25px;padding:20px;background:rgba(255,255,255,0.02);border-radius:20px;">
+            <div style="margin-top:25px;padding:22px;background:rgba(255,255,255,0.02);border-radius:20px;border:1px solid rgba(255,255,255,0.05);">
                 <div style="display:flex;align-items:center;gap:10px;margin-bottom:15px;">
-                    <div style="width:10px;height:10px;border-radius:50%;background:#22c55e;"></div>
-                    <p style="color:white;font-size:0.85rem;font-weight:800;text-transform:uppercase;">Reseñas de la comunidad</p>
+                    <div style="width:10px;height:10px;border-radius:50%;background:#22c55e;box-shadow:0 0 10px #22c55e;"></div>
+                    <p style="color:white;font-size:0.9rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;">Comunidad Konrad</p>
                 </div>
-                <div style="max-height:180px;overflow-y:auto;padding-right:10px;">${commentsHtml}</div>
+                <div id="commentsContainer" style="max-height:220px;overflow-y:auto;padding-right:10px;margin-bottom:15px;">
+                    ${commentsHtml}
+                </div>
+
+                <!-- CAJA DE COMENTARIOS MEJORADA (UNIVERSAL) -->
+                <div style="background:rgba(255,255,255,0.03);padding:15px;border-radius:15px;border:1px solid rgba(255,255,255,0.07);">
+                    <textarea id="newCommentTxt" placeholder="Escribe tu opinión sobre este producto..." 
+                        style="width:100%;height:70px;background:transparent;border:none;color:white;outline:none;resize:none;font-size:0.9rem;"></textarea>
+                    <div style="display:flex;justify-content:flex-end;margin-top:10px;">
+                        <button onclick="submitUserComment('${p.id}')" class="cta-primary" style="padding:8px 20px;font-size:0.8rem;border-radius:8px;">Publicar</button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -553,28 +569,28 @@ window.openProductDetail = (p) => {
                 <div style="width:35px;height:35px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;">👤</div>
                 <div>
                     <p style="color:#94a3b8;font-size:0.65rem;margin:0;font-weight:800;letter-spacing:1px;text-transform:uppercase;">Vendedor Oficial</p>
-                    <p style="color:white;font-size:0.95rem;font-weight:700;margin:0;"><a href="/pages/seller-profile.html?vendor_id=${p.vendedor || 1}" style="color:white;text-decoration:none;border-bottom:1px dashed rgba(255,255,255,0.4);padding-bottom:2px;">${vNombre} &rarr;</a></p>
+                    <p style="color:white;font-size:0.95rem;font-weight:700;margin:0;"><a href="/pages/seller-profile.html?vendor_id=${sellerId}" style="color:white;text-decoration:none;border-bottom:1px dashed rgba(255,255,255,0.4);padding-bottom:2px;">${sellerName} &rarr;</a></p>
                 </div>
             </div>
 
-            <h2 style="font-size:2.2rem;font-weight:900;color:white;margin-bottom:10px;">${p.nombre}</h2>
+            <h2 style="font-size:2.5rem;font-weight:900;color:white;margin-bottom:10px;letter-spacing:-1px;">${p.nombre}</h2>
             <div style="display:flex;align-items:center;gap:15px;margin-bottom:25px;">
                 <span style="color:#fbbf24;font-size:1.1rem;">★★★★★</span>
-                <span style="color:#64748b;font-size:0.85rem;">(Vendedor verificado por Konrad Shop)</span>
+                <span style="color:#64748b;font-size:0.85rem;">(Vendedor verificado por Comercial Konrad)</span>
             </div>
 
-            <p style="font-size:2.5rem;font-weight:900;color:white;margin-bottom:25px;">$${pText} <span style="font-size:1rem;color:#64748b;font-weight:400;">COP</span></p>
+            <p style="font-size:2.8rem;font-weight:900;color:white;margin-bottom:25px;text-shadow:0 0 20px rgba(99,102,241,0.3);">$${pText} <span style="font-size:1rem;color:#64748b;font-weight:400;">COP</span></p>
             
-            <div style="padding:20px;background:rgba(255,255,255,0.02);border-radius:15px;margin-bottom:30px;border:1px solid rgba(255,255,255,0.05);">
-                <p style="color:#94a3b8;line-height:1.6;font-size:0.95rem;margin:0;">${p.descripcion.split('||IMG:')[0] || 'Calidad garantizada.'}</p>
+            <div style="padding:22px;background:rgba(255,255,255,0.02);border-radius:15px;margin-bottom:30px;border:1px solid rgba(255,255,255,0.05);line-height:1.7;">
+                <p style="color:#cbd5e1;font-size:1rem;margin:0;">${p.descripcion.split('||IMG:')[0] || 'Calidad Konrad premium seleccionada.'}</p>
             </div>
 
             <div style="display:flex;gap:15px;margin-bottom:20px;">
-                <button class="cta-primary" onclick="addToCart('${p.id}'); document.getElementById('productDetailModal').style.display='none';" style="flex:2;padding:18px;font-size:1.1rem;">🛒 Añadir al Carrito</button>
-                <button onclick="handleFav('${p.id}')" style="flex:0.5;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:15px;cursor:pointer;font-size:1.5rem;">❤️</button>
+                <button class="cta-primary" onclick="addToCart('${p.id}'); document.getElementById('productDetailModal').style.display='none';" style="flex:2;padding:20px;font-size:1.2rem;font-weight:800;">🛒 Añadir al Carrito</button>
+                <button onclick="handleFav('${p.id}')" style="flex:0.5;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:18px;cursor:pointer;font-size:1.8rem;display:flex;align-items:center;justify-content:center;transition:0.3s;">❤️</button>
             </div>
             
-            <p style="font-size:0.75rem;color:#64748b;">📦 Envío prioritario • 🛡️ Garantía de 1 año • 💳 Pago seguro SSL</p>
+            <p style="font-size:0.8rem;color:#64748b;display:flex;align-items:center;gap:8px;">📦 Envío prioritario Konrad • 🛡️ Garantía Premium • 💳 SSL</p>
         </div>
     </div>`;
 
@@ -592,15 +608,32 @@ window.openProductDetail = (p) => {
     m.style.display = 'flex';
 };
 
+window.submitUserComment = async (productId) => {
+    const txt = document.getElementById('newCommentTxt').value;
+    if(!txt.trim()) return;
+    const tkn = localStorage.getItem("access_token");
+    if(!tkn) { alert("Inicia sesión para participar en la comunidad."); return; }
+    try {
+        const res = await fetch(`http://127.0.0.1:8000/api/v1/products/comentarios/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${tkn}` },
+            body: JSON.stringify({ producto: productId, comentario: txt, calificacion: 10 })
+        });
+        if(res.ok) {
+            document.getElementById('newCommentTxt').value = "";
+            showToast("✅ Comentario publicado");
+            // Recargar para ver el cambio (sería mejor append local)
+            setTimeout(() => window.location.reload(), 1000);
+        }
+    } catch(e) { }
+};
+
 // ─── SESIÓN & LOGOUT ──────────────────────────────────────────────────────────
 window.handleLogout = () => {
-    // 1. Antes de limpiar, preservamos solo items clave si quisiéramos, 
-    // pero por seguridad de ROLES, borramos todo.
-    localStorage.clear();
-    sessionStorage.clear();
-    
-    // 2. Redirigimos al Inicio
-    window.location.href = '/index.html';
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    localStorage.removeItem("user_data");
+    window.location.href = '/pages/login.html';
 };
 
 function renderAuthUI() {

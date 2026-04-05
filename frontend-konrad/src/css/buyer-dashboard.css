@@ -1,0 +1,114 @@
+/* ESTILOS ESPECÍFICOS DEL DASHBOARD DE COMPRADOR */
+
+/* HERO BANNER */
+.hero {
+    min-height: 400px;
+    margin-bottom: 40px;
+    border-radius: 30px;
+    background: linear-gradient(135deg, rgba(8, 16, 40, 0.8) 0%, rgba(13, 25, 60, 0.8) 100%), 
+                url('https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=2000&auto=format&fit=crop') center/cover no-repeat;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.5s ease;
+}
+
+.hero:hover {
+    transform: scale(1.005);
+    border-color: rgba(139, 92, 246, 0.2);
+}
+
+.hero-content {
+    padding: 60px;
+    max-width: 800px;
+}
+
+.hero-badge {
+    background: rgba(139, 92, 246, 0.2);
+    color: #a78bfa;
+    padding: 8px 20px;
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    margin-bottom: 25px;
+    display: inline-block;
+    border: 1px solid rgba(139, 92, 246, 0.1);
+}
+
+.hero h2 {
+    font-size: 3.5rem;
+    font-weight: 800;
+    margin-top: 15px;
+    margin-bottom: 20px;
+    line-height: 1.1;
+    letter-spacing: -2px;
+}
+
+.hero p {
+    font-size: 1.2rem;
+    color: #94a3b8;
+    margin-bottom: 35px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* SECTION HEADERS */
+.section-header {
+    margin-bottom: 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.section-header h3 {
+    font-size: 2.2rem;
+    margin: 0;
+    font-weight: 800;
+    letter-spacing: -1px;
+}
+
+.section-header p {
+    color: #64748b;
+    font-size: 0.95rem;
+    margin-top: 8px;
+}
+
+/* TABS DE FILTRO TEMPORAL */
+.time-tabs {
+    display: flex;
+    gap: 6px;
+    padding: 6px;
+    border-radius: 14px;
+}
+
+.time-tabs button {
+    padding: 10px 22px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 800;
+    font-size: 0.85rem;
+    transition: 0.3s;
+}
+
+.tab-active {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+}
+
+.tab-inactive {
+    background: transparent;
+    color: #94a3b8;
+}
+
+/* GRID DE PRODUCTOS */
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 30px;
+}

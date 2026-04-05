@@ -6,14 +6,13 @@ const token = localStorage.getItem("access_token");
 let allMyMedios = [];
 let cartDetails = [];            // ← declaración global (era implícita → ReferenceError en módulos)
 let selectedPaymentType = 'TARJETA'; // ← estado del botón de pago activo
-const MOCK_MEDIOS = [
-    { id: 'm1', banco_nombre: 'Banco Konrad', titular_nombre: 'Usuario Demo', tipo: 'TARJETA', numero_cuenta_tarjeta: '****1234' },
-    { id: 'm2', banco_nombre: 'Nequi', titular_nombre: 'Usuario Demo', tipo: 'BILLETERA', numero_cuenta_tarjeta: '****5678' }
-];
 
 
 window.logout = () => {
-    localStorage.clear(); // Limpieza total para evitar cruce de sesiones
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    localStorage.removeItem("user_data");
+    // El carrito y favoritos se conservan asociados al usuario
     window.location.href = "/pages/login.html";
 };
 
@@ -134,7 +133,7 @@ async function loadCart() {
         if (!p) return;
 
         const qty = counts[id];
-        // Normalización de precio igual a main.js para garantizar coherencia
+        // Normalización de precio
         let pr = parseFloat(p.valor || p.precio_venta || p.precio_fijo || p.precio || 0);
         if (pr <= 0) pr = 2500000;
         const subItem = pr * qty;
@@ -147,28 +146,30 @@ async function loadCart() {
             if (m) img = m[1];
         }
 
+        // Convertimos el objeto en string seguro para el onclick
+        const pData = JSON.stringify(p).replace(/'/g, "&apos;");
+
         list.innerHTML += `
-        <div class="cart-item-card" style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:20px;display:flex;gap:20px;align-items:center;margin-bottom:15px;animation: fadeInUp 0.3s ease both;">
-            <div style="background:rgba(255,255,255,0.03);padding:10px;border-radius:15px;">
-                <img src="${img}" onerror="this.src='https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=800&auto=format&fit=crop'" style="width:70px;height:70px;object-fit:cover;border-radius:12px;border:1px solid rgba(255,255,255,0.05);">
+        <div class="cart-item-card">
+            <div onclick='openProductDetail(${pData})' class="cart-item-img-box">
+                <img src="${img}" onerror="this.src='https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=800&auto=format&fit=crop'" style="width:65px;height:65px;object-fit:cover;border-radius:10px;">
             </div>
             <div style="flex:1;">
-                <p style="font-weight:800;color:white;font-size:1.1rem;margin-bottom:2px;">${p.nombre}</p>
+                <p onclick='openProductDetail(${pData})' class="cart-item-name">${p.nombre}</p>
                 <div style="color:#fbbf24;font-size:0.75rem;margin-bottom:8px;">★★★★★ <span style="color:#64748b;font-size:0.7rem;">(Vendedor: ${p.vendedor_nombre || 'Konrad Shop'})</span></div>
-                <p style="font-size:0.85rem;color:var(--primary);font-weight:600;margin-bottom:10px;">$${new Intl.NumberFormat('es-CO').format(pr)} COP</p>
                 
-                <div style="display:flex;align-items:center;gap:15px;">
-                    <div style="display:flex;align-items:center;background:rgba(255,255,255,0.05);border-radius:10px;padding:4px;">
-                        <button onclick="updateQty('${id}', -1)" style="background:transparent;border:none;color:white;width:30px;height:30px;cursor:pointer;">−</button>
-                        <span style="font-weight:800;min-width:30px;text-align:center;">${qty}</span>
-                        <button onclick="updateQty('${id}', 1)" style="background:transparent;border:none;color:white;width:30px;height:30px;cursor:pointer;">+</button>
+                <div style="display:flex;align-items:center;gap:15px;margin-top:10px;">
+                    <div class="qty-pill">
+                        <button onclick="updateQty('${id}', -1)" style="background:transparent;border:none;color:white;width:25px;height:25px;cursor:pointer; font-weight:900;">−</button>
+                        <span class="qty-val">${qty}</span>
+                        <button onclick="updateQty('${id}', 1)" style="background:transparent;border:none;color:white;width:25px;height:25px;cursor:pointer; font-weight:900;">+</button>
                     </div>
-                    <button onclick="removeItemById('${id}')" style="background:transparent;border:none;color:#ef4444;font-size:0.8rem;cursor:pointer;font-weight:600;">🗑️ Quitar</button>
+                    <button onclick="removeItemById('${id}')" style="background:transparent;border:none;color:#ef4444;font-size:0.75rem;cursor:pointer;font-weight:600; opacity:0.7;">🗑️ Quitar</button>
                 </div>
             </div>
             <div style="text-align:right;">
-                <p style="font-size:0.7rem;color:#64748b;margin-bottom:4px;">Subtotal Unitario</p>
-                <div style="font-weight:800;color:white;font-size:1.2rem;">$${new Intl.NumberFormat('es-CO').format(subItem)}</div>
+                <p style="font-size:0.85rem;color:var(--primary);font-weight:700;margin-bottom:4px;">$${new Intl.NumberFormat('es-CO').format(pr)}</p>
+                <div style="font-weight:900;color:white;font-size:1.15rem;">$${new Intl.NumberFormat('es-CO').format(subItem)}</div>
             </div>
         </div>`;
     });
@@ -215,16 +216,19 @@ async function loadPaymentMethods() {
     try {
         const res = await fetch(API_MEDIOS, {
             signal: AbortSignal.timeout(4000),
-            headers: { 'Authorization': `Bearer ${token}` }
+            headers: { 'Authorization': `Bearer ${localStorage.getItem("access_token")}` }
         });
         if (res.ok) {
-            const data = await res.json();
-            allMyMedios = (Array.isArray(data) && data.length > 0) ? data : MOCK_MEDIOS;
+            const rawData = await res.json();
+            const data = Array.isArray(rawData) ? rawData : (rawData.results || []);
+            allMyMedios = data;
         } else {
-            allMyMedios = MOCK_MEDIOS;
+            console.error("Cart payment methods HTTP status:", res.status);
+            allMyMedios = [];
         }
     } catch(e) {
-        allMyMedios = MOCK_MEDIOS;
+        console.error("Error loading cart payment methods:", e);
+        allMyMedios = [];
     }
     renderPaymentSelector("TARJETA");
 }
@@ -449,7 +453,10 @@ function setupCheckout() {
     });
 }
 
-async function pagoExitoso(backendOrdenId) {
+window.pagoExitoso = async (backendOrdenId) => {
+    // Refresh token
+    const currentToken = localStorage.getItem("access_token");
+
     // Si el backend no creó la orden, guardar una orden simulada en localStorage
     if (!backendOrdenId) {
         const mockOrders = JSON.parse(localStorage.getItem('mock_orders') || '[]');
@@ -482,14 +489,16 @@ async function pagoExitoso(backendOrdenId) {
     // El redirect inmediato puede cancelar peticiones de red (Race Condition).
     // Esperamos asíncronamente a que el DB despache el carrito huérfano.
     try {
-        const r = await fetch(API_ORDERS, { headers: { 'Authorization': `Bearer ${token}` } });
-        const data = await r.json();
-        const arr = Array.isArray(data) ? data : (data.results || []);
-        
-        const deleteOps = arr.filter(o => o.estado === 'CARRITO').map(o => 
-            fetch(`${API_ORDERS}${o.id}/`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } })
-        );
-        await Promise.all(deleteOps);
+        if (currentToken) {
+            const r = await fetch(API_ORDERS, { headers: { 'Authorization': `Bearer ${currentToken}` } });
+            const data = await r.json();
+            const arr = Array.isArray(data) ? data : (data.results || []);
+            
+            const deleteOps = arr.filter(o => o.estado === 'CARRITO').map(o => 
+                fetch(`${API_ORDERS}${o.id}/`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${currentToken}` } })
+            );
+            await Promise.all(deleteOps);
+        }
     } catch(e) { }
 
     window.location.href = "/pages/my-orders.html";
@@ -668,57 +677,149 @@ let curImg = 0;
 window.openProductDetail = (p) => {
     const modal   = document.getElementById('productDetailModal');
     const content = document.getElementById('modalContent');
-    let the_img = p.imagen_principal || '📦';
+    if(!modal || !content) return;
+
+    const cleanDesc = (p.descripcion || '').split('||IMG:')[0].trim() || 'Producto de alta calidad Konrad Shop.';
+    let the_img = p.imagen_principal || '';
     if (p.imagenes && p.imagenes.length > 0 && p.imagenes[0].imagen) the_img = p.imagenes[0].imagen;
     else if (p.descripcion && p.descripcion.includes('||IMG:')) {
         const m = p.descripcion.match(/\|\|IMG:(.*?)\|\|/);
         if (m) the_img = m[1];
     }
     const gal = [];
-    if (p.imagenes && p.imagenes.length > 0) {
-        p.imagenes.forEach(i => gal.push(i.imagen));
-    }
-    if (gal.length === 0) {
-        gal.push(the_img);
-        if (typeof the_img === 'string' && (the_img.startsWith('http') || the_img.startsWith('/'))) {
-            gal.push('https://placehold.co/800x800/1e293b/ffffff?text=Vista+Lateral');
-            gal.push('https://placehold.co/800x800/334155/ffffff?text=En+Caja');
-        } else {
-            gal.push('✨ ' + the_img);
-            gal.push('🏷️ Etiqueta');
-        }
-    }
+    if (p.imagenes && p.imagenes.length > 0) p.imagenes.forEach(i => gal.push(i.imagen));
+    if (gal.length === 0 && the_img) gal.push(the_img);
+    if (gal.length === 0) gal.push('https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=800');
+
     curImg = 0;
-    const isUrl = (s) => s && s.startsWith('http');
-    const render = () => `
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:30px;">
-        <div style="position:relative;background:rgba(255,255,255,0.02);height:300px;display:flex;align-items:center;justify-content:center;border-radius:20px;">
-            <button onclick="moveGallery(-1)" style="position:absolute;left:10px;z-index:10;background:rgba(0,0,0,0.5);border:none;color:white;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:1.2rem;">‹</button>
-            <div id="detailMainImageContainerCart" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:6rem;">
-                ${isUrl(gal[curImg]) ? `<img src="${gal[curImg]}" style="max-height:200px;border-radius:12px;object-fit:contain;">` : gal[curImg]}
-            </div>
-            <button onclick="moveGallery(1)" style="position:absolute;right:10px;z-index:10;background:rgba(0,0,0,0.5);border:none;color:white;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:1.2rem;">›</button>
-        </div>
+    const isUrl = (s) => s && (s.startsWith('http') || s.startsWith('/'));
+    const pText = new Intl.NumberFormat('es-CO').format(p.precio_fijo || p.valor || 0);
+    const sellerId = p.vendedor || 1;
+    const sellerName = p.vendedor_nombre || 'Konrad Shop';
+
+    content.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1.2fr;gap:40px;padding:5px;">
         <div>
-            <h3 style="font-size:1.6rem;margin-bottom:10px;">${p.nombre}</h3>
-            <div style="color:#fbbf24;margin-bottom:15px;">★★★★★ <span style="font-size:0.8rem;color:#94a3b8;">(Vendedor: <a href="/pages/seller-profile.html?vendor_id=${p.vendedor || 1}" style="color:var(--primary);text-decoration:none;">${p.vendedor_nombre || 'Konrad Shop'}</a>)</span></div>
-            <div style="font-size:2rem;font-weight:800;color:white;margin-bottom:15px;">$${new Intl.NumberFormat('es-CO').format(p.precio_fijo || 1200000)}</div>
-            <p style="line-height:1.6;color:#94a3b8;margin-bottom:20px;">${p.descripcion || 'Calidad Konrad Shop.'}</p>
-            <div style="background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.2);border-radius:12px;padding:12px;font-size:0.85rem;color:#94a3b8;">
-                🛡️ Garantía Konrad Shop · Envío asegurado · Devoluciones en 30 días
+            <div style="position:relative;width:100%;height:340px;background:#0c0f18;border-radius:25px;overflow:hidden;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.05);">
+                <button onclick="moveGallery(-1)" style="position:absolute;left:15px;z-index:20;background:rgba(0,0,0,0.6);border:none;color:white;width:40px;height:40px;border-radius:50%;cursor:pointer;">&#8249;</button>
+                <div id="detailMainImageContainerCart" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:5rem;">
+                    ${isUrl(gal[0]) ? `<img src="${gal[0]}" style="width:100%;height:100%;object-fit:contain;">` : (gal[0] || '&#x1F4E6;')}
+                </div>
+                <button onclick="moveGallery(1)" style="position:absolute;right:15px;z-index:20;background:rgba(0,0,0,0.6);border:none;color:white;width:40px;height:40px;border-radius:50%;cursor:pointer;">&#8250;</button>
+            </div>
+            <div style="margin-top:20px;padding:18px;background:rgba(255,255,255,0.02);border-radius:18px;border:1px solid rgba(255,255,255,0.05);">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+                    <div style="width:9px;height:9px;border-radius:50%;background:#22c55e;box-shadow:0 0 8px #22c55e;flex-shrink:0;"></div>
+                    <p style="color:white;font-size:0.85rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;margin:0;">Comunidad Konrad</p>
+                </div>
+                <div id="commentsContainer" style="max-height:160px;overflow-y:auto;padding-right:8px;margin-bottom:12px;">
+                    <p style="color:#64748b;text-align:center;padding:15px;font-size:0.85rem;">Cargando...</p>
+                </div>
+                <div style="background:rgba(255,255,255,0.03);padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.07);">
+                    <textarea id="newCommentTxt" placeholder="Escribe tu opinion sobre este producto..." style="width:100%;height:65px;background:transparent;border:none;color:white;outline:none;resize:none;font-size:0.85rem;font-family:inherit;box-sizing:border-box;"></textarea>
+                    <div style="display:flex;justify-content:flex-end;margin-top:6px;">
+                        <button onclick="submitCartComment('${p.id}')" class="cta-primary" style="padding:8px 20px;font-size:0.8rem;border-radius:10px;">Publicar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="display:flex;flex-direction:column;">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;background:rgba(99,102,241,0.05);padding:12px 16px;border-radius:15px;border:1px solid rgba(99,102,241,0.1);width:fit-content;">
+                <div style="width:34px;height:34px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;">&#x1F464;</div>
+                <div>
+                    <p style="color:#94a3b8;font-size:0.6rem;margin:0;font-weight:800;letter-spacing:1px;text-transform:uppercase;">Vendedor Oficial</p>
+                    <p style="color:white;font-size:0.9rem;font-weight:700;margin:0;">
+                        <a href="/pages/seller-profile.html?vendor_id=${sellerId}" style="color:white;text-decoration:none;border-bottom:1px dashed rgba(255,255,255,0.4);">${sellerName} &#x2192;</a>
+                    </p>
+                </div>
+            </div>
+            <h2 style="font-size:2.2rem;font-weight:900;color:white;margin-bottom:10px;letter-spacing:-1px;">${p.nombre}</h2>
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+                <span style="color:#fbbf24;font-size:1rem;">&#x2605;&#x2605;&#x2605;&#x2605;&#x2605;</span>
+                <span style="color:#64748b;font-size:0.8rem;">Vendedor verificado por Comercial Konrad</span>
+            </div>
+            <p style="font-size:2.5rem;font-weight:900;color:white;margin-bottom:20px;text-shadow:0 0 20px rgba(99,102,241,0.2);">$${pText} <span style="font-size:0.9rem;color:#64748b;font-weight:400;">COP</span></p>
+            <div style="padding:18px;background:rgba(255,255,255,0.02);border-radius:15px;margin-bottom:25px;border:1px solid rgba(255,255,255,0.05);line-height:1.7;">
+                <p style="color:#cbd5e1;font-size:0.95rem;margin:0;">${cleanDesc}</p>
+            </div>
+            <div style="background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.15);border-radius:12px;padding:14px;font-size:0.85rem;color:#94a3b8;">
+                &#x1F6E1;&#xFE0F; Garantia Konrad Shop &bull; &#x1F4E6; Envio asegurado &bull; &#x21A9;&#xFE0F; Devoluciones en 30 dias
             </div>
         </div>
     </div>`;
+
+    loadCartComments(p.id);
     window.currentGalleryPaths = gal;
-    window.moveGallery = (delta) => { 
+    window.moveGallery = (delta) => {
         curImg = (curImg + delta + window.currentGalleryPaths.length) % window.currentGalleryPaths.length;
         const container = document.getElementById('detailMainImageContainerCart');
         if (container) {
             const src = window.currentGalleryPaths[curImg];
-            container.innerHTML = isUrl(src) 
-                ? `<img src="${src}" style="max-height:200px;border-radius:12px;object-fit:contain;">`
-                : src;
+            container.innerHTML = isUrl(src) ? `<img src="${src}" style="width:100%;height:100%;object-fit:contain;">` : src;
         }
     };
-    content.innerHTML = render(); modal.style.display = "flex";
+    modal.style.display = "flex";
 };
+
+async function loadCartComments(productId) {
+    const box = document.getElementById('commentsContainer');
+    if(!box) return;
+    const tkn = localStorage.getItem('access_token');
+    if(!tkn) {
+        box.innerHTML = `<div style="text-align:center;padding:15px;color:#64748b;font-size:0.85rem;">
+            <a href="/pages/login.html" style="color:var(--primary);">Inicia sesión</a> para ver comentarios.</div>`;
+        return;
+    }
+    try {
+        const res = await fetch('http://127.0.0.1:8000/api/v1/products/comentarios/', {
+            headers: { 'Authorization': `Bearer ${tkn}` }
+        });
+        if(res.ok) {
+            const data = await res.json();
+            const all = Array.isArray(data) ? data : (data.results || []);
+            const mine = all.filter(c => String(c.producto) === String(productId));
+            if(mine.length > 0) {
+                box.innerHTML = mine.map(c => `
+                    <div style="background:rgba(255,255,255,0.03);padding:12px;border-radius:10px;margin-bottom:10px;border:1px solid rgba(255,255,255,0.05);">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+                            <span style="color:#818cf8;font-weight:800;font-size:0.8rem;">&#x1F464; ${c.comprador_nombre || 'Estudiante Konrad'}</span>
+                            <span style="color:#fbbf24;font-size:0.75rem;">${'★'.repeat(c.calificacion || 10)}${'☆'.repeat(10 - (c.calificacion || 10))}</span>
+                        </div>
+                        <p style="color:#e2e8f0;font-size:0.85rem;line-height:1.5;margin:0;">${c.comentario}</p>
+                    </div>`).join('');
+            } else {
+                box.innerHTML = `<div style="text-align:center;padding:20px;color:#64748b;font-size:0.85rem;"><span style="font-size:1.8rem;display:block;margin-bottom:8px;">&#x2728;</span>&#xa1;S&#xe9; el primero en opinar!</div>`;
+            }
+        } else if(res.status === 401) {
+            box.innerHTML = `<p style="color:#64748b;text-align:center;padding:15px;font-size:0.8rem;">Sesión requerida para ver comentarios.</p>`;
+        } else {
+            box.innerHTML = `<p style="color:#64748b;text-align:center;padding:15px;font-size:0.8rem;">Error ${res.status} al cargar comentarios.</p>`;
+        }
+    } catch(e) { box.innerHTML = `<p style="color:#64748b;text-align:center;padding:15px;">Sin conexión.</p>`; }
+}
+
+window.submitCartComment = async (productId) => {
+    const txtEl = document.getElementById('newCommentTxt');
+    const txt = txtEl?.value?.trim();
+    if(!txt) return;
+    if(!token) { alert("Inicia sesion para comentar."); return; }
+    try {
+        const res = await fetch('http://127.0.0.1:8000/api/v1/products/comentarios/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ producto: parseInt(productId), comentario: txt, calificacion: 10 })
+        });
+        if(res.ok) {
+            txtEl.value = "";
+            showToast("Comentario publicado");
+            loadCartComments(productId);
+        } else {
+            const err = await res.json().catch(() => ({}));
+            showToast("Error: " + (err.detail || JSON.stringify(err)));
+            console.error(err);
+        }
+    } catch(e) { showToast("Error de red"); }
+};
+
+
+

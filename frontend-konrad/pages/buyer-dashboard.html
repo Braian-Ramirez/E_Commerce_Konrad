@@ -7,88 +7,74 @@
     <title>Dashboard Comprador | Comercial Konrad</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../src/css/style.css" />
-    <link rel="stylesheet" href="../src/css/dashboard.css" />
+    <link rel="stylesheet" href="../src/css/buyer-common.css" />
+    <link rel="stylesheet" href="../src/css/buyer-dashboard.css" />
 </head>
 
-<body style="min-height: 100vh; background: #0c0a09; overflow-x: hidden; margin: 0;">
+<body>
 
-    <!-- HEADER: Navegación Principal (Consistente) -->
-    <header class="navbar glass-effect"
-        style="position: fixed; top: 0; width: 100%; z-index: 1000; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; padding: 15px 5%;">
+    <!-- HEADER: Navegación Principal -->
+    <header class="navbar">
         <div class="nav-brand">
-            <a href="/pages/catalog.html" style="text-decoration: none;">
-                <h1 style="font-size: 1.5rem; color: var(--text-light); font-weight: 800; margin:0;">🛍️Comercial<span
-                        style="color: var(--primary);">Konrad</span></h1>
+            <a href="/index.html" style="text-decoration: none;">
+                <h1>🛍️Comercial<span style="color: var(--primary);">Konrad</span></h1>
             </a>
         </div>
+        
         <!-- BARRA DE BÚSQUEDA -->
-        <div style="flex:1;max-width:400px;margin:0 20px;">
-            <div
-                style="display:flex;align-items:center;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:8px 15px;backdrop-filter:blur(10px);">
-                <input type="text" id="searchInput" placeholder="Buscar productos... (ej: Sony, Mac)"
-                    style="background:transparent;border:none;color:white;outline:none;width:100%;font-size:0.95rem;font-family:'Outfit',sans-serif;">
-                <button id="searchBtn"
-                    style="background:transparent;border:none;color:var(--primary);cursor:pointer;font-size:1.1rem;margin-left:8px;font-weight:900;">🔍</button>
+        <div class="search-container">
+            <div class="search-wrapper">
+                <span>🔍</span>
+                <input type="text" id="searchInput" placeholder="Buscar productos... (ej: Sony, Mac)">
             </div>
         </div>
 
-        <nav class="nav-links" style="display: flex; gap: 20px; align-items: center;">
-            <a href="/index.html" class="nav-item">🏠 Inicio</a>
-            <a href="/pages/catalog.html" class="nav-item">💎 Catálogo</a>
-            <button class="cart-btn" onclick="window.location.href='/pages/cart.html'">🛒 Carrito <span id="cartCount"
-                    class="badge">0</span></button>
+        <nav class="nav-links">
+            <a href="/pages/buyer-dashboard.html" class="nav-item">🏠 <span>Inicio</span></a>
+            <a href="/pages/catalog.html" class="nav-item">💎 <span>Catálogo</span></a>
+            
+            <div id="authLinks">
+                <a href="/pages/profile.html" class="nav-item">👤 <span>Mi Perfil</span></a>
+            </div>
+
+            <button class="cart-btn" onclick="window.location.href='/pages/cart.html'">🛒 <span>Carrito</span> <span id="cartCount" class="badge">0</span></button>
         </nav>
     </header>
 
-    <div class="dashboard-container" style="margin-top: 80px; width: 100%;">
-        <!-- PANEL LATERAL PREMIUM (IDENTICO AL DEL PUSH) -->
+    <div class="dashboard-container">
+        <!-- PANEL LATERAL -->
         <aside class="sidebar-nav">
             <div class="sidebar-section">
                 <p class="section-title">Navegación</p>
-                <a href="/pages/buyer-dashboard.html" class="sidebar-item active"><span class="icon">🏠</span>
-                    Inicio</a>
+                <a href="/pages/buyer-dashboard.html" class="sidebar-item active"><span class="icon">🏠</span> Inicio</a>
                 <a href="/pages/my-orders.html" class="sidebar-item"><span class="icon">🛍️</span> Mis Compras</a>
                 <a href="/pages/favorites.html" class="sidebar-item"><span class="icon">❤️</span> Favoritos</a>
-                <a href="/pages/payment-methods.html" class="sidebar-item"><span class="icon">💳</span> Medios de
-                    Pago</a>
+                <a href="/pages/payment-methods.html" class="sidebar-item"><span class="icon">💳</span> Medios de Pago</a>
                 <a href="/pages/profile.html" class="sidebar-item"><span class="icon">👤</span> Mi Perfil</a>
             </div>
-            <div style="margin-top: auto; padding-top: 20px; width: 100%;">
-                <button onclick="handleLogout()"
-                    class="logout-btn"
-                    style="display: block !important; width: 100% !important; background: rgba(239, 68, 68, 0.15) !important; color: #ef4444 !important; border: 1px solid rgba(239, 68, 68, 0.4) !important; padding: 15px !important; border-radius: 12px !important; cursor: pointer !important; font-weight: 800 !important; font-size: 1rem !important; text-align: center !important; min-height: 50px !important; visibility: visible !important; opacity: 1 !important;">
-                    🚪 Cerrar Sesión
-                </button>
-            </div>
+            <button onclick="handleLogout()" class="logout-btn">🚪 Cerrar Sesión</button>
         </aside>
 
-        <main class="main-content" style="padding: 0 40px; flex: 1;">
+        <main class="main-content">
             <!-- HERO -->
-            <section class="hero"
-                style="min-height: 40vh; margin-bottom: 40px; border-radius: 20px; background: linear-gradient(135deg, rgba(8,16,40,0.8) 0%, rgba(13,25,60,0.8) 100%), url('https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=2000&auto=format&fit=crop') center/cover no-repeat; display: flex; align-items: center; justify-content: center; text-align: center;">
-                <div class="hero-content" style="padding: 40px;">
+            <section class="hero glass-effect">
+                <div class="hero-content">
                     <span class="hero-badge">NUEVA COLECCIÓN 2026</span>
                     <h2>Tecnología de punta al alcance de tu mano</h2>
                     <p>Compra lo mejor de la comunidad Konradista con garantía real.</p>
-                    <button class="cta-primary" onclick="window.location.href='/pages/catalog.html'">Ver Catálogo
-                        Completo</button>
+                    <button class="cta-primary" onclick="window.location.href='/pages/catalog.html'">Ver Catálogo Completo</button>
                 </div>
             </section>
 
-            <div style="padding: 0 40px;">
-                <div class="section-header"
-                    style="margin-bottom: 30px; display: flex; justify-content: space-between; align-items: flex-end;">
+            <div class="section-container">
+                <div class="section-header">
                     <div>
-                        <h3 style="font-size: 2.2rem; color: white; font-weight: 800;">⚡ Destacados del Momento</h3>
-                        <p style="color: #64748b; font-size: 0.95rem; margin-top: 5px;">Ordenados por volumen real de
-                            ventas.</p>
+                        <h3>⚡ Destacados del Momento</h3>
+                        <p>Ordenados por volumen real de ventas.</p>
                     </div>
-                    <div class="time-tabs glass-effect"
-                        style="display:flex; gap:6px; background:rgba(255,255,255,0.03); padding:6px; border-radius:14px; border:1px solid rgba(255,255,255,0.05);">
-                        <button id="tab-weekly" onclick="changeHighlightsTime('semanal')"
-                            style="padding:10px 22px; border:none; border-radius:10px; cursor:pointer; font-weight:800; font-size:0.85rem; background:var(--primary); color:white; transition:0.3s; box-shadow: 0 4px 15px rgba(139,92,246,0.3);">Semanal</button>
-                        <button id="tab-monthly" onclick="changeHighlightsTime('mensual')"
-                            style="padding:10px 22px; border:none; border-radius:10px; cursor:pointer; font-weight:800; font-size:0.85rem; background:transparent; color:#94a3b8; transition:0.3s;">Mensual</button>
+                    <div class="time-tabs glass-effect">
+                        <button id="tab-weekly" class="tab-active" onclick="changeHighlightsTime('semanal')">Semanal</button>
+                        <button id="tab-monthly" class="tab-inactive" onclick="changeHighlightsTime('mensual')">Mensual</button>
                     </div>
                 </div>
 
@@ -100,13 +86,9 @@
         </main>
     </div>
 
-    <!-- MODAL DE DETALLES -->
-    <div id="productDetailModal" class="modal"
-        style="display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.9); position: fixed; inset: 0; z-index: 2000;">
-        <div class="glass-effect"
-            style="width: 90%; max-width: 950px; padding: 40px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.1); position: relative; max-height: 90vh; overflow-y: auto;">
-            <button id="closeModal"
-                style="position: absolute; top: 25px; right: 25px; background: rgba(255,255,255,0.05); border: none; width: 40px; height: 40px; border-radius: 50%; color: white; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center;">✕</button>
+    <div id="productDetailModal" class="modal" style="display: none; align-items: center; justify-content: center; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 20000;">
+        <div class="glass-effect modal-card" style="width:92%;max-width:1100px;padding:40px;border-radius:30px;">
+            <button id="closeModal" class="close-modal-round">✕</button>
             <div id="modalContent"></div>
         </div>
     </div>
@@ -121,5 +103,4 @@
         });
     </script>
 </body>
-
 </html>

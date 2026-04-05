@@ -1,0 +1,41 @@
+/* ESTILOS ESPECÍFICOS DE FAVORITOS */
+
+.favorites-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+.favorites-header h2 {
+    font-size: 2rem;
+    margin: 0;
+    font-weight: 800;
+}
+
+.btn-clear-favorites {
+    background: rgba(239, 68, 68, 0.1);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    padding: 10px 20px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: all 0.3s ease;
+}
+
+.btn-clear-favorites:hover {
+    background: #ef4444;
+    color: white;
+    transform: scale(1.05);
+}
+
+.empty-state-favs {
+    color: #94a3b8;
+    text-align: center;
+    padding: 80px 20px;
+    font-size: 1.1rem;
+    border: 1px dashed rgba(255,255,255,0.05);
+    border-radius: 20px;
+    background: rgba(255,255,255,0.01);
+}
