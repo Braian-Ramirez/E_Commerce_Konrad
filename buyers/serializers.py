@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.db import transaction
 from django.contrib.auth.models import User
-from .models import Comprador
+from .models import Comprador, MedioPago
 from vendors.models import Persona
 from vendors.serializers import PersonaSerializer
 from notifications.services import enviar_correo_bienvenida_comprador
