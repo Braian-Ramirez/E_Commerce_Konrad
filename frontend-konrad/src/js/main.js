@@ -592,27 +592,60 @@ window.openProductDetail = (p) => {
     m.style.display = 'flex';
 };
 
+// ─── SESIÓN & LOGOUT ──────────────────────────────────────────────────────────
+window.handleLogout = () => {
+    // 1. Antes de limpiar, preservamos solo items clave si quisiéramos, 
+    // pero por seguridad de ROLES, borramos todo.
+    localStorage.clear();
+    sessionStorage.clear();
+    
+    // 2. Redirigimos al Inicio
+    window.location.href = '/index.html';
+};
+
 function renderAuthUI() {
     const authLinks  = document.getElementById('authLinks');
     const token      = localStorage.getItem('access_token');
-    // Ya no se afecta el sidebar desde aquí de forma general
+    const rol        = (localStorage.getItem('rol') || '').toUpperCase();
 
     if (!authLinks) return;
 
     if (token) {
-        // SESIÓN ACTIVA: Mostrar Perfil
-        authLinks.style.display = 'flex';
-        authLinks.style.flexDirection = 'row';
-        authLinks.style.gap = '20px';
-        authLinks.innerHTML = `<a href="/pages/profile.html" class="nav-item tooltip-btn">
-            <span class="icon">👤</span>
-            <span class="hover-text">Mi Perfil</span>
-        </a>`;
+        // SESIÓN ACTIVA: Identificar si es Director o Vendedor para darles acceso a su Panel
+        if (rol === 'DIRECTOR_COMERCIAL' || rol === 'ADMIN') {
+            authLinks.innerHTML = `
+                <a href="/pages/director-dashboard.html" class="nav-item tooltip-btn" style="color:var(--primary);">
+                    <span class="icon">📊</span>
+                    <span class="hover-text">Panel Director</span>
+                </a>
+                <button onclick="handleLogout()" class="nav-item" style="background:none;border:none;cursor:pointer;color:#ef4444;font-weight:700;">
+                    🚪 Salir
+                </button>
+            `;
+        } else if (rol === 'VENDEDOR') {
+            authLinks.innerHTML = `
+                <a href="/pages/vendor-dashboard.html" class="nav-item tooltip-btn" style="color:var(--primary);">
+                    <span class="icon">🏬</span>
+                    <span class="hover-text">Panel Vendedor</span>
+                </a>
+                <button onclick="handleLogout()" class="nav-item" style="background:none;border:none;cursor:pointer;color:#ef4444;font-weight:700;">
+                    🚪 Salir
+                </button>
+            `;
+        } else {
+            // Comprador normal
+            authLinks.innerHTML = `
+                <a href="/pages/profile.html" class="nav-item tooltip-btn">
+                    <span class="icon">👤</span>
+                    <span class="hover-text">Mi Perfil</span>
+                </a>
+                <button onclick="handleLogout()" class="nav-item" style="background:none;border:none;cursor:pointer;color:#ef4444;font-weight:700;">
+                    🚪 Salir
+                </button>
+            `;
+        }
     } else {
         // SESIÓN INACTIVA: Mostrar Login y Registro horizontales
-        authLinks.style.display = 'flex';
-        authLinks.style.flexDirection = 'row';
-        authLinks.style.gap = '20px';
         authLinks.innerHTML = `
             <a href="/pages/login.html" class="nav-item tooltip-btn" style="color:var(--primary);">
                 <span class="icon">🔐</span>
