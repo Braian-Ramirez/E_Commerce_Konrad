@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sucursal Virtual - Pagos en Línea</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .bank-card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 400px; text-align: center; border-top: 8px solid #004a99; }
+        .header { margin-bottom: 30px; }
+        .bank-name { font-size: 2rem; font-weight: 800; color: #004a99; }
+        .pse-badge { background: #ff6a00; color: white; padding: 4px 12px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; vertical-align: middle; }
+        h2 { font-size: 1.2rem; color: #444; margin-bottom: 20px; }
+        input, select { width: 100%; padding: 14px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 1rem; }
+        button { width: 100%; padding: 15px; background: #004a99; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1.1rem; margin-top: 20px; transition: background 0.3s; }
+        button:hover { background: #003366; }
+        .security-footer { margin-top: 30px; font-size: 0.8rem; color: #888; border-top: 1px solid #eee; padding-top: 15px; }
+    </style>
+</head>
+<body>
+    <div class="bank-card">
+        <div class="header">
+            <div class="bank-name" id="display-bank">Banco</div>
+            <span class="pse-badge">Socio PSE</span>
+        </div>
+        <h2>Pagos Seguros en Línea</h2>
+        <form id="login-form">
+            <select required>
+                <option value="">Tipo de identificación</option>
+                <option>Cédula de Ciudadanía</option>
+                <option>NIT</option>
+                <option>Cédula de Extranjería</option>
+            </select>
+            <input type="text" placeholder="Número de identificación" required>
+            <input type="password" placeholder="Clave Personal / Virtual" required>
+            <button type="submit">Autorizar Pago</button>
+        </form>
+        <div class="security-footer">
+            🔒 Usted está en un entorno seguro de su entidad bancaria.
+        </div>
+    </div>
+
+    <script>
+        // Capturar el nombre del banco desde la URL
+        const params = new URLSearchParams(window.location.search);
+        const banco = params.get('banco') || 'Tu Banco';
+        document.getElementById('display-bank').innerText = banco;
+
+        document.getElementById('login-form').onsubmit = (e) => {
+            e.preventDefault();
+            // 1. Avisar al dashboard que el pago fue autorizado
+            if (window.opener) {
+                window.opener.postMessage('pago_pse_exitoso', '*');
+            }
+            // 2. Cerrar la ventana
+            window.close();
+        };
+    </script>
+</body>
+</html>

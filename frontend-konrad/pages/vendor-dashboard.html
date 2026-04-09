@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendor Dashboard - Konrad Commerce</title>
+    <!-- Estilos base para fuentes y resets -->
+    <link rel="stylesheet" href="../src/css/style.css">
+    <!-- Tu nuevo archivo de estilos específico -->
+    <link rel="stylesheet" href="../src/css/vendor-dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- Header superior -->
+        <header class="top-nav">
+            <div class="logo">
+                Comercial <span style="color: var(--neo-orange);">Konrad</span>
+            </div>
+            <div class="user-info">
+                <span><b>Planes de Suscripción</b></span>
+            </div>
+        </header>
+
+        <div class="layout-body">
+            <!-- Sidebar lateral -->
+            <aside class="sidebar">
+                <div class="sidebar-group">
+                    <span class="group-title">NAVEGACIÓN</span>
+                    <nav>
+                        <button class="nav-btn"><span class="icon">🏠</span> Inicio</button>
+                        <button class="nav-btn"><span class="icon">🛍️</span> Mis Ventas</button>
+                        <button class="nav-btn"><span class="icon">📦</span> Mis productos</button>
+                    </nav>
+                </div>
+
+                <div class="sidebar-group">
+                    <span class="group-title">CONFIGURACIÓN</span>
+                    <nav>
+                        <button class="nav-btn active"><span class="icon">💳</span> Mi Suscripción</button>
+                        <button class="nav-btn"><span class="icon">👤</span> Mi perfil</button>
+                    </nav>
+                </div>
+
+                <!-- Botón de Cerrar Sesión al final -->
+                <div class="sidebar-footer">
+                    <button onclick="handleLogout()" class="logout-btn">🚪 Cerrar Sesión</button>
+                </div>
+            </aside>
+
+            <!-- Contenido principal -->
+            <main class="content-area">
+                <section class="subscription-panel">
+                    <h2>Selecciona tu plan:</h2>
+
+                    <!-- Plan Mensual -->
+                    <div class="plan-card">
+                        <span>Plan Mensual <b>$50.000</b></span>
+                        <button class="select-btn">Seleccionar</button>
+                    </div>
+
+                    <!-- Plan Semestral -->
+                    <div class="plan-card">
+                        <span>Plan Semestral <b>$250.000</b></span>
+                        <button class="select-btn">Seleccionar</button>
+                    </div>
+
+                    <!-- Plan Anual -->
+                    <div class="plan-card">
+                        <span>Plan Anual <b>$450.000</b></span>
+                        <button class="select-btn">Seleccionar</button>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+    <!-- Modal de Selección de Pago -->
+    <div id="payment-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+
+            <!-- PANTALLA 1: Selección de Método (ID: payment-selection) -->
+            <div id="payment-selection">
+                <h2>Selecciona tu método de pago</h2>
+                <p>Plan seleccionado: <span id="selected-plan-name"
+                        style="color: var(--neo-orange); font-weight: bold;">-</span></p>
+                <div class="payment-options">
+                    <div class="payment-item" onclick="mostrarFormularioTarjeta()">
+                        <div class="diamond-icon">PayU</div>
+                        <span>Tarjeta Crédito</span>
+                    </div>
+                    <div class="payment-item" onclick="mostrarFormularioPSE()">
+                        <div class="diamond-icon">PSE</div>
+                        <span>Pagos en línea</span>
+                    </div>
+                    <!-- ... otros métodos ... -->
+                </div>
+            </div>
+
+            <!-- PANTALLA 2: Formulario de Tarjeta (ID: card-form-container) -->
+            <div id="card-form-container" style="display: none;">
+                <h2>Datos de la Tarjeta</h2>
+                <form id="card-form" class="premium-form">
+                    <input type="text" placeholder="Nombre en la tarjeta" required>
+
+                    <!-- Campo ID (Tipo + Número) -->
+                    <div class="form-row id-row">
+                        <select>
+                            <option>C.C</option>
+                            <option>NIT</option>
+                            <option>C.E</option>
+                        </select>
+                        <input type="text" placeholder="Número de identificación" required>
+                    </div>
+
+                    <div class="form-row">
+                        <input type="text" placeholder="Número de tarjeta" required>
+                        <input type="text" placeholder="CVV" required>
+                    </div>
+
+                    <div class="form-row">
+                        <input type="text" placeholder="MM/YY" required>
+                        <select>
+                            <option value="1">1 Cuota</option>
+                            <option value="2">2 Cuotas</option>
+                            <option value="3">3 Cuotas</option>
+                            <option value="4">4 Cuotas</option>
+                            <option value="5">5 Cuotas</option>
+                            <option value="6">6 Cuotas</option>
+                            <option value="7">7 Cuotas</option>
+                            <option value="8">8 Cuotas</option>
+                            <option value="9">9 Cuotas</option>
+                            <option value="10">10 Cuotas</option>
+                            <option value="11">11 Cuotas</option>
+                            <option value="12">12 Cuotas</option>
+                        </select>
+                    </div>
+
+                    <button type="button" class="btn-pago" onclick="procesarPago('Tarjeta')">Pagar Ahora</button>
+                    <p onclick="regresarAPagos()" style="cursor:pointer; color: var(--text-muted); margin-top:20px;">⬅️
+                        Regresar</p>
+                </form>
+            </div>
+
+            <!-- PANTALLA 3: Formulario PSE (ID: pse-form-container) -->
+            <div id="pse-form-container" style="display: none;">
+                <h2>Datos de Pago PSE</h2>
+                <form id="pse-form" class="premium-form">
+                    <select id="pse-bank" required>
+                        <option value="">Selecciona tu banco</option>
+                        <option>Bancolombia</option>
+                        <option>Banco de Bogotá</option>
+                        <option>Davivienda</option>
+                        <option>Nequi / Daviplata</option>
+                        <option>BBVA</option>
+                    </select>
+
+                    <div class="form-row id-row">
+                        <select id="pse-doc-type">
+                            <option>C.C</option>
+                            <option>NIT</option>
+                            <option>C.E</option>
+                        </select>
+                        <input type="text" id="pse-doc-number" placeholder="Número de identificación" required>
+                    </div>
+
+                    <input type="email" id="pse-email" placeholder="Correo registrado en PSE" required>
+
+                    <button type="button" class="btn-pago" onclick="procesarPago('PSE')">Ir a mi Banco</button>
+                    <p onclick="regresarAPagos()" style="cursor:pointer; color: var(--text-muted); margin-top:20px;">⬅️
+                        Regresar</p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    </div>
+    <!-- Modal de Resultado (Éxito o Error) -->
+    <div id="result-modal" class="modal">
+        <div class="modal-content result-content">
+            <div id="result-icon" class="status-icon"></div>
+            <h2 id="result-title"></h2>
+            <p id="result-message"></p>
+            <p id="result-ref" style="font-size: 0.8rem; color: var(--neo-orange); margin-bottom: 20px;"></p>
+            <button class="btn-pago" onclick="cerrarTodo()">Entendido</button>
+        </div>
+    </div>
+    <script type="module" src="/src/js/vendor-dashboard.js"></script>
+</body>
+
+</html>

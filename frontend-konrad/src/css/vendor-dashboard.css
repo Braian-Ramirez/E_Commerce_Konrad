@@ -1,0 +1,501 @@
+/* Estilos específicos para el Dashboard del Vendedor con temática Neo-Orange */
+
+:root {
+    --bg-dark-vendor: #0a0a0a;
+    --bg-card-vendor: #141414;
+    --neo-orange: #ff6a00;
+    --neo-orange-glow: rgba(255, 106, 0, 0.4);
+    --border-neon: 1px solid rgba(255, 106, 0, 0.3);
+}
+
+/* Modifica estas secciones en vendor-dashboard.css */
+
+.dashboard-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    /* Usamos el fondo del index.html */
+    background-color: #0f172a;
+    background-image:
+        radial-gradient(circle at 10% 20%, rgba(255, 106, 0, 0.1) 0%, transparent 20%),
+        radial-gradient(circle at 90% 80%, rgba(255, 106, 0, 0.1) 0%, transparent 20%);
+    background-attachment: fixed;
+    color: white;
+    font-family: 'Outfit', sans-serif;
+}
+
+.top-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 50px;
+    /* Efecto Glassmorphism del index */
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+/* Sidebar: Ajustamos para que combine con el nuevo fondo */
+.sidebar {
+    width: 280px;
+    padding: 40px 20px;
+    background: rgba(15, 23, 42, 0.4);
+    /* Un poco más transparente */
+    backdrop-filter: blur(10px);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+
+/* Header Estilo Wireframe */
+.top-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    border-bottom: var(--border-neon);
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+/* Sidebar Estilo Neo-Orange */
+.layout-body {
+    display: flex;
+    flex: 1;
+}
+
+/* Estilos Sidebar Estilo Premium */
+.sidebar {
+    width: 280px;
+    padding: 30px 15px;
+    background: rgba(15, 23, 42, 0.5);
+    /* Fondo oscuro semitransparente */
+    backdrop-filter: blur(10px);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    /* Empuja el footer al final */
+}
+
+.sidebar-group {
+    margin-bottom: 30px;
+}
+
+.group-title {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: var(--text-muted);
+    /* O usa #64748b */
+    letter-spacing: 1.5px;
+    margin-bottom: 20px;
+    padding-left: 15px;
+}
+
+.nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 14px 20px;
+    margin-bottom: 5px;
+    background: transparent;
+    border: 1px solid transparent;
+    color: #cbd5e1;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    text-align: left;
+}
+
+.nav-btn .icon {
+    font-size: 1.2rem;
+}
+
+/* Estado Hover: Borde naranja neo tenue */
+.nav-btn:hover {
+    background: rgba(255, 106, 0, 0.05);
+    color: var(--neo-orange);
+    border-color: rgba(255, 106, 0, 0.2);
+}
+
+/* Estado Activo: La píldora resaltada */
+.nav-btn.active {
+    background: rgba(255, 106, 0, 0.1);
+    color: var(--neo-orange);
+    border: 1px solid var(--neo-orange);
+    box-shadow: 0 0 15px var(--neo-orange-glow);
+}
+
+/* Botón Cerrar Sesión */
+.logout-btn {
+    width: 100%;
+    padding: 14px;
+    background: rgba(239, 68, 68, 0.1);
+    /* Rojo tenue */
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    color: #f87171;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.logout-btn:hover {
+    background: #ef4444;
+    color: white;
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+}
+
+
+.sidebar h3 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-weight: 300;
+}
+
+.nav-btn {
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 15px;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Outfit';
+}
+
+.nav-btn:hover {
+    border-color: var(--neo-orange);
+    box-shadow: 0 0 10px var(--neo-orange-glow);
+}
+
+.nav-btn.active {
+    border-color: var(--neo-orange);
+    box-shadow: 0 0 15px var(--neo-orange-glow);
+    background: rgba(255, 106, 0, 0.05);
+}
+
+/* Panel de Planes / Contenido Area */
+.content-area {
+    flex: 1;
+    padding: 60px;
+}
+
+.subscription-panel {
+    max-width: 800px;
+    margin: 0 auto;
+    border: var(--border-neon);
+    padding: 40px;
+    border-radius: 30px;
+}
+
+.plan-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin: 20px 0;
+    padding: 25px 40px;
+    border-radius: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: transform 0.3s ease;
+}
+
+.plan-card:hover {
+    transform: scale(1.02);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.select-btn {
+    padding: 10px 30px;
+    background: transparent;
+    border: 1px solid white;
+    color: white;
+    border-radius: 40px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.select-btn:hover {
+    background: white;
+    color: black;
+}
+
+/* Estilos del Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+    align-items: center;
+    justify-content: center;
+}
+
+/* Estilo del Contenedor del Modal (CORREGIDO) */
+.modal-content {
+    background-color: #1a1512;
+    /* Fondo oscuro */
+    margin: 5% auto;
+    /* Centrado vertical y horizontal */
+    padding: 60px 40px 40px;
+    /* Espacio interno, extra arriba para la X */
+    border: 2px solid var(--neo-orange);
+    /* Borde naranja neón */
+    width: 90%;
+    max-width: 600px;
+    /* Ancho controlado */
+    border-radius: 30px;
+    text-align: center;
+    color: white;
+    box-shadow: 0 0 30px var(--neo-orange-glow);
+    /* Brillo neón */
+    position: relative;
+    /* Para que la X se ubique bien */
+}
+
+/* La X de cerrar */
+.close-modal {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    font-size: 2rem;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: color 0.3s;
+}
+
+.close-modal:hover {
+    color: var(--neo-orange);
+}
+
+
+/* 2. Unificar campos del formulario */
+.premium-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-width: 500px;
+    /* Controlamos el ancho máximo */
+    margin: 0 auto;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    /* Dividir en dos columnas iguales */
+    gap: 15px;
+}
+
+/* Caso especial para el campo de identificación (3 columnas) */
+.form-row.id-row {
+    grid-template-columns: 80px 1fr;
+}
+
+.premium-form input,
+.premium-form select {
+    width: 100%;
+    /* Que ocupen todo su espacio */
+    padding: 14px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    border-radius: 12px;
+    font-family: 'Outfit';
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.premium-form input:focus {
+    border-color: var(--neo-orange);
+}
+
+/* 3. Botón Pagar ahora con tema Naranja */
+.btn-pago {
+    background: var(--neo-orange);
+    color: white;
+    border: none;
+    padding: 16px;
+    border-radius: 50px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    box-shadow: 0 0 20px var(--neon-orange-glow);
+    transition: transform 0.3s, box-shadow 0.3s;
+    margin: 20px auto 0;
+    display: block;
+    min-width: 200px;
+}
+
+.btn-pago:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0 30px var(--neon-orange-glow);
+}
+
+
+.diamond-icon {
+    width: 100px;
+    height: 100px;
+    background: #d9d9d9;
+    color: #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: rotate(45deg);
+    margin: 0 auto 20px;
+    font-weight: bold;
+    border-radius: 10px;
+}
+
+.diamond-icon>* {
+    transform: rotate(-45deg);
+}
+
+/* Des-rotar el texto */
+
+.payment-item span {
+    display: block;
+    margin-top: 10px;
+    font-weight: 600;
+}
+
+.premium-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 25px;
+}
+
+.premium-form input,
+.premium-form select {
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    color: white;
+    border-radius: 8px;
+    outline: none;
+}
+
+.form-row {
+    display: flex;
+    gap: 10px;
+}
+
+.premium-form input:focus {
+    border-color: var(--neo-orange);
+}
+
+/* Organización horizontal de los métodos de pago */
+.payment-options {
+    display: flex;
+    justify-content: center;
+    /* Centra los diamantes */
+    gap: 40px;
+    /* Espacio entre cada diamante */
+    margin-top: 40px;
+    padding: 20px 0;
+}
+
+.payment-item {
+    cursor: pointer;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    text-align: center;
+}
+
+.payment-item:hover {
+    transform: translateY(-10px);
+    /* Efecto de flotar al pasar el mouse */
+}
+
+/* Estilo para los diamantes (aseguramos el tamaño) */
+.diamond-icon {
+    width: 80px;
+    height: 80px;
+    background: #e2e8f0;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: rotate(45deg);
+    margin: 0 auto 15px;
+    font-weight: 800;
+    font-size: 0.8rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.diamond-icon>span,
+.diamond-icon>div {
+    transform: rotate(-45deg);
+    /* Enderezamos el texto dentro */
+}
+
+/* Estilos para el Modal de Resultado */
+.status-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+}
+
+.success-theme {
+    border-color: #22c55e !important;
+    box-shadow: 0 0 30px rgba(34, 197, 94, 0.4) !important;
+}
+
+.error-theme {
+    border-color: #ef4444 !important;
+    box-shadow: 0 0 30px rgba(239, 68, 68, 0.4) !important;
+}
+
+.result-content {
+    animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: block !important;
+}
+
+@keyframes popIn {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+#result-modal {
+    z-index: 2100 !important;
+    /* Un poco más alto que el otro */
+}
+
+/* Forzar que el modal ocupe toda la pantalla */
+.modal {
+    width: 100vw;
+    height: 100vh;
+    display: none;
+    /* JS cambiará esto a 'flex' */
+    align-items: center;
+    justify-content: center;
+}
