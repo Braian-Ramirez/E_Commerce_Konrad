@@ -40,7 +40,7 @@
                     <span class="group-title">CONFIGURACIÓN</span>
                     <nav>
                         <button class="nav-btn active"><span class="icon">💳</span> Mi Suscripción</button>
-                        <button class="nav-btn"><span class="icon">👤</span> Mi perfil</button>
+                        <button class="nav-btn" onclick="window.location.href='/pages/vendor-profile.html'"><span class="icon">👤</span> Mi perfil</button>
                     </nav>
                 </div>
 
@@ -95,7 +95,10 @@
                         <div class="diamond-icon">PSE</div>
                         <span>Pagos en línea</span>
                     </div>
-                    <!-- ... otros métodos ... -->
+                    <div class="payment-item" onclick="mostrarFormularioConsignacion()">
+                        <div class="diamond-icon">🏦</div>
+                        <span>Consignación Bancaria</span>
+                    </div>
                 </div>
             </div>
 
@@ -171,6 +174,32 @@
                     <button type="button" class="btn-pago" onclick="procesarPago('PSE')">Ir a mi Banco</button>
                     <p onclick="regresarAPagos()" style="cursor:pointer; color: var(--text-muted); margin-top:20px;">⬅️
                         Regresar</p>
+                </form>
+            </div>
+
+            <!-- PANTALLA 4: Formulario Consignación (ID: consignacion-form-container) -->
+            <div id="consignacion-form-container" style="display: none;">
+                <h2>Datos de Consignación Bancaria</h2>
+                <form id="consignacion-form" class="premium-form">
+                    <p class="consignacion-instructions">
+                        Realiza la transferencia a la siguiente cuenta y sube o ingresa tu número de comprobante.
+                    </p>
+                    <div class="bank-info-box">
+                        <b>Banco:</b> Bancolombia<br>
+                        <b>Cuenta Corriente:</b> 123-456789-00<br>
+                        <b>Titular:</b> Comercial Konrad S.A.S.<br>
+                        <b>NIT:</b> 900.123.456-7
+                    </div>
+                    
+                    <input type="text" id="consignacion-ref" placeholder="Número de comprobante o referencia (opcional)" required>
+                    
+                    <div class="form-row file-upload-row">
+                        <label for="comprobante" class="file-upload-label">Subir imagen del comprobante:</label>
+                        <input type="file" id="comprobante" accept="image/*, application/pdf" class="file-upload-input">
+                    </div>
+
+                    <button type="button" class="btn-pago btn-consignacion" onclick="procesarPago('Consignacion')">Notificar Pago</button>
+                    <p onclick="regresarAPagos()" style="cursor:pointer; color: var(--text-muted); margin-top:20px;">⬅️ Regresar</p>
                 </form>
             </div>
         </div>

@@ -20,12 +20,14 @@ from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib.auth.models import User
+from rest_framework import exceptions
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         # El frontend envía el email en el campo "username"
         email_ingresado = attrs.get('username')
-        from django.contrib.auth.models import User
+        
         
         # Filtramos ignorando mayúsculas/minúsculas y tomamos el primero
         user_obj = User.objects.filter(email__iexact=email_ingresado).first()
@@ -33,7 +35,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             attrs['username'] = user_obj.username
 
         data = super().validate(attrs)
-        rol = "DIRECTOR_COMERCIAL"
+        rol = None # Por defecto no tiene rol
         user = self.user
         
         if hasattr(user, 'persona_profile') and user.persona_profile:
@@ -41,16 +43,45 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             # Verificación de roles basada en perfiles relacionados
             if hasattr(persona, 'director_profile'):
                 rol = 'DIRECTOR_COMERCIAL'
-            elif hasattr(persona, 'vendedor_profile'):
-                rol = 'VENDEDOR'
             elif hasattr(persona, 'perfil_comprador'):
                 rol = 'COMPRADOR'
-            else:
-                # Si es un superusuario sin perfil específico, se le asigna rol administrativo
-                if user.is_superuser:
-                    rol = 'DIRECTOR_COMERCIAL'
+            elif persona.solicitudes.filter(estado='APROBADA').exists() or hasattr(persona, 'vendedor_profile'):
+                # Si tiene una solicitud aprobada o ya tiene un perfil de vendedor
+                rol = 'VENDEDOR'
+        
+        # Si no encajó en nada pero es superuser base
+        if not rol and user.is_superuser:
+            rol = 'DIRECTOR_COMERCIAL'
+            
+        # Si finalmente no tiene ningún rol (ni solicitud aprobada), denegamos el acceso
+        if not rol:
+            raise exceptions.AuthenticationFailed('Acceso denegado: No tienes un rol asignado o tu solicitud no ha sido aprobada.')
             
         data['rol'] = rol
+        
+        # Inyectar datos del usuario para pintar el frontend
+        user_data = {
+            'email': user.email,
+        }
+        if hasattr(user, 'persona_profile') and user.persona_profile:
+            p = user.persona_profile
+            user_data.update({
+                'id': p.id,
+                'nombre': p.nombre,
+                'apellido': p.apellido,
+                'tipo_documento': p.tipo_documento,
+                'numero_identificacion': p.numero_identificacion,
+                'telefono': p.telefono,
+                'direccion': p.direccion or '',
+                'tipo_persona': p.tipo_persona or 'JURIDICA',
+                'pais': p.pais,
+                'ciudad': p.ciudad,
+            })
+            if rol == 'VENDEDOR':
+                # Sobrescribir "nombre" si es juridica? El form usa nombre.
+                pass
+                
+        data['user'] = user_data
         return data
 
 class CustomTokenObtainPairView(TokenObtainPairView):

@@ -51,14 +51,29 @@ def mock_pasarela_pagos(request):
         data = json.loads(request.body) if request.body else {}
         titular = data.get('titular', 'Usuario Anónimo')
         tarjeta = data.get('numero_tarjeta', '****')
+        metodo = data.get('metodo', 'Tarjeta')
+        ref_consignacion = data.get('referencia_consignacion', '')
     except:
         data = {}
         titular = "Usuario Anónimo"
+        metodo = "Tarjeta"
+        tarjeta = "****"
+        
     # 2. Lógica de simulación inteligente:
+    referencia = f"PAY-{uuid.uuid4().hex[:8].upper()}"
+    
+    if metodo == 'Consignacion':
+        return JsonResponse({
+            "transaccion_id": referencia,
+            "estado": "EXITOSO",
+            "mensaje": f"Consignación registrada. Ref comprobante: {ref_consignacion}",
+            "metodo_pago": "Consignación",
+            "entidad_simulada": "Konrad Pay Gateway"
+        })
+
     # Si la tarjeta termina en 0000, simulamos un fallo
     pago_exitoso = not tarjeta.endswith('0000')
     
-    referencia = f"PAY-{uuid.uuid4().hex[:8].upper()}"
     return JsonResponse({
         "transaccion_id": referencia,
         "estado": "EXITOSO" if pago_exitoso else "RECHAZADO",

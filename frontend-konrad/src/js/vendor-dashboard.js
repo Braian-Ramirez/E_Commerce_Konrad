@@ -1,4 +1,34 @@
-// vendor-dashboard.js - VERSIÓN FINAL CON SOPORTE PSE
+// vendor-dashboard.js - VERSIÓN FINAL CON INTEGRACIÓN DE BASE DE DATOS REAL
+
+document.addEventListener('DOMContentLoaded', () => {
+    checkSubscriptionStatus();
+});
+
+async function checkSubscriptionStatus() {
+    try {
+        const response = await fetch('http://localhost:8000/api/v1/vendors/vendedores/mi-status/', {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+            }
+        });
+        if (response.ok) {
+            const data = await response.json();
+            if (data.estado_suscripcion === 'ACTIVA') {
+                document.querySelector('.subscription-panel').innerHTML = `
+                    <div class="active-subscription-card">
+                        <div class="status-badge">✅ Suscripción Activa</div>
+                        <h2>¡Tu cuenta está operando!</h2>
+                        <p>Vencimiento de tu plan: <b>${data.fecha_vencimiento}</b></p>
+                        <hr style="border: 0; border-top: 1px solid rgba(255,106,0,0.2); margin: 20px 0;">
+                        <p style="font-size: 0.9rem; color: var(--text-muted);">Puedes seguir gestionando tus productos y ventas desde el menú lateral.</p>
+                    </div>
+                `;
+            }
+        }
+    } catch (err) {
+        console.error("Error al verificar status:", err);
+    }
+}
 
 document.querySelectorAll('.select-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
@@ -8,17 +38,19 @@ document.querySelectorAll('.select-btn').forEach(btn => {
     });
 });
 
+function cerrarTodo() {
+    document.getElementById('result-modal').style.display = "none";
+    regresarAPagos();
+    // Recargar para ver el nuevo estado
+    window.location.reload();
+}
+
 const closeModal = () => {
     document.getElementById('payment-modal').style.display = "none";
     regresarAPagos();
 };
 
 document.querySelector('.close-modal').onclick = closeModal;
-
-function cerrarTodo() {
-    document.getElementById('result-modal').style.display = "none";
-    regresarAPagos();
-}
 
 // NAVEGACIÓN
 function mostrarFormularioTarjeta() {
@@ -31,10 +63,16 @@ function mostrarFormularioPSE() {
     document.getElementById('pse-form-container').style.display = 'block';
 }
 
+function mostrarFormularioConsignacion() {
+    document.getElementById('payment-selection').style.display = 'none';
+    document.getElementById('consignacion-form-container').style.display = 'block';
+}
+
 function regresarAPagos() {
     document.getElementById('payment-selection').style.display = 'block';
     document.getElementById('card-form-container').style.display = 'none';
     document.getElementById('pse-form-container').style.display = 'none';
+    document.getElementById('consignacion-form-container').style.display = 'none';
 }
 
 function mostrarResultadoUI(exito, titulo, mensaje, ref = "") {
@@ -75,67 +113,89 @@ window.addEventListener('message', (event) => {
 });
 
 function simularProcesamientoPSE() {
-    // 1. Mostrar modal de "Procesando"
-    mostrarResultadoUI(true, "Procesando Transacción", "Estamos verificando la información con tu banco... no cierres esta ventana.", "");
-    
-    // Cambiamos el icono temporalmente a un reloj
+    mostrarResultadoUI(true, "Procesando Transacción", "Estamos verificando la información con tu banco...", "");
     document.getElementById('result-icon').innerText = "⏳";
     const btnEntendido = document.getElementById('result-modal').querySelector('button');
-    btnEntendido.style.display = "none"; // Ocultar botón
+    btnEntendido.style.display = "none"; 
 
-    // 2. Después de 3 segundos, mostrar el éxito real
-    setTimeout(() => {
-        const ref = "PSE-" + Math.random().toString(36).substr(2, 9).toUpperCase();
-        mostrarResultadoUI(true, "¡Suscripción Activada!", "Tu pago por PSE ha sido confirmado. ¡Bienvenido a Konrad Commerce!", ref);
-        btnEntendido.style.display = "block"; // Volver a mostrar botón
+    setTimeout(async () => {
+        const plan = document.getElementById('selected-plan-name').innerText;
+        const exito = await llamarAPIAfectacionReal(plan);
+        if (exito) {
+            const ref = "PSE-" + Math.random().toString(36).substr(2, 9).toUpperCase();
+            mostrarResultadoUI(true, "¡Suscripción Activada!", "Tu pago por PSE ha sido confirmado. ¡Bienvenido!", ref);
+        } else {
+             mostrarResultadoUI(false, "Error de Activación", "El pago fue exitoso pero no pudimos activar tu cuenta. Contacta a soporte.");
+        }
+        btnEntendido.style.display = "block";
     }, 3000);
 }
 
+async function llamarAPIAfectacionReal(planName) {
+    try {
+        const response = await fetch('http://localhost:8000/api/v1/vendors/vendedores/activar-suscripcion/', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+            },
+            body: JSON.stringify({ plan: planName })
+        });
+        return response.ok;
+    } catch (e) {
+        console.error("Error activando suscripción:", e);
+        return false;
+    }
+}
+
 async function procesarPago(metodo) {
+    const planName = document.getElementById('selected-plan-name').innerText;
     let payload = {
         metodo: metodo,
-        plan: document.getElementById('selected-plan-name').innerText
+        plan: planName
     };
 
     if (metodo === 'Tarjeta') {
-        payload.titular = document.querySelector('input[placeholder="Nombre en la tarjeta"]')?.value || 'N/A';
         payload.numero_tarjeta = document.querySelector('input[placeholder="Número de tarjeta"]')?.value || 'N/A';
     } else if (metodo === 'PSE') {
         const banco = document.getElementById('pse-bank').value;
-        const urlBanco = `bank-mock.html?banco=${encodeURIComponent(banco)}`;
-        window.open(urlBanco, 'Sucursal Virtual', 'width=500,height=650');
-        
-        // Simplemente cerramos el modal de pago y esperamos el mensaje del banco
+        window.open(`bank-mock.html?banco=${encodeURIComponent(banco)}`, 'Sucursal Virtual', 'width=500,height=650');
         document.getElementById('payment-modal').style.display = "none";
         return;
+    } else if (metodo === 'Consignacion') {
+        payload.referencia_consignacion = document.getElementById('consignacion-ref').value;
     }
 
     try {
-        const response = await fetch('http://127.0.0.1:8000/mocks/pagos/', {
+        // 1. Simulación de pasarela
+        const responseMock = await fetch('http://127.0.0.1:8000/mocks/pagos/', {
             method: 'POST',
             body: JSON.stringify(payload),
             headers: { 'Content-Type': 'application/json' }
         });
         
-        if (!response.ok) throw new Error("Error en el servidor");
-
-        const data = await response.json();
+        const dataMock = await responseMock.json();
         
-        if (data.estado === 'EXITOSO') {
-            mostrarResultadoUI(true, "¡Pago Confirmado!", data.mensaje, data.transaccion_id);
+        if (dataMock.estado === 'EXITOSO') {
+            // 2. ACTIVACIÓN REAL EN BASE DE DATOS
+            const exitoReal = await llamarAPIAfectacionReal(planName);
+            if (exitoReal) {
+                mostrarResultadoUI(true, "¡Pago Confirmado!", "Tu suscripción ha sido activada correctamente en el sistema.", dataMock.transaccion_id);
+            } else {
+                mostrarResultadoUI(false, "Fallo de Activación", "El pago se procesó pero hubo un error actualizando tu cuenta en la base de datos.");
+            }
         } else {
-            mostrarResultadoUI(false, "Pago Rechazado", data.mensaje);
+            mostrarResultadoUI(false, "Pago Rechazado", dataMock.mensaje);
         }
-
     } catch (error) {
-        console.error("DEBUG - Error:", error);
-        mostrarResultadoUI(false, "Error de Conexión", "No se pudo contactar con el backend.");
+        mostrarResultadoUI(false, "Error de Conexión", "No se pudo contactar con el servidor.");
     }
 }
 
 // EXPOSICIÓN GLOBAL
 window.mostrarFormularioTarjeta = mostrarFormularioTarjeta;
 window.mostrarFormularioPSE = mostrarFormularioPSE;
+window.mostrarFormularioConsignacion = mostrarFormularioConsignacion;
 window.regresarAPagos = regresarAPagos;
 window.procesarPago = procesarPago;
 window.cerrarTodo = cerrarTodo;

@@ -7,6 +7,9 @@ from django.db.models import Avg
 
 from .models import Persona, Vendedor, Solicitud, CalificacionVendedor
 from .serializers import PersonaSerializer, VendedorSerializer, CalificacionVendedorSerializer, SolicitudVendedorRegistrationSerializer
+from notifications.services import enviar_notificacion_pago_suscripcion
+from payments.models import Suscripcion
+from datetime import date, timedelta
 
 # Vista Persona
 class PersonaViewSet(viewsets.ModelViewSet):
@@ -17,6 +20,77 @@ class PersonaViewSet(viewsets.ModelViewSet):
 class VendedorViewSet(viewsets.ModelViewSet):
     queryset = Vendedor.objects.all()
     serializer_class = VendedorSerializer
+
+    @action(detail=False, methods=['post'], url_path='activar-suscripcion', permission_classes=[IsAuthenticated])
+    def activar_suscripcion(self, request):
+        user = request.user
+        plan = request.data.get('plan', '').upper()
+        
+        # 1. Asegurarnos que el usuario tiene una Persona
+        if not hasattr(user, 'persona_profile'):
+            return Response({"error": "El usuario no tiene un perfil de persona asociado."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        persona = user.persona_profile
+        
+        # 2. Buscar o crear el perfil de Vendedor
+        vendedor, created = Vendedor.objects.get_or_create(persona=persona)
+        
+        # 3. Calcular fecha de vencimiento según el plan
+        hoy = date.today()
+        dias = 30
+        
+        # Detectar el nombre limpio y el valor para el historial
+        nombre_plan = "MENSUAL"
+        valor_plan = "$50.000"
+        
+        if 'SEMESTRAL' in plan: 
+            dias = 180
+            nombre_plan = "SEMESTRAL"
+            valor_plan = "$250.000"
+        elif 'ANUAL' in plan: 
+            dias = 365
+            nombre_plan = "ANUAL"
+            valor_plan = "$450.000"
+        
+        vendedor.estado_suscripcion = 'ACTIVA'
+        vendedor.fecha_vencimiento = hoy + timedelta(days=dias)
+        vendedor.save()
+
+        # 4. Registrar en el historial de pagos (App Payments)
+        Suscripcion.objects.create(
+            vendedor=vendedor,
+            tipo=nombre_plan,
+            monto_pagado=float(valor_plan.replace('$', '').replace('.', '')),
+            fecha_inicio=hoy,
+            fecha_fin=vendedor.fecha_vencimiento,
+            activo=True
+        )
+
+        # 5. Enviar notificación certificada (RNF)      
+        enviar_notificacion_pago_suscripcion(
+            persona=persona,
+            plan=nombre_plan,
+            valor=valor_plan,
+            vencimiento=vendedor.fecha_vencimiento.strftime("%d/%m/%Y")
+        )
+        
+        return Response({
+            "status": "ACTIVA",
+            "vencimiento": vendedor.fecha_vencimiento.strftime("%d/%m/%Y"),
+            "mensaje": f"Suscripción {nombre_plan} activada con éxito."
+        })
+
+    @action(detail=False, methods=['get'], url_path='mi-status', permission_classes=[IsAuthenticated])
+    def mi_status(self, request):
+        user = request.user
+        if hasattr(user, 'persona_profile') and hasattr(user.persona_profile, 'vendedor_profile'):
+            vendedor = user.persona_profile.vendedor_profile
+            return Response({
+                "estado_suscripcion": vendedor.estado_suscripcion,
+                "fecha_vencimiento": vendedor.fecha_vencimiento,
+                "calificacion": vendedor.calificacion_promedio
+            })
+        return Response({"estado_suscripcion": "INACTIVA"}, status=status.HTTP_200_OK)
 
 # Vista Solicitud (SÓLO RUTAS PÚBLICAS Y BÁSICAS DE VENDEDORES)
 class SolicitudViewSet(viewsets.GenericViewSet):
