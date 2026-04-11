@@ -12,6 +12,7 @@ document.getElementById('vendorRegisterForm').addEventListener('submit', async (
     formData.append('telefono', document.getElementById('telefono').value);
     formData.append('pais', document.getElementById('pais').value);
     formData.append('ciudad', document.getElementById('ciudad').value);
+    formData.append('direccion', document.getElementById('direccion').value);
     formData.append('tipo_persona', document.getElementById('tipo_persona').value);
 
     // 2. Los 5 archivos individuales (Cambiamos el loop viejo por esto)

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil de Vendedor - Konrad Commerce</title>
+    <!-- Estilos base para fuentes y resets -->
+    <link rel="stylesheet" href="../src/css/style.css">
+    <link rel="stylesheet" href="../src/css/vendor-dashboard.css">
+    <!-- Layout base del perfil (grillas, avatar, secciones) -->
+    <link rel="stylesheet" href="../src/css/profile.css">
+    <!-- Overrides de tema naranja para el perfil de vendedor -->
+    <link rel="stylesheet" href="../src/css/vendor-profile.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- Header superior -->
+        <header class="top-nav">
+            <div class="logo">
+                Comercial <span style="color: var(--neo-orange);">Konrad</span>
+            </div>
+            <div class="user-info">
+                <span><b>Mi Perfil (Vendedor)</b></span>
+            </div>
+        </header>
+
+        <div class="layout-body">
+            <!-- Sidebar lateral -->
+            <aside class="sidebar">
+                <div class="sidebar-group">
+                    <span class="group-title">NAVEGACIÓN</span>
+                    <nav>
+                        <button class="nav-btn"><span class="icon">🏠</span> Inicio</button>
+                        <button class="nav-btn"><span class="icon">🛍️</span> Mis Ventas</button>
+                        <button class="nav-btn" onclick="window.location.href='/pages/vendor-products.html'">
+                            <span class="icon">📦</span> Mis Productos
+                        </button>
+                    </nav>
+                </div>
+
+                <div class="sidebar-group">
+                    <span class="group-title">CONFIGURACIÓN</span>
+                    <nav>
+                        <button class="nav-btn" onclick="window.location.href='/pages/vendor-dashboard.html'"><span
+                                class="icon">💳</span> Mi Suscripción</button>
+                        <button class="nav-btn active"><span class="icon">👤</span> Mi perfil</button>
+                    </nav>
+                </div>
+
+                <!-- Botón de Cerrar Sesión al final -->
+                <div class="sidebar-footer">
+                    <button onclick="window.location.href='/index.html'" class="logout-btn">🚪 Cerrar Sesión</button>
+                </div>
+            </aside>
+
+            <!-- Contenido principal -->
+            <main class="content-area">
+                <div class="profile-container"
+                    style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255, 106, 0, 0.2);">
+                    <div class="avatar-section">
+                        <div id="avatarCircle" class="avatar-circle">M</div>
+                        <label class="file-upload-btn">
+                            📷 Cambiar Foto de Empresa
+                            <input type="file" id="avatarInput" accept="image/*" style="display: none;">
+                        </label>
+                    </div>
+
+                    <!-- FORMULARIO DE PERFIL PROFESIONAL -->
+                    <form id="profileForm" class="profile-main-form">
+                        <div class="form-grid">
+                            <div class="input-group">
+                                <label>Nombre / Razón Social</label>
+                                <input type="text" id="nombre" value="MegaTech Global" required>
+                            </div>
+                            <div class="input-group">
+                                <label>Apellidos (Si aplica)</label>
+                                <input type="text" id="apellido">
+                            </div>
+                            <div class="input-group">
+                                <label>Tipo de Persona</label>
+                                <select id="tipo_persona"
+                                    style="width: 100%; padding: 14px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: white; border-radius: 12px; font-family: 'Outfit'; outline: none;">
+                                    <option value="JURIDICA" selected>Persona Jurídica</option>
+                                    <option value="NATURAL">Persona Natural</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label>Tipo y Número de Identificación</label>
+                                <div style="display: flex; gap: 8px;">
+                                    <select id="tipo_documento"
+                                        style="width: 35%; padding: 14px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: white; border-radius: 12px; font-family: 'Outfit'; outline: none;">
+                                        <option value="NIT" selected>NIT</option>
+                                        <option value="CC">C.C.</option>
+                                        <option value="CE">C.E.</option>
+                                    </select>
+                                    <input type="text" id="numero_identificacion" value="900.123.456-7"
+                                        style="width: 65%;">
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <label>Teléfono</label>
+                                <input type="text" id="telefono" value="+57 300 123 4567">
+                            </div>
+                            <div class="input-group">
+                                <label>Correo Electrónico</label>
+                                <input type="email" id="email" value="contacto@megatech.com" disabled>
+                            </div>
+                            <div class="input-group">
+                                <label>País</label>
+                                <select id="pais"
+                                    style="width: 100%; padding: 14px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: white; border-radius: 12px; font-family: 'Outfit'; outline: none;">
+                                    <option value="CO" selected>Colombia</option>
+                                    <option value="MX">México</option>
+                                    <option value="PE">Perú</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label>Ciudad</label>
+                                <input type="text" id="ciudad" placeholder="Bogotá" value="Bogotá">
+                            </div>
+                            <div class="input-group">
+                                <label>Dirección</label>
+                                <input type="text" id="direccion" placeholder="Calle ...">
+                            </div>
+                        </div>
+                        <button type="submit" class="profile-save-btn">✅ Guardar Cambios de Empresa</button>
+                    </form>
+
+                    <div class="security-divider" style="border-top-color: rgba(255, 106, 0, 0.2);">
+                        <h3 class="security-title">🔐 Seguridad de la Cuenta</h3>
+                        <div class="form-grid">
+                            <div class="input-group">
+                                <label>Nueva Contraseña</label>
+                                <input type="password" id="new_password" placeholder="••••••••">
+                            </div>
+                            <div class="input-group">
+                                <label>Confirmar Contraseña</label>
+                                <input type="password" id="confirm_password" placeholder="••••••••">
+                            </div>
+                            <!-- MENSAJE INFORMATIVO DE SEGURIDAD -->
+                            <div class="security-info-box">
+                                <p>💡 <b>Consejo de Seguridad:</b> Tu contraseña de vendedor debe ser robusta e incluir
+                                    al menos 8 caracteres para proteger tus ingresos.</p>
+                            </div>
+                        </div>
+                        <div style="display: flex; justify-content: center; width: 100%; margin-top: 25px;">
+                            <button id="changePassBtn" class="security-btn"
+                                style="width: auto; min-width: 300px; padding: 15px; border-radius: 50px; font-weight: bold;"
+                                onclick="alert('Contraseña actualizada.')">Actualizar Seguridad</button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="../src/js/vendor-profile.js"></script>
+</body>
+
+</html>

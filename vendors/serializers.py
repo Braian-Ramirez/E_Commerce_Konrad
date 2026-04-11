@@ -2,6 +2,9 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import Persona, Vendedor, Solicitud, ConsultaCrediticia_Local, CalificacionVendedor, Documento
 from notifications.models import Notificacion
+from django.db import transaction
+
+
 
 # Serializador User
 class UserSerializer(serializers.ModelSerializer):
@@ -17,7 +20,7 @@ class PersonaSerializer(serializers.ModelSerializer):
         model = Persona
         fields = [
             'id', 'user', 'user_details', 'nombre', 'apellido', 
-            'email', 'numero_identificacion', 'telefono', 
+            'email', 'numero_identificacion', 'telefono', 'direccion',
             'tipo_persona', 'pais', 'ciudad'
         ]
 
@@ -77,6 +80,7 @@ class SolicitudVendedorRegistrationSerializer(serializers.ModelSerializer):
     telefono = serializers.CharField(write_only=True)
     pais = serializers.CharField(write_only=True)
     ciudad = serializers.CharField(write_only=True)
+    direccion = serializers.CharField(write_only=True, required=False, allow_blank=True)
     tipo_persona = serializers.CharField(write_only=True)
     
     # 5 Campos de Documentación Obligatoria (Independientes)
@@ -91,17 +95,13 @@ class SolicitudVendedorRegistrationSerializer(serializers.ModelSerializer):
         # Definimos los campos que retornaremos (lectura) y los que recibiremos (escritura)
         fields = [
             'nombre', 'apellido', 'email', 'tipo_documento', 'numero_identificacion',
-            'telefono', 'pais', 'ciudad', 'tipo_persona',
+            'telefono', 'pais', 'ciudad', 'direccion', 'tipo_persona',
             'doc_cedula', 'doc_rut', 'doc_camara', 'doc_riesgo', 'doc_datos',
             'id', 'numero_solicitud', 'estado'
         ]
         read_only_fields = ['id', 'numero_solicitud', 'estado']
 
     def create(self, validated_data):
-        from .models import Persona, Solicitud, Documento
-        from django.db import transaction
-        from notifications.models import Notificacion
-
         # Extraemos los archivos individuales
         doc_cedula = validated_data.pop('doc_cedula')
         doc_rut = validated_data.pop('doc_rut')
@@ -120,6 +120,7 @@ class SolicitudVendedorRegistrationSerializer(serializers.ModelSerializer):
                 'telefono': validated_data.pop('telefono'),
                 'pais': validated_data.pop('pais'),
                 'ciudad': validated_data.pop('ciudad'),
+                'direccion': validated_data.pop('direccion', ''),
                 'tipo_persona': validated_data.pop('tipo_persona'),
             }
             persona, created = Persona.objects.get_or_create(

@@ -1,6 +1,9 @@
+from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import render
 from django.http import JsonResponse
 import random
 import uuid
+import json
 
 # Vista CIFIN (TransUnion)
 def mock_cifin(request, identificacion):
@@ -41,17 +44,42 @@ def mock_antecedentes_judiciales(request, identificacion):
     })
 
 # Vistas Pasarela de Pagos (PayU/Stripe)
+@csrf_exempt
 def mock_pasarela_pagos(request):
-    """
-    Simula un intento de cobro en tarjeta de crédito o PSE.
-    80% de probabilidad de que el pago pase.
-    """
-    pago_exitoso = random.random() < 0.80
-    referencia = str(uuid.uuid4()) # Genera un ID único como "123e4567-e89b-12d3..."
+    # 1. Intentamos leer los datos enviados desde el frontend
+    try:
+        data = json.loads(request.body) if request.body else {}
+        titular = data.get('titular', 'Usuario Anónimo')
+        tarjeta = data.get('numero_tarjeta', '****')
+        metodo = data.get('metodo', 'Tarjeta')
+        ref_consignacion = data.get('referencia_consignacion', '')
+    except:
+        data = {}
+        titular = "Usuario Anónimo"
+        metodo = "Tarjeta"
+        tarjeta = "****"
+        
+    # 2. Lógica de simulación inteligente:
+    referencia = f"PAY-{uuid.uuid4().hex[:8].upper()}"
+    
+    if metodo == 'Consignacion':
+        return JsonResponse({
+            "transaccion_id": referencia,
+            "estado": "EXITOSO",
+            "mensaje": f"Consignación registrada. Ref comprobante: {ref_consignacion}",
+            "metodo_pago": "Consignación",
+            "entidad_simulada": "Konrad Pay Gateway"
+        })
 
+    # Si la tarjeta termina en 0000, simulamos un fallo
+    pago_exitoso = not tarjeta.endswith('0000')
+    
     return JsonResponse({
         "transaccion_id": referencia,
         "estado": "EXITOSO" if pago_exitoso else "RECHAZADO",
-        "mensaje": "Transacción aprobada" if pago_exitoso else "Fondos insuficientes o tarjeta rechazada",
-        "entidad_simulada": "Mock Pasarela Pagos (PayU/Stripe)"
+        "mensaje": f"Pago aprobado para {titular}" if pago_exitoso else "La tarjeta fue declinada por el banco",
+        "tarjeta_usada": f"****-****-****-{tarjeta[-4:]}",
+        "entidad_simulada": "Konrad Pay Gateway"
     })
+
+    
