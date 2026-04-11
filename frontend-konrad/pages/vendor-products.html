@@ -245,6 +245,62 @@
             </div>
         </div>
     </div>
+    <!-- ==========================================
+         MODAL: DETALLE DE PRODUCTO
+    =========================================== -->
+    <div id="product-detail-modal" class="product-modal-overlay" style="display:none;">
+        <div class="product-modal-content detail-modal-content">
+            <button class="close-modal-btn" onclick="cerrarModalDetalle()" aria-label="Cerrar">&times;</button>
+            <div id="detail-loading" class="detail-loading">
+                <div class="spinner"></div>
+                <p>Cargando detalles...</p>
+            </div>
+            <div id="detail-content" style="display:none;">
+                <div class="detail-layout">
+                    <!-- Galería de imágenes -->
+                    <div class="detail-gallery">
+                        <div class="main-image-container" id="detail-main-img-container">
+                            <!-- Imagen principal aquí -->
+                        </div>
+                        <div class="thumbnails-grid" id="detail-thumbnails">
+                            <!-- Miniaturas aquí -->
+                        </div>
+                    </div>
+                    <!-- Información del producto -->
+                    <div class="detail-info">
+                        <div class="detail-header">
+                            <span id="detail-badge" class="product-badge"></span>
+                            <h2 id="detail-nombre" class="detail-title"></h2>
+                            <p id="detail-meta" class="detail-subtitle"></p>
+                        </div>
+                        <div class="detail-price-box">
+                            <span id="detail-precio" class="detail-price"></span>
+                            <span id="detail-stock" class="detail-stock"></span>
+                        </div>
+                        <div class="detail-specs-grid">
+                            <div class="spec-item"><strong>Marca:</strong> <span id="detail-marca">-</span></div>
+                            <div class="spec-item"><strong>Color:</strong> <span id="detail-color">-</span></div>
+                            <div class="spec-item"><strong>Tamaño:</strong> <span id="detail-tamano">-</span></div>
+                            <div class="spec-item"><strong>Talla:</strong> <span id="detail-talla">-</span></div>
+                            <div class="spec-item"><strong>Peso:</strong> <span id="detail-peso">-</span></div>
+                            <div class="spec-item"><strong>Autenticidad:</strong> <span id="detail-autenticidad">-</span></div>
+                        </div>
+                        <div class="detail-description">
+                            <h3>Descripción</h3>
+                            <p id="detail-descripcion"></p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Sección de Interacciones (Comentarios y Preguntas) -->
+                <div class="detail-interactions-section">
+                    <h3>Interacciones y Reseñas</h3>
+                    <div id="detail-interactions-list" class="interactions-list">
+                        <!-- Comentarios y preguntas mezclados aquí -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script type="module" src="/src/js/vendor-products.js"></script>
 </body>

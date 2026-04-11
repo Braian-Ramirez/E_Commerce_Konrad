@@ -101,6 +101,8 @@ class ComentarioProducto(models.Model):
     comprador = models.ForeignKey('vendors.Persona', on_delete=models.CASCADE)
     comentario = models.TextField()
     calificacion = models.IntegerField(default=10, help_text="Calificación de 1 a 10")
+    respuesta_vendedor = models.TextField(blank=True, null=True)
+    fecha_respuesta = models.DateTimeField(blank=True, null=True)
     fecha = models.DateTimeField(auto_now_add=True)
 
     class Meta:

@@ -3,9 +3,10 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
-from .models import Categoria, Producto, ImagenProducto, CostoDomicilio, ComentarioProducto, Subcategoria
-from .serializers import CategoriaSerializer, ProductoSerializer, CostoDomicilioSerializer, ComentarioProductoSerializer, SubcategoriaSerializer
-from ecommerce_konrad.permissions import IsVendorOwnerOrReadOnly
+from .models import Categoria, Producto, ImagenProducto, CostoDomicilio, ComentarioProducto, Subcategoria, PreguntaProducto
+from .serializers import CategoriaSerializer, ProductoSerializer, CostoDomicilioSerializer, ComentarioProductoSerializer, SubcategoriaSerializer, PreguntaProductoSerializer
+from ecommerce_konrad.permissions import IsVendorOwnerOrReadOnly, IsProductVendor
+from django.utils import timezone
 
 # Vista categoria
 class CategoriaViewSet(viewsets.ModelViewSet):
@@ -36,6 +37,28 @@ class ProductoViewSet(viewsets.ModelViewSet):
             serializer.save(vendedor=user.persona_profile.vendedor_profile)
         else:
             serializer.save()
+
+    def perform_update(self, serializer):
+        producto = serializer.save()
+        
+        # Manejar imágenes si se envían
+        if 'imagenes' in self.request.FILES:
+            # Opción: Reemplazar imágenes anteriores si se suben nuevas
+            producto.imagenes.all().delete()
+            
+            imagenes = self.request.FILES.getlist('imagenes')
+            try:
+                raw_idx = self.request.data.get('indice_principal', 0)
+                indice_principal = int(raw_idx) if raw_idx != "" else 0
+            except (ValueError, TypeError):
+                indice_principal = 0
+                
+            for i, imagen in enumerate(imagenes):
+                ImagenProducto.objects.create(
+                    producto=producto,
+                    imagen=imagen,
+                    es_principal=(i == indice_principal)
+                )
 
     @action(detail=False, methods=['get'], url_path='mis-productos', permission_classes=[IsAuthenticated])
     def mis_productos(self, request):
@@ -85,22 +108,27 @@ class ProductoViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_403_FORBIDDEN
             )
 
-        # Construir los datos del producto
-        data = request.data.copy()
-        data['vendedor'] = vendedor.id
-
-        serializer = ProductoSerializer(data=data, context={'request': request})
+        serializer = ProductoSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             producto = serializer.save(vendedor=vendedor)
 
             # Procesar imágenes adjuntas
             imagenes = request.FILES.getlist('imagenes')
+            
+            # Obtener el índice principal de forma segura
+            try:
+                raw_idx = request.data.get('indice_principal', 0)
+                indice_principal = int(raw_idx) if raw_idx != "" else 0
+            except (ValueError, TypeError):
+                indice_principal = 0
+            
             for i, imagen in enumerate(imagenes):
                 ImagenProducto.objects.create(
                     producto=producto,
                     imagen=imagen,
-                    es_principal=(i == 0)  # La primera imagen es la principal
+                    es_principal=(i == indice_principal)
                 )
+
 
             # Devolver el producto completo con imágenes
             producto_completo = ProductoSerializer(producto, context={'request': request})
@@ -148,3 +176,35 @@ class ComentarioProductoViewSet(viewsets.ModelViewSet):
         from vendors.models import Persona
         persona, _ = Persona.objects.get_or_create(user=user)
         serializer.save(comprador=persona)
+
+    @action(detail=True, methods=['post'], url_path='responder', permission_classes=[IsAuthenticated, IsProductVendor])
+    def responder(self, request, pk=None):
+        comentario = self.get_object()
+        respuesta = request.data.get('respuesta')
+        
+        if not respuesta:
+            return Response({"error": "La respuesta no puede estar vacía."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        comentario.respuesta_vendedor = respuesta
+        comentario.fecha_respuesta = timezone.now()
+        comentario.save()
+        
+        return Response({"status": "Respuesta guardada correctamente."}, status=status.HTTP_200_OK)
+
+class PreguntaProductoViewSet(viewsets.ModelViewSet):
+    queryset = PreguntaProducto.objects.all()
+    serializer_class = PreguntaProductoSerializer
+
+    @action(detail=True, methods=['post'], url_path='responder', permission_classes=[IsAuthenticated, IsProductVendor])
+    def responder(self, request, pk=None):
+        pregunta = self.get_object()
+        respuesta = request.data.get('respuesta')
+        
+        if not respuesta:
+            return Response({"error": "La respuesta no puede estar vacía."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        pregunta.respuesta = respuesta
+        pregunta.fecha_respuesta = timezone.now()
+        pregunta.save()
+        
+        return Response({"status": "Respuesta guardada correctamente."}, status=status.HTTP_200_OK)
