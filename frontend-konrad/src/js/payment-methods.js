@@ -110,8 +110,16 @@ function setupPaymentLogic() {
     };
     if (cancelBtn) cancelBtn.onclick = closeModal;
     if (closeBtn) closeBtn.onclick = closeModal;
-    // Also close on backdrop click
-    modal?.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+    // PREVENIR CIERRE POR ARRASTRE (Race Condition del click en overlay)
+    let isMouseDownOnModal = false;
+    modal?.addEventListener('mousedown', (e) => { 
+        isMouseDownOnModal = (e.target === modal); 
+    });
+    modal?.addEventListener('mouseup', (e) => { 
+        if (isMouseDownOnModal && e.target === modal) closeModal(); 
+        isMouseDownOnModal = false;
+    });
 
     form?.addEventListener("submit", async (e) => {
         e.preventDefault();

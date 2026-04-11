@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Categoria, Subcategoria, Producto, ImagenProducto, CostoDomicilio, ComentarioProducto
+from .models import Categoria, Subcategoria, Producto, ImagenProducto, CostoDomicilio, ComentarioProducto, PreguntaProducto
 
 # Serializador Categoria
 class CategoriaSerializer(serializers.ModelSerializer):
@@ -32,13 +32,21 @@ class ComentarioProductoSerializer(serializers.ModelSerializer):
         return "Usuario Konrad"
     class Meta:
         model = ComentarioProducto
-        fields = ['id', 'producto', 'comprador', 'comprador_nombre', 'comentario', 'calificacion', 'fecha']
+        fields = ['id', 'producto', 'comprador', 'comprador_nombre', 'orden', 'comentario', 'calificacion', 'fecha']
         read_only_fields = ['fecha', 'comprador']
+
+class PreguntaProductoSerializer(serializers.ModelSerializer):
+    comprador_nombre = serializers.ReadOnlyField(source='comprador.nombre')
+    class Meta:
+        model = PreguntaProducto
+        fields = ['id', 'producto', 'comprador', 'comprador_nombre', 'pregunta', 'respuesta', 'fecha_pregunta', 'fecha_respuesta']
+        read_only_fields = ['fecha_pregunta', 'fecha_respuesta', 'comprador']
 
 # Serializador Producto (Enriquecido para Producción)
 class ProductoSerializer(serializers.ModelSerializer):
     imagenes = ImagenProductoSerializer(many=True, read_only=True)
     comentarios = ComentarioProductoSerializer(many=True, read_only=True)
+    preguntas = PreguntaProductoSerializer(many=True, read_only=True)
     categoria_nombre = serializers.ReadOnlyField(source='categoria.nombre')
     vendedor_nombre = serializers.ReadOnlyField(source='vendedor.persona.nombre')
     
@@ -48,7 +56,7 @@ class ProductoSerializer(serializers.ModelSerializer):
             'id', 'vendedor', 'vendedor_nombre', 'categoria', 'categoria_nombre', 
             'subcategoria', 'nombre', 'marca', 'descripcion', 'autenticidad',
             'color', 'tamano', 'peso', 'talla', 'condicion', 
-            'cantidad', 'valor', 'fecha_publicacion', 'imagenes', 'comentarios'
+            'cantidad', 'valor', 'fecha_publicacion', 'imagenes', 'comentarios', 'preguntas'
         ]
 
 # Serializador CostoDomicilio

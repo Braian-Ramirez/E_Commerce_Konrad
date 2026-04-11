@@ -39,19 +39,25 @@ class GestionSolicitudesViewSet(viewsets.ModelViewSet):
             solicitud.estado = nuevo_estado
             solicitud.save()
 
-            if nuevo_estado == 'APROBADA' and not solicitud.persona.user:
-                password_temporal = get_random_string(10)
-                username = solicitud.persona.email
-                nuevo_usuario = User.objects.create_user(
-                    username=username,
-                    email=solicitud.persona.email,
-                    password=password_temporal,
-                    first_name=solicitud.persona.nombre,
-                    last_name=solicitud.persona.apellido
-                )
-                solicitud.persona.user = nuevo_usuario
-                solicitud.persona.save()
-                enviar_correo_bienvenida_vendedor(solicitud.persona, password_temporal)
+            if nuevo_estado == 'APROBADA':
+                # Crear User de Django si aún no existe
+                if not solicitud.persona.user:
+                    password_temporal = get_random_string(10)
+                    username = solicitud.persona.email
+                    nuevo_usuario = User.objects.create_user(
+                        username=username,
+                        email=solicitud.persona.email,
+                        password=password_temporal,
+                        first_name=solicitud.persona.nombre,
+                        last_name=solicitud.persona.apellido
+                    )
+                    solicitud.persona.user = nuevo_usuario
+                    solicitud.persona.save()
+                    # Enviar correo con la contraseña temporal generada
+                    enviar_correo_bienvenida_vendedor(solicitud.persona, password_temporal)
+                else:
+                    # El usuario ya existía (re-aprobación o flujo alterno) — enviar correo sin password
+                    enviar_correo_bienvenida_vendedor(solicitud.persona, "Tu contraseña anterior")
             
             # --- NOTA ARQUITECTÓNICA ---
             # Las notificaciones de DEVUELTA y RECHAZADA no se disparan desde aquí en el controlador. 

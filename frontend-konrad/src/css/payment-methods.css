@@ -1,59 +1,177 @@
-/* ESTILOS ESPECÍFICOS DE MEDIOS DE PAGO */
+/* ============================================================
+   MEDIOS DE PAGO - COMPRADOR
+   Diseño inspirado en el Panel Premium del Vendedor.
+   Colores: Paleta original del comprador (azul/morado).
+   Funcionalidad: Intacta - Este archivo solo define visual.
+============================================================ */
 
+/* ── Cabecera de la sección ── */
 .payments-page-header {
     text-align: center;
-    margin-bottom: 50px;
-    margin-top: 20px;
+    margin-bottom: 40px;
+    margin-top: 10px;
+    padding: 0 20px;
 }
 
 .payments-page-header h2 {
-    font-size: 2.5rem;
-    margin-bottom: 10px;
+    font-size: 2rem;
     font-weight: 800;
+    margin-bottom: 8px;
+    color: white;
 }
 
 .payments-page-header p {
     color: var(--text-muted);
+    font-size: 0.95rem;
 }
 
 .add-payment-btn {
-    margin-top: 25px;
-    padding: 15px 40px !important;
-    font-size: 1.1rem;
+    margin-top: 20px;
+    padding: 14px 40px !important;
+    font-size: 1rem;
     border-radius: 50px;
+    transition: transform 0.3s, box-shadow 0.3s;
 }
 
+.add-payment-btn:hover {
+    transform: translateY(-3px);
+}
+
+/* ── Contenedor principal de la lista ── */
 .payments-list-container {
-    max-width: 850px;
-    margin: 40px auto;
+    max-width: 860px;
+    margin: 0 auto;
+    width: 100%;
 }
 
-/* Modales específicos de pagos */
-.payment-modal-card {
-    width: 95%;
-    max-width: 500px;
-    padding: 45px;
-}
-
-.payment-modal-title {
-    margin-bottom: 35px;
-    font-size: 1.8rem;
+/* ── Estado vacío ── */
+.empty-payments-container {
+    background: rgba(15, 23, 42, 0.4);
+    border: 1px dashed rgba(99, 102, 241, 0.3);
+    border-radius: 24px;
+    padding: 70px 40px;
     text-align: center;
-    font-weight: 800;
+    backdrop-filter: blur(10px);
 }
 
-.payment-form-group {
+.empty-payments-icon {
+    font-size: 3.5rem;
     margin-bottom: 20px;
+    opacity: 0.5;
 }
 
-.payment-form-group-large {
-    margin-bottom: 35px;
+.empty-payments-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 10px;
 }
 
+.empty-payments-text {
+    color: #64748b;
+    font-size: 0.9rem;
+    max-width: 380px;
+    margin: 0 auto 25px;
+    line-height: 1.5;
+}
+
+/* ── Tarjetas de medios vinculados ── */
+.payment-method-card {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 20px;
+    padding: 22px 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.payment-method-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(99, 102, 241, 0.4);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+}
+
+/* ── Modal de vinculación ── */
+.modal-card {
+    background: #0f1629;
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    border-radius: 28px;
+    padding: 50px 40px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 85vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 0 40px rgba(99, 102, 241, 0.2);
+}
+
+/* Scrollbar estilizada */
+.modal-card::-webkit-scrollbar { width: 7px; }
+.modal-card::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); border-radius: 10px; }
+.modal-card::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.4); border-radius: 10px; }
+.modal-card::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+/* Botón de cerrar (X) */
+.close-modal-round {
+    position: absolute;
+    top: 18px;
+    right: 22px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #94a3b8;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.close-modal-round:hover {
+    background: rgba(239,68,68,0.15);
+    color: #ef4444;
+    border-color: rgba(239,68,68,0.3);
+}
+
+/* ── Campos del formulario dentro del modal ── */
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 14px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    border-radius: 12px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.3s;
+    box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: var(--primary);
+}
+
+.form-group select option {
+    background: #0f172a;
+    color: white;
+}
+
+/* ── Acciones del formulario ── */
 .payment-form-actions {
     display: flex;
     gap: 15px;
     align-items: center;
+    margin-top: 5px;
 }
 
 .btn-cancel-flat {
@@ -63,77 +181,43 @@
     border: none;
     cursor: pointer;
     font-weight: 700;
-    transition: 0.3s;
+    font-family: 'Outfit', sans-serif;
+    transition: color 0.2s;
+    padding: 14px;
 }
 
-.btn-cancel-flat:hover {
-    color: white;
-}
+.btn-cancel-flat:hover { color: white; }
 
 .payment-submit-btn {
     flex: 2;
-    padding: 18px !important;
+    padding: 16px !important;
+    border-radius: 50px !important;
+    font-weight: 800 !important;
+    transition: transform 0.3s, box-shadow 0.3s !important;
 }
 
-/* Estado vacío */
-.empty-payments-container {
-    background: rgba(15, 23, 42, 0.3);
-    border: 1px dashed var(--glass-border);
-    border-radius: 25px;
-    padding: 60px 40px;
-    text-align: center;
+.payment-submit-btn:hover {
+    transform: translateY(-2px);
 }
 
-.empty-payments-icon {
-    font-size: 3rem;
-    margin-bottom: 20px;
-    opacity: 0.5;
-}
-
-.empty-payments-text {
-    color: #64748b;
-    text-align: center;
-    margin-bottom: 30px;
-    max-width: 400px;
-}
-
-/* TARJETAS DE PAGO VINCULADAS */
-.payment-method-card {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 20px;
-    padding: 25px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-    transition: 0.3s;
-}
-
-.payment-method-card:hover {
-    border-color: var(--primary);
-    background: rgba(255, 255, 255, 0.05);
-}
-
-/* SELECTOR PERSONALIZADO DE PAGO */
+/* ── Selector tipo de pago ── */
 .payment-type-select {
     width: 100%;
-    padding: 15px;
+    padding: 14px;
     border-radius: 12px;
-    background: #1e293b;
+    background: rgba(255,255,255,0.05);
     color: white;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    font-size: 1rem;
+    border: 1px solid rgba(255,255,255,0.1);
+    font-size: 0.95rem;
     cursor: pointer;
     appearance: none;
-    font-family: inherit;
+    font-family: 'Outfit', sans-serif;
+    outline: none;
     background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
     background-repeat: no-repeat;
-    background-position: right 15px center;
-    background-size: 15px;
+    background-position: right 14px center;
+    background-size: 14px;
+    transition: border-color 0.3s;
 }
 
-.payment-type-select:focus {
-    border-color: var(--primary);
-    outline: none;
-}
+.payment-type-select:focus { border-color: var(--primary); }

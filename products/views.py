@@ -3,8 +3,11 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
-from .models import Categoria, Producto, ImagenProducto, CostoDomicilio, ComentarioProducto, Subcategoria
-from .serializers import CategoriaSerializer, ProductoSerializer, CostoDomicilioSerializer, ComentarioProductoSerializer, SubcategoriaSerializer
+from .models import Categoria, Producto, ImagenProducto, CostoDomicilio, ComentarioProducto, Subcategoria, PreguntaProducto
+from .serializers import (
+    CategoriaSerializer, ProductoSerializer, CostoDomicilioSerializer, 
+    ComentarioProductoSerializer, SubcategoriaSerializer, PreguntaProductoSerializer
+)
 from ecommerce_konrad.permissions import IsVendorOwnerOrReadOnly
 
 # Vista categoria
@@ -142,6 +145,27 @@ class CostoDomicilioViewSet(viewsets.ModelViewSet):
 class ComentarioProductoViewSet(viewsets.ModelViewSet):
     queryset = ComentarioProducto.objects.all()
     serializer_class = ComentarioProductoSerializer
+
+    def perform_create(self, serializer):
+        user = self.request.user
+        producto_id = self.request.data.get('producto')
+        orden_id = self.request.data.get('orden')
+        
+        from vendors.models import Persona
+        persona, _ = Persona.objects.get_or_create(user=user)
+
+        # Evitar duplicados por compra (si se proporciona orden)
+        if orden_id:
+            if ComentarioProducto.objects.filter(comprador=persona, producto_id=producto_id, orden_id=orden_id).exists():
+                from rest_framework.exceptions import ValidationError
+                raise ValidationError("Ya has calificado este producto para esta compra.")
+
+        serializer.save(comprador=persona)
+
+# Vista pregunta producto
+class PreguntaProductoViewSet(viewsets.ModelViewSet):
+    queryset = PreguntaProducto.objects.all()
+    serializer_class = PreguntaProductoSerializer
 
     def perform_create(self, serializer):
         user = self.request.user

@@ -62,6 +62,26 @@ def enviar_correo_devolucion(persona):
     _enviar_safe(asunto, mensaje, persona.email)
 
 
+def enviar_correo_otp(persona, otp_code, email_override=None):
+    """
+    Envía un código OTP de autorización de pago.
+    Se audita vinculándolo a la Persona solicitante.
+    """
+    asunto = '🔐 Código de Autorización - Comercial Konrad'
+    
+    mensaje = (
+        f"Hola,\n\n"
+        f"Tu código de seguridad (OTP) para autorizar la transacción en Comercial Konrad es:\n\n"
+        f"    {otp_code}\n\n"
+        f"Este código es de un solo uso. Si no solicitaste este código, por favor ignora este correo.\n"
+    )
+    
+    _registrar_auditoria_correo(persona, asunto, mensaje)
+    
+    destino = email_override if email_override else persona.email
+    _enviar_safe(asunto, mensaje, destino)
+
+
 def enviar_correo_rechazo(persona):
     """
     Notificación de rechazo con registro de auditoría.

@@ -154,8 +154,40 @@
                     <select id="paymentSelector" class="payment-type-select card-selector">
                         <option value="">Selecciona un medio guardado...</option>
                     </select>
-                    <a href="/pages/payment-methods.html" class="link-btn-payment" style="text-decoration:none;display:inline-block;cursor:pointer;">&#x2728; Vincular nuevo medio de pago</a>
                 </div>
+                
+                <div id="inline-consignacion-form" style="display: none; margin-top: 20px; text-align: left;">
+                    <h4 style="color:var(--text-light); margin-bottom:15px; font-weight:700;">Consignación Bancaria</h4>
+                    <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom: 20px;">Realiza la transferencia a la siguiente cuenta y sube o ingresa tu número de comprobante.</p>
+                    <div style="background:rgba(99,102,241,0.05); padding:15px; border-radius:12px; border:1px solid rgba(99,102,241,0.2); margin-bottom:15px; font-size:0.9rem; line-height:1.5;">
+                        <b style="color:var(--primary);">Banco:</b> Bancolombia<br>
+                        <b style="color:var(--primary);">Cuenta Corriente:</b> 123-456789-00<br>
+                        <b style="color:var(--primary);">Titular:</b> Comercial Konrad S.A.S.<br>
+                        <b style="color:var(--primary);">NIT:</b> 900.123.456-7
+                    </div>
+                    <input type="text" id="inline-consignacion-ref" class="cart-input-field" placeholder="Número de comprobante o referencia (Opcional)" style="margin-bottom:15px; width:100%;" required>
+                    <label style="display:block; font-size:0.85rem; color:var(--text-muted); margin-bottom:8px;">Subir imagen del voucher:</label>
+                    <input type="file" accept="image/*, application/pdf" class="cart-input-field" style="padding:10px; width:100%;">
+                </div>
+
+                <style>
+                    .cart-input-field {
+                        background: rgba(255,255,255,0.03);
+                        border: 1px solid rgba(255,255,255,0.08);
+                        border-radius: 12px;
+                        padding: 14px;
+                        color: white !important;
+                        font-family: inherit;
+                        font-size: 0.95rem;
+                        transition: all 0.3s ease;
+                        box-sizing: border-box;
+                    }
+                    .cart-input-field:focus {
+                        border-color: var(--primary);
+                        outline: none;
+                        background: rgba(99,102,241,0.05);
+                    }
+                </style>
             </div>
         </main>
 
