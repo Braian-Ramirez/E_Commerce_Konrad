@@ -1,0 +1,115 @@
+/* ==========================================
+   VENDOR PROFILE - Overrides de tema naranja
+   Sobreescribe los colores azules de profile.css
+   por la paleta Neo-Orange del vendor dashboard.
+=========================================== */
+
+/* ── Avatar ── */
+.avatar-circle {
+    background: linear-gradient(135deg, var(--neo-orange), #ff4500);
+    box-shadow: 0 10px 25px rgba(255, 106, 0, 0.4);
+}
+
+/* ── Botón guardar ── */
+.profile-save-btn {
+    background: linear-gradient(135deg, var(--neo-orange), #ff4500);
+    box-shadow: 0 10px 30px rgba(255, 106, 0, 0.4);
+    border: none;
+    color: white;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.profile-save-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 35px rgba(255, 106, 0, 0.6);
+}
+
+/* ── Caja de seguridad ── */
+.security-info-box {
+    background: rgba(255, 106, 0, 0.1);
+    border: 1px solid rgba(255, 106, 0, 0.2);
+    color: #ffdaba;
+}
+
+.security-info-box b {
+    color: white;
+}
+
+/* ── Botón de seguridad ── */
+.security-btn {
+    background: var(--neo-orange);
+    border: none;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 10px 25px rgba(255, 106, 0, 0.3);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.security-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 35px rgba(255, 106, 0, 0.5);
+}
+
+/* ── Campos de formulario ── */
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: left;
+}
+
+.input-group label {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.input-group input,
+.input-group select {
+    padding: 14px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    border-radius: 12px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.3s;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.input-group input:focus,
+.input-group select:focus {
+    border-color: var(--neo-orange);
+}
+
+.input-group select option {
+    background: #0f172a;
+    color: white;
+}
+
+/* ── Botón subir foto ── */
+.file-upload-btn {
+    cursor: pointer;
+    color: var(--neo-orange);
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: opacity 0.2s;
+}
+
+.file-upload-btn:hover {
+    opacity: 0.8;
+}
+
+/* ── Contenedor principal con tono naranja ── */
+.profile-container {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 106, 0, 0.2);
+}
+
+/* ── Divisor de seguridad con tono naranja ── */
+.security-divider {
+    border-top-color: rgba(255, 106, 0, 0.2);
+}

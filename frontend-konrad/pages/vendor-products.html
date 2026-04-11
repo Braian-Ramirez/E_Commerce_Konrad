@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Productos - Comercial Konard</title>
+    <meta name="description" content="Gestiona tu catálogo de productos en Konrad Commerce.">
+    <link rel="stylesheet" href="../src/css/style.css">
+    <link rel="stylesheet" href="../src/css/vendor-dashboard.css">
+    <link rel="stylesheet" href="../src/css/vendor-products.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="dashboard-container">
+
+        <!-- Header superior -->
+        <header class="top-nav">
+            <div class="logo">
+                Comercial <span style="color: var(--neo-orange);">Konrad</span>
+            </div>
+            <div class="user-info">
+                <span><b>Mis Productos</b></span>
+            </div>
+        </header>
+
+        <div class="layout-body">
+
+            <!-- Sidebar lateral -->
+            <aside class="sidebar">
+                <div class="sidebar-group">
+                    <span class="group-title">NAVEGACIÓN</span>
+                    <nav>
+                        <button class="nav-btn" onclick="window.location.href='/pages/vendor-dashboard.html'">
+                            <span class="icon">🏠</span> Inicio
+                        </button>
+                        <button class="nav-btn" onclick="alert('Próximamente')">
+                            <span class="icon">🛍️</span> Mis Ventas
+                        </button>
+                        <button class="nav-btn" onclick="window.location.href='/pages/vendor-products.html'">
+                            <span class="icon">📦</span> Mis Productos
+                        </button>
+                    </nav>
+                </div>
+
+                <div class="sidebar-group">
+                    <span class="group-title">CONFIGURACIÓN</span>
+                    <nav>
+                        <button class="nav-btn" onclick="window.location.href='/pages/vendor-dashboard.html'">
+                            <span class="icon">💳</span> Mi Suscripción
+                        </button>
+                        <button class="nav-btn" onclick="window.location.href='/pages/vendor-profile.html'">
+                            <span class="icon">👤</span> Mi Perfil
+                        </button>
+                    </nav>
+                </div>
+
+                <div class="sidebar-footer">
+                    <button onclick="handleLogout()" class="logout-btn">🚪 Cerrar Sesión</button>
+                </div>
+            </aside>
+
+            <!-- Contenido principal -->
+            <main class="content-area">
+                <section class="products-panel">
+
+                    <!-- Cabecera del panel -->
+                    <div class="panel-header">
+                        <div>
+                            <h1 class="panel-title">Mis Productos</h1>
+                            <p class="panel-subtitle" id="products-count-text">Cargando tu catálogo...</p>
+                        </div>
+                        <button id="btn-agregar-producto" class="btn-add-product" onclick="abrirModalCrearProducto()"
+                            style="display:none;">
+                            <span>+</span> Agregar Producto
+                        </button>
+                    </div>
+
+                    <!-- === ESTADO: Cargando === -->
+                    <div id="products-loading" class="products-loading">
+                        <div class="spinner"></div>
+                        <p>Cargando productos...</p>
+                    </div>
+
+                    <!-- === ESTADO: Suscripción inactiva === -->
+                    <div id="products-subscription-warning" class="products-empty-state" style="display:none;">
+                        <div class="empty-icon">🔒</div>
+                        <h2>Suscripción Inactiva</h2>
+                        <p>Necesitas una suscripción activa para gestionar tus productos en Konrad Commerce.</p>
+                        <button class="btn-add-product-empty"
+                            onclick="window.location.href='/pages/vendor-dashboard.html'">
+                            💳 Activar Suscripción
+                        </button>
+                    </div>
+
+                    <!-- === ESTADO: Sin productos === -->
+                    <div id="products-empty-state" class="products-empty-state" style="display:none;">
+                        <div class="empty-icon">📭</div>
+                        <h2>Aún no tienes productos</h2>
+                        <p>Comienza a vender creando tu primer producto. Llega a miles de compradores en la plataforma.
+                        </p>
+                        <button class="btn-add-product-empty" onclick="abrirModalCrearProducto()">
+                            <span>+</span> Crear mi primer producto
+                        </button>
+                    </div>
+
+                    <!-- === ESTADO: Grid de productos === -->
+                    <div id="products-grid" class="products-grid" style="display:none;"></div>
+
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         MODAL: CREAR PRODUCTO
+    =========================================== -->
+    <div id="product-modal" class="product-modal-overlay" style="display:none;">
+        <div class="product-modal-content">
+            <button class="close-modal-btn" onclick="cerrarModalProducto()" aria-label="Cerrar">&times;</button>
+
+            <h2 class="modal-title">Crea un nuevo producto</h2>
+            <p class="modal-subtitle">Completa los datos para publicar tu producto en la tienda.</p>
+
+            <div class="product-form-layout">
+
+                <!-- ── Columna izquierda: campos ── -->
+                <div class="product-form-fields">
+                    <form id="product-form" class="product-specific-form" onsubmit="return false;">
+
+                        <div class="form-group">
+                            <label for="prod-nombre">Nombre del producto *</label>
+                            <input type="text" id="prod-nombre" placeholder="Ej: Camiseta Deportiva Nike" required>
+                        </div>
+
+                        <div class="form-row-product">
+                            <div class="form-group">
+                                <label for="prod-categoria">Categoría *</label>
+                                <select id="prod-categoria" onchange="cargarSubcategorias()" required>
+                                    <option value="">Selecciona...</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="prod-subcategoria">Subcategoría *</label>
+                                <select id="prod-subcategoria" required>
+                                    <option value="">Elige categoría primero</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row-product">
+                            <div class="form-group">
+                                <label for="prod-marca">Marca</label>
+                                <input type="text" id="prod-marca" placeholder="Ej: Nike, Adidas...">
+                            </div>
+                            <div class="form-group">
+                                <label for="prod-autenticidad">Autenticidad</label>
+                                <select id="prod-autenticidad">
+                                    <option value="ORIGINAL">Original</option>
+                                    <option value="GENERICO">Genérico</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row-product">
+                            <div class="form-group">
+                                <label for="prod-color">Color</label>
+                                <input type="text" id="prod-color" placeholder="Ej: Rojo, Azul...">
+                            </div>
+                            <div class="form-group">
+                                <label for="prod-tamano">Tamaño</label>
+                                <input type="text" id="prod-tamano" placeholder="Ej: 30x20cm">
+                            </div>
+                        </div>
+
+                        <div class="form-row-product">
+                            <div class="form-group">
+                                <label for="prod-peso">Peso (kg) *</label>
+                                <input type="number" id="prod-peso" placeholder="0.5" step="0.01" min="0" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="prod-talla">Talla</label>
+                                <input type="text" id="prod-talla" placeholder="Ej: M, L, XL, 42...">
+                            </div>
+                        </div>
+
+                        <div class="form-row-product">
+                            <div class="form-group">
+                                <label for="prod-condicion">Condición</label>
+                                <select id="prod-condicion">
+                                    <option value="NUEVO">Nuevo</option>
+                                    <option value="USADO">Usado</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="prod-cantidad">Cantidad disponible *</label>
+                                <input type="number" id="prod-cantidad" value="1" min="1" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="prod-valor">Valor (COP) *</label>
+                            <input type="number" id="prod-valor" placeholder="50000" min="0" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="prod-descripcion">Descripción</label>
+                            <textarea id="prod-descripcion" rows="3"
+                                placeholder="Describe tu producto detalladamente..."></textarea>
+                        </div>
+
+                    </form>
+                </div>
+
+                <!-- ── Columna derecha: imágenes + acciones ── -->
+                <div class="product-form-sidebar">
+
+                    <div class="image-upload-section">
+                        <span class="image-upload-title">📷 Imágenes del producto</span>
+                        <p class="image-upload-hint">La primera imagen será la portada</p>
+
+                        <div id="image-preview-grid" class="image-preview-grid">
+                            <label for="prod-imagenes" class="image-add-btn" id="label-add-image">
+                                <span>+</span>
+                                <small>Agregar foto</small>
+                            </label>
+                        </div>
+                        <input type="file" id="prod-imagenes" multiple accept="image/*" style="display:none;"
+                            onchange="previsualizarImagenes(event)">
+
+                        <p id="image-count-label" class="image-count-label">0 imágenes seleccionadas</p>
+                    </div>
+
+                    <div class="product-modal-actions">
+                        <button class="btn-pago" id="btn-crear-producto" onclick="enviarProducto()">
+                            ✅ Crear Producto
+                        </button>
+                        <button class="btn-cancelar-producto" onclick="cerrarModalProducto()">
+                            Cancelar
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="/src/js/vendor-products.js"></script>
+</body>
+
+</html>

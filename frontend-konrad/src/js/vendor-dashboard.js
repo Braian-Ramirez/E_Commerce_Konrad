@@ -1,12 +1,21 @@
-// vendor-dashboard.js - VERSIÓN FINAL CON INTEGRACIÓN DE BASE DE DATOS REAL
+// vendor-dashboard.js - Gestión de Mi Suscripción
 
+const API_BASE = 'http://localhost:8000/api/v1';
+
+// ──────────────────────────────────────────
+// INICIALIZACIÓN
+// ──────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
     checkSubscriptionStatus();
+    setupPaymentButtons();
 });
 
+// ──────────────────────────────────────────
+// VERIFICAR ESTADO DE SUSCRIPCIÓN
+// ──────────────────────────────────────────
 async function checkSubscriptionStatus() {
     try {
-        const response = await fetch('http://localhost:8000/api/v1/vendors/vendedores/mi-status/', {
+        const response = await fetch(`${API_BASE}/vendors/vendedores/mi-status/`, {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('access_token')}`
             }
@@ -20,39 +29,39 @@ async function checkSubscriptionStatus() {
                         <h2>¡Tu cuenta está operando!</h2>
                         <p>Vencimiento de tu plan: <b>${data.fecha_vencimiento}</b></p>
                         <hr style="border: 0; border-top: 1px solid rgba(255,106,0,0.2); margin: 20px 0;">
-                        <p style="font-size: 0.9rem; color: var(--text-muted);">Puedes seguir gestionando tus productos y ventas desde el menú lateral.</p>
+                        <p style="font-size: 0.9rem; color: var(--text-muted);">
+                            Puedes gestionar tus productos y ventas desde el menú lateral.
+                        </p>
                     </div>
                 `;
             }
         }
     } catch (err) {
-        console.error("Error al verificar status:", err);
+        console.error('Error al verificar status:', err);
     }
 }
 
-document.querySelectorAll('.select-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-        const planName = e.target.parentElement.querySelector('span').innerText;
-        document.getElementById('selected-plan-name').innerText = planName;
-        document.getElementById('payment-modal').style.display = "block";
+// ──────────────────────────────────────────
+// BOTONES DE PLAN
+// ──────────────────────────────────────────
+function setupPaymentButtons() {
+    document.querySelectorAll('.select-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const planName = e.target.parentElement.querySelector('span').innerText;
+            document.getElementById('selected-plan-name').innerText = planName;
+            document.getElementById('payment-modal').style.display = 'flex';
+        });
     });
-});
-
-function cerrarTodo() {
-    document.getElementById('result-modal').style.display = "none";
-    regresarAPagos();
-    // Recargar para ver el nuevo estado
-    window.location.reload();
 }
 
-const closeModal = () => {
-    document.getElementById('payment-modal').style.display = "none";
+// ──────────────────────────────────────────
+// MODAL DE PAGO — NAVEGACIÓN ENTRE PANTALLAS
+// ──────────────────────────────────────────
+function cerrarModalPago() {
+    document.getElementById('payment-modal').style.display = 'none';
     regresarAPagos();
-};
+}
 
-document.querySelector('.close-modal').onclick = closeModal;
-
-// NAVEGACIÓN
 function mostrarFormularioTarjeta() {
     document.getElementById('payment-selection').style.display = 'none';
     document.getElementById('card-form-container').style.display = 'block';
@@ -75,67 +84,74 @@ function regresarAPagos() {
     document.getElementById('consignacion-form-container').style.display = 'none';
 }
 
-function mostrarResultadoUI(exito, titulo, mensaje, ref = "") {
+// ──────────────────────────────────────────
+// MODAL DE RESULTADO
+// ──────────────────────────────────────────
+function mostrarResultadoUI(exito, titulo, mensaje, ref = '') {
     const resModal = document.getElementById('result-modal');
-    const content = resModal.querySelector('.modal-content');
-    const icon = document.getElementById('result-icon');
-    
+    const content  = resModal.querySelector('.modal-content');
+    const icon     = document.getElementById('result-icon');
+
     content.classList.remove('success-theme', 'error-theme');
-    
+
     if (exito) {
         content.classList.add('success-theme');
-        icon.innerText = "✅";
+        icon.innerText = '✅';
     } else {
         content.classList.add('error-theme');
-        icon.innerText = "❌";
+        icon.innerText = '❌';
     }
-    
-    document.getElementById('result-title').innerText = titulo;
+
+    document.getElementById('result-title').innerText   = titulo;
     document.getElementById('result-message').innerText = mensaje;
-    
-    const refElement = document.getElementById('result-ref');
-    if (refElement) {
-        refElement.innerText = ref ? `Ref: ${ref}` : "";
-    }
-    
-    document.getElementById('payment-modal').style.display = "none";
-    
-    setTimeout(() => {
-        resModal.style.display = "flex";
-    }, 50);
+
+    const refEl = document.getElementById('result-ref');
+    if (refEl) refEl.innerText = ref ? `Ref: ${ref}` : '';
+
+    document.getElementById('payment-modal').style.display = 'none';
+    setTimeout(() => { resModal.style.display = 'flex'; }, 50);
 }
 
-// SIMULACIÓN PSE CON ESPERA
+function cerrarTodo() {
+    document.getElementById('result-modal').style.display = 'none';
+    regresarAPagos();
+    window.location.reload();
+}
+
+// ──────────────────────────────────────────
+// PSE — SIMULACIÓN BANCO EXTERNO
+// ──────────────────────────────────────────
 window.addEventListener('message', (event) => {
-    if (event.data === 'pago_pse_exitoso') {
-        simularProcesamientoPSE();
-    }
+    if (event.data === 'pago_pse_exitoso') simularProcesamientoPSE();
 });
 
 function simularProcesamientoPSE() {
-    mostrarResultadoUI(true, "Procesando Transacción", "Estamos verificando la información con tu banco...", "");
-    document.getElementById('result-icon').innerText = "⏳";
+    mostrarResultadoUI(true, 'Procesando Transacción', 'Verificando con tu banco...', '');
+    document.getElementById('result-icon').innerText = '⏳';
     const btnEntendido = document.getElementById('result-modal').querySelector('button');
-    btnEntendido.style.display = "none"; 
+    btnEntendido.style.display = 'none';
 
     setTimeout(async () => {
-        const plan = document.getElementById('selected-plan-name').innerText;
+        const plan  = document.getElementById('selected-plan-name').innerText;
         const exito = await llamarAPIAfectacionReal(plan);
         if (exito) {
-            const ref = "PSE-" + Math.random().toString(36).substr(2, 9).toUpperCase();
-            mostrarResultadoUI(true, "¡Suscripción Activada!", "Tu pago por PSE ha sido confirmado. ¡Bienvenido!", ref);
+            const ref = 'PSE-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+            mostrarResultadoUI(true, '¡Suscripción Activada!', 'Tu pago por PSE fue confirmado. ¡Bienvenido!', ref);
         } else {
-             mostrarResultadoUI(false, "Error de Activación", "El pago fue exitoso pero no pudimos activar tu cuenta. Contacta a soporte.");
+            mostrarResultadoUI(false, 'Error de Activación', 'El pago fue exitoso pero no pudimos activar tu cuenta. Contacta a soporte.');
         }
-        btnEntendido.style.display = "block";
+        btnEntendido.style.display = 'block';
     }, 3000);
 }
 
+// ──────────────────────────────────────────
+// ACTIVACIÓN REAL EN BASE DE DATOS
+// ──────────────────────────────────────────
 async function llamarAPIAfectacionReal(planName) {
     try {
-        const response = await fetch('http://localhost:8000/api/v1/vendors/vendedores/activar-suscripcion/', {
+        const response = await fetch(`${API_BASE}/vendors/vendedores/activar-suscripcion/`, {
             method: 'POST',
-            headers: { 
+            headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${localStorage.getItem('access_token')}`
             },
@@ -143,60 +159,70 @@ async function llamarAPIAfectacionReal(planName) {
         });
         return response.ok;
     } catch (e) {
-        console.error("Error activando suscripción:", e);
+        console.error('Error activando suscripción:', e);
         return false;
     }
 }
 
+// ──────────────────────────────────────────
+// PROCESAR PAGO (mock + activación real)
+// ──────────────────────────────────────────
 async function procesarPago(metodo) {
     const planName = document.getElementById('selected-plan-name').innerText;
-    let payload = {
-        metodo: metodo,
-        plan: planName
-    };
+    const payload  = { metodo, plan: planName };
 
     if (metodo === 'Tarjeta') {
         payload.numero_tarjeta = document.querySelector('input[placeholder="Número de tarjeta"]')?.value || 'N/A';
     } else if (metodo === 'PSE') {
         const banco = document.getElementById('pse-bank').value;
         window.open(`bank-mock.html?banco=${encodeURIComponent(banco)}`, 'Sucursal Virtual', 'width=500,height=650');
-        document.getElementById('payment-modal').style.display = "none";
+        document.getElementById('payment-modal').style.display = 'none';
         return;
     } else if (metodo === 'Consignacion') {
         payload.referencia_consignacion = document.getElementById('consignacion-ref').value;
     }
 
     try {
-        // 1. Simulación de pasarela
         const responseMock = await fetch('http://127.0.0.1:8000/mocks/pagos/', {
             method: 'POST',
             body: JSON.stringify(payload),
             headers: { 'Content-Type': 'application/json' }
         });
-        
         const dataMock = await responseMock.json();
-        
+
         if (dataMock.estado === 'EXITOSO') {
-            // 2. ACTIVACIÓN REAL EN BASE DE DATOS
             const exitoReal = await llamarAPIAfectacionReal(planName);
             if (exitoReal) {
-                mostrarResultadoUI(true, "¡Pago Confirmado!", "Tu suscripción ha sido activada correctamente en el sistema.", dataMock.transaccion_id);
+                mostrarResultadoUI(true, '¡Pago Confirmado!', 'Tu suscripción ha sido activada correctamente.', dataMock.transaccion_id);
             } else {
-                mostrarResultadoUI(false, "Fallo de Activación", "El pago se procesó pero hubo un error actualizando tu cuenta en la base de datos.");
+                mostrarResultadoUI(false, 'Fallo de Activación', 'El pago se procesó pero hubo un error actualizando tu cuenta.');
             }
         } else {
-            mostrarResultadoUI(false, "Pago Rechazado", dataMock.mensaje);
+            mostrarResultadoUI(false, 'Pago Rechazado', dataMock.mensaje);
         }
     } catch (error) {
-        mostrarResultadoUI(false, "Error de Conexión", "No se pudo contactar con el servidor.");
+        mostrarResultadoUI(false, 'Error de Conexión', 'No se pudo contactar con el servidor.');
     }
 }
 
+// ──────────────────────────────────────────
+// SESIÓN
+// ──────────────────────────────────────────
+function handleLogout() {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    window.location.href = '/pages/login.html';
+}
+
+// ──────────────────────────────────────────
 // EXPOSICIÓN GLOBAL
-window.mostrarFormularioTarjeta = mostrarFormularioTarjeta;
-window.mostrarFormularioPSE = mostrarFormularioPSE;
+// ──────────────────────────────────────────
+window.mostrarFormularioTarjeta      = mostrarFormularioTarjeta;
+window.mostrarFormularioPSE          = mostrarFormularioPSE;
 window.mostrarFormularioConsignacion = mostrarFormularioConsignacion;
-window.regresarAPagos = regresarAPagos;
-window.procesarPago = procesarPago;
-window.cerrarTodo = cerrarTodo;
-window.mostrarResultadoUI = mostrarResultadoUI;
+window.regresarAPagos               = regresarAPagos;
+window.cerrarModalPago              = cerrarModalPago;
+window.procesarPago                 = procesarPago;
+window.cerrarTodo                   = cerrarTodo;
+window.mostrarResultadoUI           = mostrarResultadoUI;
+window.handleLogout                 = handleLogout;

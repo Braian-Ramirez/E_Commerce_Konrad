@@ -597,3 +597,465 @@
     from { opacity: 0; transform: translateY(-30px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
+/* =====================================
+   PANEL MIS PRODUCTOS
+===================================== */
+.products-panel {
+    max-width: 1100px;
+    margin: 0 auto;
+    width: 100%;
+    animation: fadeInDown 0.5s ease;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.panel-header h2 {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: white;
+    margin: 0;
+}
+
+/* Botón Agregar Producto */
+.btn-add-product {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, var(--neo-orange), #ff8c42);
+    border: none;
+    color: white;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 700;
+    font-family: 'Outfit', sans-serif;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(255, 106, 0, 0.3);
+}
+
+.btn-add-product span {
+    font-size: 1.3rem;
+    line-height: 1;
+}
+
+.btn-add-product:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(255, 106, 0, 0.5);
+}
+
+/* Empty State */
+.products-empty-state {
+    text-align: center;
+    padding: 80px 40px;
+    border: 1px dashed rgba(255, 106, 0, 0.3);
+    border-radius: 24px;
+    background: rgba(255, 106, 0, 0.02);
+    animation: fadeInDown 0.5s ease;
+}
+
+.empty-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+}
+
+.products-empty-state h3 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: white;
+}
+
+.products-empty-state p {
+    color: #64748b;
+    font-size: 0.95rem;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.btn-add-product-empty {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 28px;
+    padding: 14px 32px;
+    background: transparent;
+    border: 2px solid var(--neo-orange);
+    color: var(--neo-orange);
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 700;
+    font-family: 'Outfit', sans-serif;
+    transition: all 0.3s ease;
+}
+
+.btn-add-product-empty:hover {
+    background: var(--neo-orange);
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(255, 106, 0, 0.4);
+}
+
+/* Loading Spinner */
+.products-loading {
+    text-align: center;
+    padding: 60px;
+    color: #64748b;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255, 106, 0, 0.2);
+    border-top-color: var(--neo-orange);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Grid de tarjetas de producto */
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+    animation: fadeInDown 0.4s ease;
+}
+
+.product-card {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 20px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    position: relative;
+}
+
+.product-card:hover {
+    transform: translateY(-6px);
+    border-color: rgba(255, 106, 0, 0.3);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
+}
+
+.product-card-image {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    background: rgba(255, 255, 255, 0.03);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    color: rgba(255, 255, 255, 0.1);
+}
+
+.product-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.product-card-body {
+    padding: 16px;
+}
+
+.product-card-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.product-card-meta {
+    font-size: 0.8rem;
+    color: #64748b;
+    margin-bottom: 12px;
+}
+
+.product-card-price {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--neo-orange);
+}
+
+.product-card-stock {
+    font-size: 0.78rem;
+    color: #64748b;
+    margin-top: 4px;
+}
+
+.product-card-actions {
+    display: flex;
+    gap: 8px;
+    padding: 12px 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.btn-card-action {
+    flex: 1;
+    padding: 8px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: transparent;
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-family: 'Outfit', sans-serif;
+    transition: all 0.2s;
+}
+
+.btn-card-action.danger:hover {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.4);
+    color: #f87171;
+}
+
+.btn-card-action:hover {
+    background: rgba(255, 106, 0, 0.08);
+    border-color: var(--neo-orange);
+    color: var(--neo-orange);
+}
+
+.product-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge-new {
+    background: rgba(46, 213, 115, 0.15);
+    color: #2ed573;
+    border: 1px solid rgba(46, 213, 115, 0.3);
+}
+
+.badge-used {
+    background: rgba(255, 184, 0, 0.15);
+    color: #ffb800;
+    border: 1px solid rgba(255, 184, 0, 0.3);
+}
+
+/* =====================================
+   MODAL CREAR PRODUCTO
+===================================== */
+.product-modal-content {
+    max-width: 900px !important;
+    width: 95% !important;
+    text-align: left !important;
+    padding: 40px !important;
+}
+
+.product-form-layout {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 32px;
+    align-items: start;
+}
+
+.product-specific-form {
+    gap: 14px;
+}
+
+.product-specific-form .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.product-specific-form label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.product-specific-form input,
+.product-specific-form select,
+.product-specific-form textarea {
+    padding: 12px 14px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    border-radius: 10px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.3s;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.product-specific-form input:focus,
+.product-specific-form select:focus,
+.product-specific-form textarea:focus {
+    border-color: var(--neo-orange);
+    background: rgba(255, 106, 0, 0.04);
+}
+
+.product-specific-form select option {
+    background: #1a1512;
+    color: white;
+}
+
+.product-specific-form textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.form-row-product {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+/* Sidebar del modal */
+.product-form-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    position: sticky;
+    top: 20px;
+}
+
+.image-upload-section {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 106, 0, 0.2);
+    border-radius: 16px;
+    padding: 20px;
+}
+
+.image-upload-title {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 4px;
+}
+
+.image-preview-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.image-add-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    aspect-ratio: 1;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px dashed rgba(255, 106, 0, 0.4);
+    border-radius: 10px;
+    cursor: pointer;
+    color: var(--neo-orange);
+    font-size: 1.5rem;
+    transition: all 0.2s;
+    grid-column: 1 / -1;
+    padding: 20px 0;
+}
+
+.image-add-btn small {
+    font-size: 0.75rem;
+    font-family: 'Outfit', sans-serif;
+}
+
+.image-add-btn:hover {
+    background: rgba(255, 106, 0, 0.08);
+    border-color: var(--neo-orange);
+}
+
+.image-preview-thumb {
+    aspect-ratio: 1;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+}
+
+.image-preview-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.image-preview-thumb .thumb-badge {
+    position: absolute;
+    bottom: 4px;
+    left: 4px;
+    background: var(--neo-orange);
+    color: white;
+    font-size: 0.6rem;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-weight: 700;
+}
+
+/* Botones de acción del modal */
+.product-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.btn-cancelar-producto {
+    padding: 12px;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #64748b;
+    border-radius: 50px;
+    cursor: pointer;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.btn-cancelar-producto:hover {
+    border-color: rgba(239, 68, 68, 0.4);
+    color: #f87171;
+    background: rgba(239, 68, 68, 0.05);
+}
+
+#btn-crear-producto {
+    margin: 0;
+    width: 100%;
+    padding: 14px;
+}
+
+/* Responsive del layout de producto */
+@media (max-width: 768px) {
+    .product-form-layout {
+        grid-template-columns: 1fr;
+    }
+    .form-row-product {
+        grid-template-columns: 1fr;
+    }
+    .product-modal-content {
+        padding: 24px !important;
+    }
+}
