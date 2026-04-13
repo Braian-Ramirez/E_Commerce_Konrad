@@ -32,8 +32,26 @@ class ComentarioProductoSerializer(serializers.ModelSerializer):
         return "Usuario Konrad"
     class Meta:
         model = ComentarioProducto
-        fields = ['id', 'producto', 'comprador', 'comprador_nombre', 'orden', 'comentario', 'calificacion', 'fecha']
-        read_only_fields = ['fecha', 'comprador']
+        fields = [
+            'id', 'producto', 'comprador', 'comprador_nombre', 
+            'comentario', 'calificacion', 'respuesta_vendedor', 
+            'fecha_respuesta', 'fecha'
+        ]
+        read_only_fields = ['fecha', 'comprador', 'fecha_respuesta']
+
+# Serializador Preguntas
+class PreguntaProductoSerializer(serializers.ModelSerializer):
+    comprador_nombre = serializers.SerializerMethodField()
+    
+    def get_comprador_nombre(self, obj):
+        if hasattr(obj, 'comprador') and obj.comprador:
+            return f"{obj.comprador.nombre} {obj.comprador.apellido}"
+        return "Comprador"
+
+    class Meta:
+        model = PreguntaProducto
+        fields = ['id', 'producto', 'comprador', 'comprador_nombre', 'pregunta', 'respuesta', 'fecha_pregunta', 'fecha_respuesta']
+        read_only_fields = ['fecha_pregunta', 'fecha_respuesta', 'comprador']
 
 class PreguntaProductoSerializer(serializers.ModelSerializer):
     comprador_nombre = serializers.ReadOnlyField(source='comprador.nombre')
@@ -58,6 +76,9 @@ class ProductoSerializer(serializers.ModelSerializer):
             'color', 'tamano', 'peso', 'talla', 'condicion', 
             'cantidad', 'valor', 'fecha_publicacion', 'imagenes', 'comentarios', 'preguntas'
         ]
+        extra_kwargs = {
+            'vendedor': {'read_only': True}
+        }
 
 # Serializador CostoDomicilio
 class CostoDomicilioSerializer(serializers.ModelSerializer):

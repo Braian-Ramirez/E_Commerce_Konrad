@@ -102,6 +102,8 @@ class ComentarioProducto(models.Model):
     orden = models.ForeignKey('orders.Orden', on_delete=models.SET_NULL, null=True, blank=True, related_name='comentarios_productos')
     comentario = models.TextField()
     calificacion = models.IntegerField(default=10, help_text="Calificación de 1 a 10")
+    respuesta_vendedor = models.TextField(blank=True, null=True)
+    fecha_respuesta = models.DateTimeField(blank=True, null=True)
     fecha = models.DateTimeField(auto_now_add=True)
 
     class Meta:

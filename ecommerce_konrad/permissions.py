@@ -25,6 +25,23 @@ class IsVendorOwnerOrReadOnly(permissions.BasePermission):
         # obj debe tener un atributo 'vendedor'
         return obj.vendedor == persona.vendedor_profile
 
+class IsProductVendor(permissions.BasePermission):
+    """
+    Permite acceso si el usuario es el vendedor del PRODUCTO relacionado 
+    al objeto (ej: Comentario o Pregunta).
+    """
+    def has_object_permission(self, request, view, obj):
+        if not hasattr(request.user, 'persona_profile'):
+            return False
+        persona = request.user.persona_profile
+        if not hasattr(persona, 'vendedor_profile'):
+            return False
+            
+        # El objeto (comentario/pregunta) tiene relación 'producto'
+        if hasattr(obj, 'producto'):
+            return obj.producto.vendedor == persona.vendedor_profile
+        return False
+
 # clase administrador permisos de lectura
 class IsAdminOrReadOnly(permissions.BasePermission):
     """
