@@ -65,6 +65,12 @@
     letter-spacing: 1px;
 }
 
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
 /* Sidebar Estilo Neo-Orange */
 .layout-body {
     display: flex;
@@ -1058,4 +1064,36 @@
     .product-modal-content {
         padding: 24px !important;
     }
-}
+}
+/* ------------------------------------------
+   SISTEMA DE NOTIFICACIONES (TOAST)
+------------------------------------------ */
+.vp-toast {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    z-index: 9999;
+    padding: 13px 22px;
+    border-radius: 12px;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: white;
+    pointer-events: none;
+    animation: toastIn 0.35s ease;
+}
+
+.vp-toast.success {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    box-shadow: 0 8px 25px rgba(34, 197, 94, 0.35);
+}
+
+.vp-toast.error {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    box-shadow: 0 8px 25px rgba(239, 68, 68, 0.35);
+}
+
+@keyframes toastIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+}

@@ -7,6 +7,8 @@ class Notificacion(models.Model):
         ('SOLICITUD', 'Actualización de Solicitud'),
         ('COMPRA', 'Nueva Compra'),
         ('SISTEMA', 'Aviso del Sistema'),
+        ('PREGUNTA', 'Nueva Pregunta'),
+        ('RESPUESTA', 'Respuesta Recibida'),
     ]
 
     persona = models.ForeignKey(Persona, on_delete=models.CASCADE, related_name='notificaciones')

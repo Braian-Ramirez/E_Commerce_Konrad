@@ -157,6 +157,19 @@ class DetalleOrdenViewSet(viewsets.ModelViewSet):
             raise PermissionDenied("La orden ya fue procesada")
         instance.delete()    
 
+    @action(detail=False, methods=['get'])
+    def mis_ventas(self, request):
+        user = request.user
+        if not hasattr(user, 'persona_profile'):
+            return Response([])
+        # Filtrar solo productos que le pertenecen al vendedor y de órdenes confirmadas
+        ventas = DetalleOrden.objects.filter(
+            producto__vendedor=user.persona_profile
+        ).exclude(orden__estado='CARRITO').order_by('-orden__fecha')
+        
+        serializer = self.get_serializer(ventas, many=True)
+        return Response(serializer.data)
+
 #Vista CalificacionProducto
 class CalificacionProductoViewSet(viewsets.ModelViewSet):
     queryset = CalificacionProducto.objects.all()
