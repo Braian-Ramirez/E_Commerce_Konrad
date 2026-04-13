@@ -1,11 +1,21 @@
 from rest_framework import serializers
 from .models import Orden, DetalleOrden, CalificacionProducto
+from payments.serializers import PagoOrdenSerializer
 
 # 1. Primero el Detalle (porque la Orden lo usará)
 class DetalleOrdenSerializer(serializers.ModelSerializer):
     producto_nombre = serializers.ReadOnlyField(source='producto.nombre')
     producto_imagen = serializers.SerializerMethodField()
+    ya_calificado = serializers.SerializerMethodField()
     
+    def get_ya_calificado(self, obj):
+        from products.models import ComentarioProducto
+        return ComentarioProducto.objects.filter(
+            producto=obj.producto, 
+            orden=obj.orden, 
+            comprador=obj.orden.comprador
+        ).exists()
+
     def get_producto_imagen(self, obj):
         if hasattr(obj.producto, 'imagenes') and obj.producto.imagenes.exists():
             return obj.producto.imagenes.first().imagen
@@ -17,7 +27,7 @@ class DetalleOrdenSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DetalleOrden
-        fields = ['id', 'orden', 'producto', 'producto_nombre', 'producto_imagen', 'cantidad', 'valor_unitario']
+        fields = ['id', 'orden', 'producto', 'producto_nombre', 'producto_imagen', 'cantidad', 'valor_unitario', 'ya_calificado']
 
     def validate(self, attrs):
         # Para creación (self.instance es None), obtenemos de attrs directamente
@@ -48,6 +58,7 @@ class DetalleOrdenSerializer(serializers.ModelSerializer):
 # 2. Luego la Orden
 class OrdenSerializer(serializers.ModelSerializer):
     detalles = DetalleOrdenSerializer(many=True, read_only=True)
+    pagos = PagoOrdenSerializer(many=True, read_only=True)
     comprador_nombre = serializers.ReadOnlyField(source='comprador.nombre')
     
     class Meta:
@@ -55,7 +66,7 @@ class OrdenSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'comprador', 'comprador_nombre', 'fecha', 'estado', 
             'tipo_entrega', 'costo_envio', 'total_iva', 
-            'total_comision', 'total_final', 'detalles' 
+            'total_comision', 'total_final', 'detalles', 'pagos'
         ]
         # comprador se inyecta desde perform_create; no es necesario en el body del request
         read_only_fields = ['comprador', 'comprador_nombre', 'fecha', 'estado',

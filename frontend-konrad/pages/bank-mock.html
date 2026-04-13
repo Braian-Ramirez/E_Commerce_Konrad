@@ -15,6 +15,8 @@
         button { width: 100%; padding: 15px; background: #004a99; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1.1rem; margin-top: 20px; transition: background 0.3s; }
         button:hover { background: #003366; }
         .security-footer { margin-top: 30px; font-size: 0.8rem; color: #888; border-top: 1px solid #eee; padding-top: 15px; }
+        .cancel-btn { background: transparent; border: 1px solid #cbd5e1; color: #475569; margin-top: 10px; font-size: 0.9rem; }
+        .cancel-btn:hover { background: #f8fafc; }
     </style>
 </head>
 <body>
@@ -23,17 +25,9 @@
             <div class="bank-name" id="display-bank">Banco</div>
             <span class="pse-badge">Socio PSE</span>
         </div>
-        <h2>Pagos Seguros en Línea</h2>
+        <h2 id="modal-title">Pagos Seguros en Línea</h2>
         <form id="login-form">
-            <select required>
-                <option value="">Tipo de identificación</option>
-                <option>Cédula de Ciudadanía</option>
-                <option>NIT</option>
-                <option>Cédula de Extranjería</option>
-            </select>
-            <input type="text" placeholder="Número de identificación" required>
-            <input type="password" placeholder="Clave Personal / Virtual" required>
-            <button type="submit">Autorizar Pago</button>
+            <!-- Cargado dinámicamente -->
         </form>
         <div class="security-footer">
             🔒 Usted está en un entorno seguro de su entidad bancaria.
@@ -41,20 +35,129 @@
     </div>
 
     <script>
-        // Capturar el nombre del banco desde la URL
         const params = new URLSearchParams(window.location.search);
-        const banco = params.get('banco') || 'Tu Banco';
-        document.getElementById('display-bank').innerText = banco;
+        let banco = params.get('banco') || 'Tu Banco';
+        const cuenta = params.get('cuenta') || '';
+        const tipoPago = params.get('tipo') || 'PSE';
+        const isNew = cuenta === 'NEW' || cuenta === '';
 
-        document.getElementById('login-form').onsubmit = (e) => {
+        document.getElementById('display-bank').innerText = banco;
+        if (tipoPago === 'TARJETA') {
+            document.querySelector('.pse-badge').innerText = "3D Secure";
+            document.querySelector('.pse-badge').style.background = "#1d4ed8";
+        }
+
+        let currentState = isNew ? 'DATA_ENTRY' : 'OTP_BUTTON';
+        let storedNewCard = cuenta;
+        let storedTitular = 'Titular Konrad';
+        
+        const formEl = document.getElementById('login-form');
+
+        function renderState() {
+            if (currentState === 'DATA_ENTRY') {
+                if (tipoPago === 'TARJETA') {
+                    document.getElementById('modal-title').innerText = "Ingreso de Nueva Tarjeta";
+                    formEl.innerHTML = `
+                        <input type="text" id="new-bank" placeholder="Nombre de tu banco" required>
+                        <select id="new-card-type" required>
+                            <option value="">Tipo de Tarjeta</option>
+                            <option value="Crédito">Crédito</option>
+                            <option value="Débito">Débito</option>
+                        </select>
+                        <input type="text" id="new-holder" placeholder="Nombre en la tarjeta" required>
+                        <input type="text" id="new-num" placeholder="Número de tarjeta (16 dígitos)" required minlength="14" maxlength="19">
+                        <div style="display:flex; gap:10px;">
+                            <input type="text" placeholder="MM/YY" required style="flex:1;">
+                            <input type="password" placeholder="CVV" required style="flex:1;">
+                        </div>
+                        <button type="submit">Continuar</button>
+                    `;
+                } else {
+                    document.getElementById('modal-title').innerText = "Credenciales PSE";
+                    formEl.innerHTML = `
+                        ${isNew ? '<input type="text" id="new-bank" placeholder="Nombre de tu banco (ej: Davivienda, Nequi)" required>' : ''}
+                        <select required>
+                            <option value="">Tipo de identificación</option>
+                            <option>Cédula de Ciudadanía</option>
+                            <option>NIT</option>
+                        </select>
+                        <input type="text" id="new-num" placeholder="Número de identificación" required>
+                        <input type="text" id="new-holder" placeholder="Nombre del titular" required>
+                        ${isNew ? '<input type="email" id="new-email" placeholder="Correo para OTP" required>' : ''}
+                        <input type="password" placeholder="Clave Personal" required>
+                        <button type="submit">Continuar</button>
+                    `;
+                }
+                formEl.innerHTML += `<button type="button" class="cancel-btn" onclick="window.close()">Cancelar Pago</button>`;
+            } else if (currentState === 'OTP_BUTTON') {
+                document.getElementById('modal-title').innerText = "Verificación de Seguridad";
+                formEl.innerHTML = `
+                    <p style="color:#555;margin-bottom:20px;font-size:0.9rem;">Para proteger tu cuenta, te enviaremos un código de seguridad.</p>
+                    <button type="button" id="btn-send-code" style="background:#2563eb;">✉️ Enviar código al correo</button>
+                    <button type="button" class="cancel-btn" onclick="window.close()">Cancelar</button>
+                `;
+                document.getElementById('btn-send-code').onclick = async () => {
+                    document.getElementById('btn-send-code').innerText = "Enviando...";
+                    const email = document.getElementById('new-email')?.value || '';
+                    const token = localStorage.getItem('access_token');
+                    try {
+                        await fetch('http://127.0.0.1:8000/api/v1/notifications/enviar-otp/', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': token?`Bearer ${token}`:'' },
+                            body: JSON.stringify({ email_destino: email })
+                        });
+                    } catch(e) {}
+                    currentState = 'OTP_ENTRY';
+                    renderState();
+                };
+            } else if (currentState === 'OTP_ENTRY') {
+                document.getElementById('modal-title').innerText = "Ingresa el Código";
+                formEl.innerHTML = `
+                    <input type="text" id="otp-code" placeholder="Código de 6 dígitos" required maxlength="6" style="text-align:center; font-size:1.5rem; letter-spacing:5px;">
+                    <button type="submit">Validar y Pagar</button>
+                    <button type="button" class="cancel-btn" onclick="currentState='OTP_BUTTON'; renderState();">Volver</button>
+                `;
+            }
+        }
+
+        formEl.onsubmit = (e) => {
             e.preventDefault();
-            // 1. Avisar al dashboard que el pago fue autorizado
+            if (currentState === 'DATA_ENTRY') {
+                if (isNew) {
+                    const b = document.getElementById('new-bank').value;
+                    if(b) banco = b;
+                    storedTitular = document.getElementById('new-holder').value;
+                    storedNewCard = document.getElementById('new-num').value;
+                }
+                const cardType = document.getElementById('new-card-type')?.value;
+                if (cardType === 'Crédito') {
+                    finishPaymentSuccess();
+                } else {
+                    currentState = 'OTP_BUTTON';
+                    renderState();
+                }
+            } else if (currentState === 'OTP_ENTRY') {
+                finishPaymentSuccess();
+            }
+        };
+
+        function finishPaymentSuccess() {
             if (window.opener) {
+                window.opener.postMessage(JSON.stringify({
+                    status: 'pago_mock_exitoso',
+                    newCardNum: storedNewCard,
+                    titular: storedTitular,
+                    banco_nombre: banco,
+                    tipoMedio: (tipoPago === 'TARJETA') ? 'TARJETA' : 'CUENTA'
+                }), '*');
                 window.opener.postMessage('pago_pse_exitoso', '*');
             }
-            // 2. Cerrar la ventana
-            window.close();
-        };
+            document.getElementById('modal-title').innerText = "¡Éxito!";
+            formEl.innerHTML = `<p style="color:#22c55e;font-weight:bold;">Pago autorizado correctamente.</p>`;
+            setTimeout(() => window.close(), 1200);
+        }
+
+        renderState();
     </script>
 </body>
 </html>

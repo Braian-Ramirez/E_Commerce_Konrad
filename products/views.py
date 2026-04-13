@@ -173,6 +173,27 @@ class ComentarioProductoViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         user = self.request.user
+        producto_id = self.request.data.get('producto')
+        orden_id = self.request.data.get('orden')
+        
+        from vendors.models import Persona
+        persona, _ = Persona.objects.get_or_create(user=user)
+
+        # Evitar duplicados por compra (si se proporciona orden)
+        if orden_id:
+            if ComentarioProducto.objects.filter(comprador=persona, producto_id=producto_id, orden_id=orden_id).exists():
+                from rest_framework.exceptions import ValidationError
+                raise ValidationError("Ya has calificado este producto para esta compra.")
+
+        serializer.save(comprador=persona)
+
+# Vista pregunta producto
+class PreguntaProductoViewSet(viewsets.ModelViewSet):
+    queryset = PreguntaProducto.objects.all()
+    serializer_class = PreguntaProductoSerializer
+
+    def perform_create(self, serializer):
+        user = self.request.user
         from vendors.models import Persona
         persona, _ = Persona.objects.get_or_create(user=user)
         serializer.save(comprador=persona)

@@ -53,6 +53,13 @@ class PreguntaProductoSerializer(serializers.ModelSerializer):
         fields = ['id', 'producto', 'comprador', 'comprador_nombre', 'pregunta', 'respuesta', 'fecha_pregunta', 'fecha_respuesta']
         read_only_fields = ['fecha_pregunta', 'fecha_respuesta', 'comprador']
 
+class PreguntaProductoSerializer(serializers.ModelSerializer):
+    comprador_nombre = serializers.ReadOnlyField(source='comprador.nombre')
+    class Meta:
+        model = PreguntaProducto
+        fields = ['id', 'producto', 'comprador', 'comprador_nombre', 'pregunta', 'respuesta', 'fecha_pregunta', 'fecha_respuesta']
+        read_only_fields = ['fecha_pregunta', 'fecha_respuesta', 'comprador']
+
 # Serializador Producto (Enriquecido para Producción)
 class ProductoSerializer(serializers.ModelSerializer):
     imagenes = ImagenProductoSerializer(many=True, read_only=True)

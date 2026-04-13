@@ -266,7 +266,9 @@ function renderPaymentSelector(f = "ALL") {
     });
 
     if (list.length === 0) {
-        s.innerHTML = `<option value="">Sin medios para este tipo</option>`;
+        s.innerHTML += `<option value="NEW">✨ Agregar Método Nuevo</option>`;
+    } else {
+        s.innerHTML += `<option value="NEW" style="font-weight:bold; color:var(--neo-orange);">✨ (+) Usar otro medio no guardado</option>`;
     }
 }
 
@@ -280,7 +282,6 @@ function setupPaymentFilters() {
 
         label.addEventListener('click', (e) => {
             e.stopPropagation();
-            // Marcar el radio manualmente (por si acaso)
             radio.checked = true;
             selectedPaymentType = radio.value;
 
@@ -293,7 +294,16 @@ function setupPaymentFilters() {
             label.style.borderColor = 'var(--primary)';
             label.style.background = 'rgba(99,102,241,0.1)';
 
-            renderPaymentSelector(selectedPaymentType);
+            const cardCont = document.getElementById('cardSection');
+            const consigCont = document.getElementById('inline-consignacion-form');
+            
+            if (selectedPaymentType === 'CONSIGNACION') {
+                if(cardCont) cardCont.style.display = 'none';
+                if(consigCont) consigCont.style.display = 'block';
+            } else {
+                if(consigCont) consigCont.style.display = 'none';
+                renderPaymentSelector(selectedPaymentType); // Muestra el cardSection adentro
+            }
         });
     });
 
@@ -340,11 +350,24 @@ function showPayResult(aprobado, totalStr, backendOrdenId = null) {
         document.getElementById('payTitle').style.color   = '#22c55e';
         document.getElementById('paySubtitle').textContent = `Tu pedido fue procesado exitosamente por ${totalStr} vía ${medioNombre}.`;
         document.getElementById('payRef').textContent     = `Referencia: ${ref}`;
-        document.getElementById('payActions').innerHTML   = `
-            <button onclick="pagoExitoso(${backendOrdenId ? backendOrdenId : 'null'})" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9);color:white;border:none;padding:15px 30px;border-radius:12px;font-weight:800;cursor:pointer;font-size:1rem;">
-                📦 Ver mis pedidos
-            </button>`;
-        setTimeout(() => pagoExitoso(backendOrdenId), 4000);
+        
+        // Si el medio es nuevo, preguntamos si desea guardarlo
+        if (window._wasNewPayment) {
+            document.getElementById('payActions').innerHTML   = `
+                <div style="width:100%; text-align:center;">
+                    <p style="color:white; margin-bottom:15px; font-weight:600;">¿Deseas guardar este medio de pago para futuras compras?</p>
+                    <div style="display:flex; gap:10px; justify-content:center;">
+                        <button id="btnSavePayment" onclick="window.guardarMedioDePago(${backendOrdenId ? backendOrdenId : 'null'})" style="background:#22c55e; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:700;">Sí, Guardar</button>
+                        <button onclick="pagoExitoso(${backendOrdenId ? backendOrdenId : 'null'})" style="background:#64748b; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:700;">No por ahora</button>
+                    </div>
+                </div>`;
+        } else {
+            document.getElementById('payActions').innerHTML   = `
+                <button onclick="pagoExitoso(${backendOrdenId ? backendOrdenId : 'null'})" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9);color:white;border:none;padding:15px 30px;border-radius:12px;font-weight:800;cursor:pointer;font-size:1rem;">
+                    📦 Ver mis pedidos
+                </button>`;
+            setTimeout(() => pagoExitoso(backendOrdenId), 4000);
+        }
 
     } else {
         document.getElementById('payIcon').textContent    = '❌';
@@ -399,59 +422,220 @@ function setupCheckout() {
             }
         }
 
-        // 3. Validar medio de pago seleccionado (excepto en consignación)
+        // 3. Validar medio de pago seleccionado
         const type = selectedPaymentType || document.querySelector('input[name="paymentType"]:checked')?.value;
         const medioSel = document.getElementById('paymentSelector')?.value;
-        if (type !== 'CONSIGNACION' && !medioSel) {
-            showToast("⚠️ Selecciona un medio de pago.", true); return;
+        
+        let refConsig = '';
+        if (type === 'CONSIGNACION') {
+            refConsig = document.getElementById('inline-consignacion-ref')?.value;
+            if (!refConsig || refConsig.trim() === '') {
+                showToast("⚠️ Es necesario ingresar un comprobante/referencia para continuar.", true); return;
+            }
+        } else if (!medioSel) {
+            showToast("⚠️ Selecciona un medio de pago guardado o elige nuevo.", true); return;
         }
 
         btn.disabled = true;
 
-        // Mostrar pantalla de "procesando"
-        showProcessingScreen();
-
-        // Simular validación del banco (1.5s delay)
-        await sleep(1500);
-
-        // Intentar backend real (sin bloquear si falla)
-        let backendOk = false;
-        let ordenId = null;
-        try {
-            const delivery = document.getElementById('deliveryType')?.value || 'RECOGER';
-            const resO = await fetch(API_ORDERS, {
-                method: "POST", signal: AbortSignal.timeout(4000),
-                headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-                body: JSON.stringify({ tipo_entrega: delivery })
-            });
-            if (resO.ok) {
-                const od = await resO.json();
-                ordenId = od.id;
-                for (const det of cartDetails) {
-                    await fetch(API_DETALLES, {
-                        method: "POST", signal: AbortSignal.timeout(4000),
-                        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-                        body: JSON.stringify({ orden: ordenId, ...det })
-                    }).catch(() => {});
-                }
-                const resC = await fetch(`${API_ORDERS}${ordenId}/checkout/`, {
-                    method: "POST", signal: AbortSignal.timeout(4000),
-                    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` }
-                });
-                backendOk = resC.ok;
+        if (type === 'PSE' || type === 'TARJETA') {
+            let numCuenta = '';
+            let bancoName = '';
+            
+            if (medioSel === 'NEW') {
+                numCuenta = 'NEW';
+                bancoName = type === 'TARJETA' ? 'Emisor de Tarjeta' : 'Nuevo Banco (PSE)';
+            } else {
+                const selectedText = document.getElementById('paymentSelector').selectedOptions[0]?.text || '';
+                const isNequiDaviplata = type === 'PSE' && (selectedText.toLowerCase().includes('nequi') || selectedText.toLowerCase().includes('daviplata'));
+                const defaultBankName = type === 'TARJETA' ? 'Visa / Mastercard' : 'PSE';
+                bancoName = isNequiDaviplata ? 'Nequi / Daviplata' : (selectedText.replace(/💳 |📱 /g, '').split('****')[0].trim() || defaultBankName);
+                numCuenta = selectedText.includes('****') ? ('****' + selectedText.split('****')[1]) : '';
             }
-        } catch(e) { /* Backend no disponible → modo simulado */ }
 
-        // Cerrar pantalla procesando
-        closeProcessingScreen();
+            const url = `bank-mock.html?tipo=${type}&banco=${encodeURIComponent(bancoName)}&cuenta=${encodeURIComponent(numCuenta)}`;
+            window.open(url, 'Sucursal_Virtual_Mock', 'width=500,height=750,resizable=no');
+            // Cargar datos a la global para cuando regrese el event
+            window._tempCartPaymentData = { type, cardNum: 'N/A', refConsig: '', isNew: (medioSel === 'NEW') };
+            return;
+        }
 
-        // El pago SIEMPRE se "aprueba" en demo (es simulado)
-        // Puedes cambiar a false para probar el rechazo
-        const totalEl = document.getElementById('totalVal');
-        const totalStr = totalEl?.textContent || '$0';
-        showPayResult(true, totalStr, backendOk ? ordenId : null);
+        // Si es CONSIGNACIÓN va directo al backend
+        await window.procesarPagoFinal(type, 'N/A', refConsig);
     });
 }
+
+// Se ejecuta directamente o después de que vuelve de bank-mock.html
+window.procesarPagoFinal = async (type, modalOutCardNum = null, modalOutRefConsig = null) => {
+    // Mostrar pantalla de "procesando"
+    showProcessingScreen();
+
+    // 1. Simulación PASARELA DE PAGOS (igual que Vendedor)
+    let cardNum = modalOutCardNum || 'N/A';
+    // Si viene de un pago guardado extrae número:
+    if (type === 'TARJETA' && !modalOutCardNum) {
+        const option = document.getElementById('paymentSelector')?.selectedOptions[0]?.text || '';
+        cardNum = option.includes('****') ? option.split('****').pop() : 'N/A';
+    }
+    
+    let refParam = modalOutRefConsig || '';
+
+    try {
+        const payload = { 
+            metodo: type === 'TARJETA' ? 'Tarjeta' : (type === 'PSE' ? 'PSE' : 'Consignacion'),
+            numero_tarjeta: cardNum,
+            referencia_consignacion: refParam
+        };
+        const responseMock = await fetch('http://127.0.0.1:8000/mocks/pagos/', {
+            method: 'POST', body: JSON.stringify(payload), headers: { 'Content-Type': 'application/json' }
+        });
+        const dataMock = await responseMock.json();
+
+        if (dataMock.estado !== 'EXITOSO') {
+            closeProcessingScreen();
+            showPayResult(false, "$0", null);
+            return;
+        }
+    } catch(e) {
+        // Fallback local si el mock no responde
+        await sleep(1500); 
+    }
+
+    // 2. Afectación Real a Base de Datos
+    let backendOk = false;
+    let ordenId = null;
+    try {
+        const delivery = document.getElementById('deliveryType')?.value || 'RECOGER';
+        const resO = await fetch(API_ORDERS, {
+            method: "POST", signal: AbortSignal.timeout(4000),
+            headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+            body: JSON.stringify({ tipo_entrega: delivery })
+        });
+        if (resO.ok) {
+            const od = await resO.json();
+            ordenId = od.id;
+            for (const det of cartDetails) {
+                await fetch(API_DETALLES, {
+                    method: "POST", signal: AbortSignal.timeout(4000),
+                    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+                    body: JSON.stringify({ orden: ordenId, ...det })
+                }).catch(() => {});
+            }
+            // Determinar nombre del banco para el backend
+            let bankNameForBackend = 'Pago Konrad';
+            if (type === 'TARJETA') {
+                const opt = document.getElementById('paymentSelector')?.selectedOptions[0]?.text || '';
+                bankNameForBackend = window._lastNewPaymentData?.banco_nombre || opt.split('****')[0].trim() || 'Tarjeta';
+            } else if (type === 'PSE') {
+                const opt = document.getElementById('paymentSelector')?.selectedOptions[0]?.text || '';
+                bankNameForBackend = window._lastNewPaymentData?.banco_nombre || opt.trim() || 'PSE';
+            } else if (type === 'CONSIGNACION') {
+                bankNameForBackend = 'Consignación Konrad';
+            }
+
+            const resC = await fetch(`${API_ORDERS}${ordenId}/checkout/`, {
+                method: "POST", signal: AbortSignal.timeout(4000),
+                headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+                body: JSON.stringify({ 
+                    metodo_pago: type,
+                    banco_nombre: bankNameForBackend
+                })
+            });
+            backendOk = resC.ok;
+        }
+    } catch(e) { /* Backend no disponible → modo simulado */ }
+
+    // 3. Resultado Final
+    closeProcessingScreen();
+    const totalEl = document.getElementById('totalVal');
+    const totalStr = totalEl?.textContent || '$0';
+    showPayResult(true, totalStr, backendOk ? ordenId : null);
+};
+
+// Listener para el popup de PSE/Tarjeta (bank-mock.html)
+window.addEventListener('message', async (event) => {
+    const btn = document.getElementById("checkoutBtn");
+    
+    if (event.data === 'pago_mock_cancelado') {
+        if(btn) btn.disabled = false;
+        return;
+    }
+
+    let isSuccess = false;
+    let cardDataFromMock = 'N/A';
+
+    // Parseamos posibles objetos JSON (usado por pago de tarjeta nueva)
+    if (typeof event.data === 'string' && event.data.startsWith('{')) {
+        try {
+            const parsed = JSON.parse(event.data);
+            if (parsed.status === 'pago_mock_exitoso') {
+                isSuccess = true;
+                if (parsed.newCardNum) cardDataFromMock = parsed.newCardNum;
+                // Guardamos la DATA COMPLETA para el guardado automático posterior
+                window._lastNewPaymentData = parsed;
+            }
+        } catch(e) {}
+    } else if (event.data === 'pago_mock_exitoso' || event.data === 'pago_pse_exitoso') {
+        isSuccess = true;
+    }
+
+    if (isSuccess && window._tempCartPaymentData) {
+        if(btn) btn.disabled = true;
+        
+        // Guardar si era un medio nuevo para preguntar al final
+        window._wasNewPayment = window._tempCartPaymentData.isNew;
+
+        // Si ingresaron tarjeta nueva, usa cardDataFromMock. Si no, usa el temp de la config
+        const finalCardNum = cardDataFromMock !== 'N/A' ? cardDataFromMock : window._tempCartPaymentData.cardNum;
+        const finalType = window._tempCartPaymentData.type;
+        const finalRef = window._tempCartPaymentData.refConsig;
+        
+        // RESET EARLY
+        window._tempCartPaymentData = null; 
+
+        await window.procesarPagoFinal(finalType, finalCardNum, finalRef);
+    }
+});
+
+// FUNCIÓN PARA GUARDAR EL MEDIO AUTOMÁTICAMENTE
+window.guardarMedioDePago = async (backendOrdenId) => {
+    const btn = document.getElementById('btnSavePayment');
+    if(btn) { btn.disabled = true; btn.textContent = 'Guardando...'; }
+
+    if (!window._lastNewPaymentData) {
+        showToast("No hay datos para guardar", true);
+        pagoExitoso(backendOrdenId);
+        return;
+    }
+
+    try {
+        const res = await fetch('http://127.0.0.1:8000/api/v1/buyers/medios-pago/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                banco_nombre: window._lastNewPaymentData.banco_nombre,
+                titular_nombre: window._lastNewPaymentData.titular,
+                tipo: window._lastNewPaymentData.tipoMedio, // TARJETA o CUENTA
+                numero_cuenta_tarjeta: window._lastNewPaymentData.newCardNum
+            })
+        });
+
+        if (res.ok) {
+            showToast("✅ Medio de pago guardado correctamente");
+            setTimeout(() => {
+                window.location.href = "/pages/payment-methods.html";
+            }, 1000);
+        } else {
+            showToast("❌ No se pudo guardar el medio", true);
+            pagoExitoso(backendOrdenId);
+        }
+    } catch(e) {
+        pagoExitoso(backendOrdenId);
+    }
+};
 
 window.pagoExitoso = async (backendOrdenId) => {
     // Refresh token
@@ -466,6 +650,11 @@ window.pagoExitoso = async (backendOrdenId) => {
         const com = sub * 0.05;
         const env = document.getElementById('deliveryType')?.value === 'DOMICILIO' ? 12000 : 0;
         
+        // Determinar el nombre del medio para el mock
+        const medioSel = document.getElementById('paymentSelector');
+        const medioNombreRaw = medioSel?.selectedOptions[0]?.text || 'Pago Electrónico';
+        const metodoTxt = window._lastNewPaymentData?.banco_nombre || (medioNombreRaw.split('****')[0].trim());
+
         mockOrders.unshift({
             id: 'M' + Date.now().toString(36).toUpperCase(),
             estado: 'PAGADA',
@@ -476,6 +665,7 @@ window.pagoExitoso = async (backendOrdenId) => {
             total_comision: com,
             costo_envio: env,
             detalles: cartDetails.map(d => ({ ...d, producto_nombre: 'Producto #' + d.producto })),
+            pagos: [{ metodo_pago: 'TARJETA', banco_nombre: metodoTxt }], // Para que el detalle lo muestre
             simulado: true
         });
         localStorage.setItem('mock_orders', JSON.stringify(mockOrders));
@@ -490,11 +680,14 @@ window.pagoExitoso = async (backendOrdenId) => {
     // Esperamos asíncronamente a que el DB despache el carrito huérfano.
     try {
         if (currentToken) {
-            const r = await fetch(API_ORDERS, { headers: { 'Authorization': `Bearer ${currentToken}` } });
+            // Buscamos específicamente cualquier orden en CARRITO para eliminarla
+            const r = await fetch(`${API_ORDERS}?estado=CARRITO&page_size=100`, { 
+                headers: { 'Authorization': `Bearer ${currentToken}` } 
+            });
             const data = await r.json();
             const arr = Array.isArray(data) ? data : (data.results || []);
             
-            const deleteOps = arr.filter(o => o.estado === 'CARRITO').map(o => 
+            const deleteOps = arr.map(o => 
                 fetch(`${API_ORDERS}${o.id}/`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${currentToken}` } })
             );
             await Promise.all(deleteOps);

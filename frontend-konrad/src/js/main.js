@@ -42,6 +42,12 @@ function toggleFav(id) {
 
 // ─── INICIALIZACIÓN ──────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", async () => {
+    // REQUISITO: Obligar a loguearse
+    if (!token) {
+        window.location.href = '/pages/login.html';
+        return;
+    }
+
     // 0. Renderizar la interfaz según la sesión (Perfil vs Login)
     renderAuthUI();
 
@@ -331,9 +337,21 @@ window.changeQty = changeQty;
 window.handleFav = (id) => {
     const added = toggleFav(id);
     updateFavoritesPanel();
-    showToast(added ? '❤️ Añadido' : '💔 Quitado');
-    const btn = document.getElementById(`fav-${id}`);
-    if (btn) btn.innerHTML = added ? '❤️' : '🤍';
+    showToast(added ? '❤️ Añadido a favoritos' : '💔 Quitado de favoritos');
+    
+    // Actualizar botón en el GRID
+    const btnGrid = document.getElementById(`fav-${id}`);
+    if (btnGrid) {
+        btnGrid.innerHTML = added ? '❤️' : '🤍';
+        btnGrid.style.background = added ? 'rgba(239,68,68,0.2)' : 'rgba(255,255,255,0.05)';
+    }
+
+    // Actualizar botón en el MODAL DETALLE
+    const btnModal = document.getElementById(`modal-fav-${id}`);
+    if (btnModal) {
+        btnModal.innerHTML = added ? '❤️' : '🤍';
+        btnModal.style.background = added ? 'rgba(239,68,68,0.1)' : 'rgba(255,255,255,0.05)';
+    }
 };
 
 function injectFavoritesSection() {
@@ -518,20 +536,40 @@ window.openProductDetail = (p) => {
     const isUrl = mainImg.startsWith('http') || mainImg.startsWith('/');
     const vNombre = p.vendedor_nombre || 'Konrad Shop Oficial';
 
-    // Generar HTML de comentarios reales de la BD
-    const commentsHtml = (p.comentarios && p.comentarios.length > 0) 
-        ? p.comentarios.map(r => `
-            <div style="margin-bottom:15px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.03);">
-                <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
-                    <span style="color:white;font-weight:700;font-size:0.85rem;">${r.comprador_nombre}</span>
-                    <span style="color:#fbbf24;font-size:0.7rem;">${'★'.repeat(r.calificacion || 10)}${'☆'.repeat(10 - (r.calificacion || 10))}</span>
-                </div>
-                <p style="color:#94a3b8;font-size:0.75rem;line-height:1.4;margin:0;">${r.comentario}</p>
-            </div>`).join('')
-        : '<p style="color:#64748b;font-size:0.8rem;">Aún no hay reseñas de este producto.</p>';
-
     const sellerId = p.vendedor || 1;
     const sellerName = p.vendedor_nombre || 'Konrad Shop Oficial';
+
+    // Generar HTML de RESEÑAS (Historial de comentarios con estrellas)
+    const reviewsHtml = (p.comentarios && p.comentarios.length > 0)
+        ? p.comentarios.map(r => `
+            <div style="margin-bottom:12px; padding:10px; background:rgba(255,191,36,0.03); border-radius:10px; border:1px solid rgba(255,191,36,0.05);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                    <span style="color:white; font-weight:800; font-size:0.8rem;">${r.comprador_nombre}</span>
+                    <span style="color:#64748b; font-size:0.6rem;">${new Date(r.fecha).toLocaleDateString()}</span>
+                </div>
+                <div style="margin-bottom:5px;">
+                    <span style="color:#fbbf24; font-size:0.7rem;">${'★'.repeat(Math.min(10, r.calificacion || 10))}${'☆'.repeat(Math.max(0, 10 - (r.calificacion || 10)))}</span>
+                </div>
+                <p style="color:#e2e8f0; font-size:0.75rem; margin:0; line-height:1.4;">${r.comentario}</p>
+            </div>`).join('')
+        : '<p style="color:#64748b; font-size:0.75rem;">Aún no hay reseñas de compradores.</p>';
+
+    // Generar HTML de PREGUNTAS reales de la BD
+    const qsHtml = (p.preguntas && p.preguntas.length > 0) 
+        ? p.preguntas.map(q => `
+            <div style="margin-bottom:15px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.03);">
+                <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                    <span style="color:white;font-weight:700;font-size:0.85rem;">👤 ${q.comprador_nombre}</span>
+                    <span style="color:#64748b;font-size:0.65rem;">${new Date(q.fecha_pregunta).toLocaleDateString()}</span>
+                </div>
+                <p style="color:#cbd5e1;font-size:0.8rem;line-height:1.4;margin:0;">Q: ${q.pregunta}</p>
+                ${q.respuesta ? `
+                <div style="margin-top:8px;padding-left:15px;border-left:2px solid #3b82f6;animation:slideIn 0.3s ease;">
+                    <p style="color:#3b82f6;font-size:0.75rem;font-weight:800;margin:0;">Vendedor responde:</p>
+                    <p style="color:#94a3b8;font-size:0.75rem;margin:0;">${q.respuesta}</p>
+                </div>` : ''}
+            </div>`).join('')
+        : '<p style="color:#64748b; font-size:0.8rem;">Aún no hay preguntas. ¡Sé el primero!</p>';
 
     c.innerHTML = `
     <div style="display:grid;grid-template-columns:1fr 1.2fr;gap:40px;padding:5px;">
@@ -544,21 +582,31 @@ window.openProductDetail = (p) => {
                 <button onclick="moveGallery(1)" style="position:absolute;right:15px;z-index:20;background:rgba(0,0,0,0.6);border:none;color:white;width:40px;height:40px;border-radius:50%;cursor:pointer;">›</button>
             </div>
             
-            <div style="margin-top:25px;padding:22px;background:rgba(255,255,255,0.02);border-radius:20px;border:1px solid rgba(255,255,255,0.05);">
-                <div style="display:flex;align-items:center;gap:10px;margin-bottom:15px;">
-                    <div style="width:10px;height:10px;border-radius:50%;background:#22c55e;box-shadow:0 0 10px #22c55e;"></div>
-                    <p style="color:white;font-size:0.9rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;">Comunidad Konrad</p>
-                </div>
-                <div id="commentsContainer" style="max-height:220px;overflow-y:auto;padding-right:10px;margin-bottom:15px;">
-                    ${commentsHtml}
+            <div style="margin-top:25px; display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+                <!-- SECCIÓN IZQ: PREGUNTAS -->
+                <div style="padding:15px; background:rgba(255,255,255,0.01); border-radius:20px; border:1px solid rgba(255,255,255,0.03);">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+                        <div style="width:8px;height:8px;border-radius:50%;background:#3b82f6;box-shadow:0 0 8px #3b82f6;"></div>
+                        <p style="color:white;font-size:0.8rem;font-weight:800;text-transform:uppercase;">Preguntas</p>
+                    </div>
+                    <div id="questionsContainer" style="max-height:180px;overflow-y:auto;padding-right:5px;margin-bottom:12px;">
+                        ${qsHtml}
+                    </div>
+                    <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,0.05);">
+                        <textarea id="newQuestionTxt" placeholder="Pregunta algo..." 
+                            style="width:100%;height:45px;background:transparent;border:none;color:white;outline:none;resize:none;font-size:0.8rem;"></textarea>
+                        <button onclick="submitUserQuestion('${p.id}')" class="cta-primary" style="width:100%; padding:6px; font-size:0.7rem; background:#3b82f6; border-radius:8px;">Enviar Pregunta</button>
+                    </div>
                 </div>
 
-                <!-- CAJA DE COMENTARIOS MEJORADA (UNIVERSAL) -->
-                <div style="background:rgba(255,255,255,0.03);padding:15px;border-radius:15px;border:1px solid rgba(255,255,255,0.07);">
-                    <textarea id="newCommentTxt" placeholder="Escribe tu opinión sobre este producto..." 
-                        style="width:100%;height:70px;background:transparent;border:none;color:white;outline:none;resize:none;font-size:0.9rem;"></textarea>
-                    <div style="display:flex;justify-content:flex-end;margin-top:10px;">
-                        <button onclick="submitUserComment('${p.id}')" class="cta-primary" style="padding:8px 20px;font-size:0.8rem;border-radius:8px;">Publicar</button>
+                <!-- SECCIÓN DER: RESEÑAS -->
+                <div style="padding:15px; background:rgba(255,255,255,0.01); border-radius:20px; border:1px solid rgba(255,255,255,0.03);">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+                        <div style="width:8px;height:8px;border-radius:50%;background:#fbbf24;box-shadow:0 0 8px #fbbf24;"></div>
+                        <p style="color:white;font-size:0.8rem;font-weight:800;text-transform:uppercase;">Reseñas</p>
+                    </div>
+                    <div id="reviewsContainer" style="max-height:300px;overflow-y:auto;padding-right:5px;">
+                        ${reviewsHtml}
                     </div>
                 </div>
             </div>
@@ -587,7 +635,9 @@ window.openProductDetail = (p) => {
 
             <div style="display:flex;gap:15px;margin-bottom:20px;">
                 <button class="cta-primary" onclick="addToCart('${p.id}'); document.getElementById('productDetailModal').style.display='none';" style="flex:2;padding:20px;font-size:1.2rem;font-weight:800;">🛒 Añadir al Carrito</button>
-                <button onclick="handleFav('${p.id}')" style="flex:0.5;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:18px;cursor:pointer;font-size:1.8rem;display:flex;align-items:center;justify-content:center;transition:0.3s;">❤️</button>
+                <button id="modal-fav-${p.id}" onclick="handleFav('${p.id}')" style="flex:0.5;background:${isFav(p.id) ? 'rgba(239,68,68,0.1)' : 'rgba(255,255,255,0.05)'};border:1px solid ${isFav(p.id) ? 'rgba(239,68,68,0.3)' : 'rgba(255,255,255,0.1)'};border-radius:18px;cursor:pointer;font-size:1.8rem;display:flex;align-items:center;justify-content:center;transition:0.3s;">
+                    ${isFav(p.id) ? '❤️' : '🤍'}
+                </button>
             </div>
             
             <p style="font-size:0.8rem;color:#64748b;display:flex;align-items:center;gap:8px;">📦 Envío prioritario Konrad • 🛡️ Garantía Premium • 💳 SSL</p>
@@ -608,22 +658,38 @@ window.openProductDetail = (p) => {
     m.style.display = 'flex';
 };
 
-window.submitUserComment = async (productId) => {
-    const txt = document.getElementById('newCommentTxt').value;
+window.submitUserQuestion = async (productId) => {
+    const txt = document.getElementById('newQuestionTxt').value;
     if(!txt.trim()) return;
     const tkn = localStorage.getItem("access_token");
-    if(!tkn) { alert("Inicia sesión para participar en la comunidad."); return; }
+    if(!tkn) { 
+        showToast("🔐 Inicia sesión para preguntar.", false);
+        return; 
+    }
     try {
-        const res = await fetch(`http://127.0.0.1:8000/api/v1/products/comentarios/`, {
+        const res = await fetch(`http://127.0.0.1:8000/api/v1/products/preguntas/`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${tkn}` },
-            body: JSON.stringify({ producto: productId, comentario: txt, calificacion: 10 })
+            body: JSON.stringify({ producto: productId, pregunta: txt })
         });
         if(res.ok) {
-            document.getElementById('newCommentTxt').value = "";
-            showToast("✅ Comentario publicado");
-            // Recargar para ver el cambio (sería mejor append local)
-            setTimeout(() => window.location.reload(), 1000);
+            const container = document.getElementById('questionsContainer');
+            if(container) {
+                if(container.textContent.includes('Aún no hay preguntas')) container.innerHTML = '';
+                const newQ = document.createElement('div');
+                newQ.style = "margin-bottom:15px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.03); animation: fadeIn 0.5s ease;";
+                newQ.innerHTML = `
+                    <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                        <span style="color:white;font-weight:700;font-size:0.85rem;">👤 Tú</span>
+                        <span style="color:#64748b;font-size:0.65rem;">Recién ahora</span>
+                    </div>
+                    <p style="color:#cbd5e1;font-size:0.8rem;line-height:1.4;margin:0;">Q: ${txt}</p>
+                    <p style="color:#64748b;font-size:0.7rem;margin-top:5px;font-style:italic;">Esperando respuesta...</p>
+                `;
+                container.prepend(newQ);
+            }
+            document.getElementById('newQuestionTxt').value = "";
+            showToast("✅ Pregunta enviada al vendedor");
         }
     } catch(e) { }
 };

@@ -180,12 +180,28 @@ window.openOrderDetails = async (id) => {
                 
                 <!-- SECCIÓN DE CALIFICACIÓN -->
                 <div id="review-form-${pid}" style="border-top:1px solid rgba(255,255,255,0.1); padding-top:15px; margin-top:10px;">
-                    <p style="font-size:0.8rem; color:#94a3b8; margin-bottom:10px;">⭐ Califica este producto (1-10):</p>
-                    <div style="display:flex; gap:8px; margin-bottom:12px;">
-                        <input type="number" id="rating-${pid}" min="1" max="10" value="10" style="width:60px; padding:8px; border-radius:8px; background:#1e293b; color:white; border:1px solid rgba(255,255,255,0.1);">
-                        <input type="text" id="comment-${pid}" placeholder="Escribe tu opinión aquí..." style="flex:1; padding:8px 12px; border-radius:8px; background:#1e293b; color:white; border:1px solid rgba(255,255,255,0.1);">
-                        <button onclick="submitReview('${pid}')" style="background:var(--primary); color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer; font-weight:700; transition:0.3s;">Enviar</button>
-                    </div>
+                    ${d.ya_calificado ? `
+                        <p style="color:#22c55e; font-size:0.85rem; font-weight:700; background:rgba(34,197,94,0.05); padding:10px; border-radius:10px; text-align:center;">✅ Ya has calificado este producto.</p>
+                    ` : `
+                        <p style="font-size:0.8rem; color:#94a3b8; margin-bottom:10px;">⭐ ¿Qué te pareció el producto?</p>
+                        <div style="display:flex; gap:8px; margin-bottom:12px;">
+                            <select id="rating-${pid}" style="width:100px; padding:8px; border-radius:8px; background:#1e293b; color:white; border:1px solid rgba(255,255,255,0.1);">
+                                <option value="">Calificar</option>
+                                <option value="10">10 - Excelente</option>
+                                <option value="9">9 - Muy Bueno</option>
+                                <option value="8">8 - Bueno</option>
+                                <option value="7">7 - Regular</option>
+                                <option value="6">6 - Aceptable</option>
+                                <option value="5">5 - Mediocre</option>
+                                <option value="4">4 - Deficiente</option>
+                                <option value="3">3 - Muy Malo</option>
+                                <option value="2">2 - Pobre</option>
+                                <option value="1">1 - Pésimo</option>
+                            </select>
+                            <input type="text" id="comment-${pid}" placeholder="Escribe tu reseña aquí..." style="flex:1; padding:8px 12px; border-radius:8px; background:#1e293b; color:white; border:1px solid rgba(255,255,255,0.1);">
+                            <button onclick="submitReview('${pid}', '${orderData.id}')" style="background:var(--primary); color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer; font-weight:700; transition:0.3s;">Publicar</button>
+                        </div>
+                    `}
                 </div>
                 </div>
             </div>`;
@@ -201,8 +217,34 @@ window.openOrderDetails = async (id) => {
         const calcSubtotal = parsedTotal > 0 ? (parsedTotal - comision - costoEnvio) : subtotalSuma;
         const calcTotal = parsedTotal > 0 ? parsedTotal : (subtotalSuma + comision + costoEnvio);
 
+        // Extraer info de pago
+        const pago = orderData?.pagos?.[0] || {};
+        const iconMap = {
+            'TARJETA': '💳',
+            'PSE': '📱',
+            'EFECTIVO': '💵',
+            'CONSIGNACION': '🏦'
+        };
+        const icon = iconMap[pago.metodo_pago] || '🛡️';
+        const bancoLabel = pago.banco_nombre ? ` - ${pago.banco_nombre}` : '';
+        const tipoLabel = {
+            'TARJETA': 'Tarjeta',
+            'PSE': 'PSE / Billetera',
+            'EFECTIVO': 'Efectivo',
+            'CONSIGNACION': 'Consignación'
+        }[pago.metodo_pago] || 'Pago Electrónico';
+
+        const metodoTxt = `${icon} ${tipoLabel}${bancoLabel}`;
+
         content.innerHTML = `
-        <div style="max-height:60vh; overflow-y:auto; padding-right:10px;">
+        <div style="background:rgba(255,255,255,0.02); padding:15px; border-radius:12px; margin-bottom:20px; border:1px solid rgba(255,255,255,0.05); display:flex; align-items:center; gap:10px;">
+            <span style="font-size:1.2rem;">🔐</span>
+            <div>
+                <p style="color:#94a3b8; font-size:0.75rem; text-transform:uppercase; font-weight:700; margin:0;">Medio de Pago</p>
+                <p style="color:white; font-size:0.95rem; font-weight:600; margin:0;">${metodoTxt}</p>
+            </div>
+        </div>
+        <div style="max-height:45vh; overflow-y:auto; padding-right:10px;">
             ${itemsHtml}
         </div>
         <div style="background:rgba(139,92,246,0.05); padding:20px; border-radius:15px; border:1px solid rgba(139,92,246,0.1); margin-top:15px;">
@@ -221,13 +263,16 @@ window.openOrderDetails = async (id) => {
         </div>`;
 };
 
-window.submitReview = async (productId) => {
+window.submitReview = async (productId, orderId) => {
     const btn = event.target;
     const rating = document.getElementById(`rating-${productId}`).value;
     const comment = document.getElementById(`comment-${productId}`).value;
     const userData = JSON.parse(localStorage.getItem('user_data') || '{}');
     const personaId = userData.persona_id || userData.id;
 
+    if (!rating) {
+        alert("⭐ Por favor selecciona una calificación."); return;
+    }
     if (!comment) {
         alert("⚠️ Por favor escribe un comentario."); return;
     }
@@ -251,6 +296,7 @@ window.submitReview = async (productId) => {
             body: JSON.stringify({
                 producto: parseInt(productId),
                 comprador: personaId,
+                orden: parseInt(orderId),
                 comentario: comment,
                 calificacion: parseInt(rating)
             })

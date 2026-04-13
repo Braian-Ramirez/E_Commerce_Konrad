@@ -4,6 +4,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import Orden, DetalleOrden, CalificacionProducto
 from products.models import CostoDomicilio
+from payments.models import PagoOrden
 from .serializers import OrdenSerializer, DetalleOrdenSerializer, CalificacionProductoSerializer
 from decimal import Decimal
 
@@ -107,13 +108,31 @@ class OrdenViewSet(viewsets.ModelViewSet):
         orden.estado = 'PENDIENTE' # ¡Oficialmente salió del carrito!
         orden.save()
 
+        # 7. Crear el registro de Pago (Auditoría)
+        metodo_raw = request.data.get('metodo_pago', 'TARJETA').upper()
+        # Mapeo simple front -> back
+        metodo_map = {'TARJETA': 'TARJETA', 'PSE': 'PSE', 'CONSIGNACION': 'EFECTIVO'}
+        metodo_final = metodo_map.get(metodo_raw, 'TARJETA')
+        
+        banco_final = request.data.get('banco_nombre', 'Banco Konrad')
+
+        PagoOrden.objects.create(
+            orden=orden,
+            monto=orden.total_final,
+            metodo_pago=metodo_final,
+            estado='EXITOSO',
+            banco_nombre=banco_final, # Si agregamos este campo al modelo
+            referencia_transaccion=f"K-PAY-{orden.id}-{int(Decimal(subtotal))}"
+        )
+
         return Response({
             'mensaje': 'Checkout matemático exitoso', 
             'subtotal': subtotal,
             'iva': total_iva,
             'comision': total_comision,
             'costo_envio': costo_envio,
-            'total_a_pagar': orden.total_final
+            'total_a_pagar': orden.total_final,
+            'metodo_usado': metodo_final
         })
 
 

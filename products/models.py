@@ -99,6 +99,7 @@ class PreguntaProducto(models.Model):
 class ComentarioProducto(models.Model):
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE, related_name='comentarios')
     comprador = models.ForeignKey('vendors.Persona', on_delete=models.CASCADE)
+    orden = models.ForeignKey('orders.Orden', on_delete=models.SET_NULL, null=True, blank=True, related_name='comentarios_productos')
     comentario = models.TextField()
     calificacion = models.IntegerField(default=10, help_text="Calificación de 1 a 10")
     respuesta_vendedor = models.TextField(blank=True, null=True)
@@ -108,6 +109,7 @@ class ComentarioProducto(models.Model):
     class Meta:
         verbose_name = "Comentario de Producto"
         verbose_name_plural = "Comentarios de Productos"
+        unique_together = [['producto', 'orden', 'comprador']]
 
 # Tabla de Costos de Envío
 class CostoDomicilio(models.Model):
