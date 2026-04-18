@@ -75,10 +75,14 @@ class ProductoSerializer(serializers.ModelSerializer):
             return img.imagen.url
         return None
 
+    categoria_aplica_iva = serializers.ReadOnlyField(source='categoria.aplica_iva')
+    categoria_comision = serializers.ReadOnlyField(source='categoria.porcentaje_comision')
+
     class Meta:
         model = Producto
         fields = [
             'id', 'vendedor', 'vendedor_nombre', 'categoria', 'categoria_nombre', 
+            'categoria_aplica_iva', 'categoria_comision',
             'subcategoria', 'nombre', 'marca', 'descripcion', 'autenticidad',
             'color', 'tamano', 'peso', 'talla', 'condicion', 
             'cantidad', 'valor', 'fecha_publicacion', 'imagenes', 'comentarios', 'preguntas', 'imagen_principal'

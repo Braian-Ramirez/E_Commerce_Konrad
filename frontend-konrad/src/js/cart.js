@@ -142,7 +142,13 @@ async function loadCart() {
         if (pr <= 0) pr = 2500000;
         const subItem = pr * qty;
         sum += subItem;
-        cartDetails.push({ producto: p.id, cantidad: qty, valor_unitario: pr });
+        cartDetails.push({ 
+            producto: p.id, 
+            cantidad: qty, 
+            valor_unitario: pr,
+            aplica_iva: p.categoria_aplica_iva !== false, // Por defecto true si no viene
+            comision: parseFloat(p.categoria_comision || 5.0) / 100
+        });
 
         let img = p.imagen_principal || '📦';
         if (img.startsWith('/media/')) {
@@ -186,9 +192,17 @@ async function loadCart() {
 function updateSummary(sum) {
     const delivery = document.getElementById('deliveryType')?.value || 'RECOGER';
     const env = sum > 0 ? (delivery === 'DOMICILIO' ? 12000 : 0) : 0;
-    const base = sum / 1.19;
-    const i = sum - base;
-    const c = sum * 0.05; // 5% Comisión
+    
+    let i = 0;
+    let c = 0;
+
+    cartDetails.forEach(d => {
+        const lineTotal = d.valor_unitario * d.cantidad;
+        if (d.aplica_iva) {
+            i += (lineTotal - (lineTotal / 1.19));
+        }
+        c += lineTotal * d.comision;
+    });
 
     const fmt = (n) => '$' + new Intl.NumberFormat('es-CO').format(Math.round(n));
 
@@ -690,9 +704,15 @@ window.pagoExitoso = async (backendOrdenId) => {
             try {
                 const mockOrders = JSON.parse(localStorage.getItem('mock_orders') || '[]');
                 const sub = cartDetails.reduce((a, d) => a + (d.valor_unitario * d.cantidad), 0);
-                const base = sub / 1.19;
-                const iva = sub - base;
-                const com = sub * 0.05;
+                
+                let iva = 0;
+                let com = 0;
+                cartDetails.forEach(d => {
+                    const lineTotal = d.valor_unitario * d.cantidad;
+                    if (d.aplica_iva) iva += (lineTotal - (lineTotal / 1.19));
+                    com += lineTotal * d.comision;
+                });
+                
                 const env = document.getElementById('deliveryType')?.value === 'DOMICILIO' ? 12000 : 0;
 
                 // Determinar el nombre del medio para el mock

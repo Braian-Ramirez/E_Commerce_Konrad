@@ -61,7 +61,11 @@ async function cargarPedidos() {
 
     // Combinar reales + simuladas del localStorage
     const mockOrders = JSON.parse(localStorage.getItem('mock_orders') || '[]');
-    orders = [...orders, ...mockOrders];
+    orders = [...orders, ...mockOrders].sort((a, b) => {
+        const dateA = new Date(a.fecha || a.creado_en || a.fecha_simulada || 0);
+        const dateB = new Date(b.fecha || b.creado_en || b.fecha_simulada || 0);
+        return dateB - dateA;
+    });
 
     list.innerHTML = "";
 

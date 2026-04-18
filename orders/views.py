@@ -17,9 +17,9 @@ class OrdenViewSet(viewsets.ModelViewSet):
         if not user.is_authenticated:
             return Orden.objects.none()
         if user.is_staff or user.is_superuser:
-            return Orden.objects.all()
+            return Orden.objects.all().order_by('-fecha')
         if hasattr(user, 'persona_profile'):
-            return Orden.objects.filter(comprador=user.persona_profile)
+            return Orden.objects.filter(comprador=user.persona_profile).order_by('-fecha')
         return Orden.objects.none()
 
     def perform_create(self, serializer):
@@ -70,8 +70,13 @@ class OrdenViewSet(viewsets.ModelViewSet):
             # --- D. CÁLCULO DE PESO Y ACTUALIZACIÓN DE ESTADÍSTICAS ---
             peso_total += (producto.peso * detalle.cantidad)
             
-            # --- E. ACTUALIZAR VENTAS TOTALES PARA "DESTACADOS" ---
+            # --- E. ACTUALIZAR ESTADÍSTICAS Y DESCONTAR STOCK ---
             producto.ventas_totales += detalle.cantidad
+            if producto.cantidad >= detalle.cantidad:
+                producto.cantidad -= detalle.cantidad
+            else:
+                producto.cantidad = 0 # Fallback por seguridad para no dejar inventarios negativos
+            
             producto.save()
 
         # 5. Cálculo del costo de envío
@@ -165,7 +170,7 @@ class DetalleOrdenViewSet(viewsets.ModelViewSet):
             return Response([])
         # Filtrar solo productos que le pertenecen al vendedor y de órdenes confirmadas
         ventas = DetalleOrden.objects.filter(
-            producto__vendedor=user.persona_profile
+            producto__vendedor__persona=user.persona_profile
         ).exclude(orden__estado='CARRITO').order_by('-orden__fecha')
         
         serializer = self.get_serializer(ventas, many=True)

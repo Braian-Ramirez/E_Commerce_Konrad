@@ -21,7 +21,8 @@ class DetalleOrdenSerializer(serializers.ModelSerializer):
 
     def get_producto_imagen(self, obj):
         if hasattr(obj.producto, 'imagenes') and obj.producto.imagenes.exists():
-            return obj.producto.imagenes.first().imagen
+            imagen_obj = obj.producto.imagenes.first().imagen
+            return imagen_obj.url if imagen_obj else None
         if hasattr(obj.producto, 'descripcion') and '||IMG:' in obj.producto.descripcion:
             import re
             match = re.search(r'\|\|IMG:(.*?)\|\|', obj.producto.descripcion)
