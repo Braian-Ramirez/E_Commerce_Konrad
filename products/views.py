@@ -170,6 +170,7 @@ class CostoDomicilioViewSet(viewsets.ModelViewSet):
 class ComentarioProductoViewSet(viewsets.ModelViewSet):
     queryset = ComentarioProducto.objects.all()
     serializer_class = ComentarioProductoSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def perform_create(self, serializer):
         user = self.request.user
@@ -191,6 +192,7 @@ class ComentarioProductoViewSet(viewsets.ModelViewSet):
 class PreguntaProductoViewSet(viewsets.ModelViewSet):
     queryset = PreguntaProducto.objects.all()
     serializer_class = PreguntaProductoSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def perform_create(self, serializer):
         user = self.request.user

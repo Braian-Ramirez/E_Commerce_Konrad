@@ -145,7 +145,9 @@ async function loadCart() {
         cartDetails.push({ producto: p.id, cantidad: qty, valor_unitario: pr });
 
         let img = p.imagen_principal || '📦';
-        if (p.descripcion && p.descripcion.includes('||IMG:')) {
+        if (img.startsWith('/media/')) {
+            img = `http://127.0.0.1:8000${img}`;
+        } else if (p.descripcion && p.descripcion.includes('||IMG:')) {
             const m = p.descripcion.match(/\|\|IMG:(.*?)\|\|/);
             if (m) img = m[1];
         }
@@ -165,10 +167,11 @@ async function loadCart() {
                 <div style="display:flex;align-items:center;gap:15px;margin-top:10px;">
                     <div class="qty-pill">
                         <button onclick="updateQty('${id}', -1)" style="background:transparent;border:none;color:white;width:25px;height:25px;cursor:pointer; font-weight:900;">−</button>
-                        <span class="qty-val">${qty}</span>
+                        <span class="qty-val" id="qty-val-${id}" data-stock="${p.cantidad || 0}">${qty}</span>
                         <button onclick="updateQty('${id}', 1)" style="background:transparent;border:none;color:white;width:25px;height:25px;cursor:pointer; font-weight:900;">+</button>
                     </div>
                     <button onclick="removeItemById('${id}')" style="background:transparent;border:none;color:#ef4444;font-size:0.75rem;cursor:pointer;font-weight:600; opacity:0.7;">🗑️ Quitar</button>
+                    ${p.cantidad <= 5 ? `<span style="font-size:0.65rem;color:#f59e0b;font-weight:700;">(Últimas ${p.cantidad}!)</span>` : ''}
                 </div>
             </div>
             <div style="text-align:right;">
@@ -782,6 +785,15 @@ function closeProcessingScreen() {
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 window.updateQty = async (id, delta) => {
+    const qtySpan = document.getElementById(`qty-val-${id}`);
+    const stock = parseInt(qtySpan?.dataset?.stock || '0');
+    const currentQtyInList = parseInt(qtySpan?.textContent || '0');
+
+    if (delta > 0 && currentQtyInList >= stock) {
+        showToast(`⚠️ No hay más stock disponible (${stock} unid.)`, true);
+        return;
+    }
+
     let items = getCartItems();
     if (delta > 0) {
         items.push(String(id));
@@ -954,19 +966,34 @@ window.openProductDetail = (p) => {
                 </div>
                 <button onclick="moveGallery(1)" style="position:absolute;right:15px;z-index:20;background:rgba(0,0,0,0.6);border:none;color:white;width:40px;height:40px;border-radius:50%;cursor:pointer;">&#8250;</button>
             </div>
-            <div style="margin-top:20px;padding:18px;background:rgba(255,255,255,0.02);border-radius:18px;border:1px solid rgba(255,255,255,0.05);">
-                <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
-                    <div style="width:9px;height:9px;border-radius:50%;background:#22c55e;box-shadow:0 0 8px #22c55e;flex-shrink:0;"></div>
-                    <p style="color:white;font-size:0.85rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;margin:0;">Comunidad Konrad</p>
-                </div>
-                <div id="commentsContainer" style="max-height:160px;overflow-y:auto;padding-right:8px;margin-bottom:12px;">
-                    <p style="color:#64748b;text-align:center;padding:15px;font-size:0.85rem;">Cargando...</p>
-                </div>
-                <div style="background:rgba(255,255,255,0.03);padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.07);">
-                    <textarea id="newCommentTxt" placeholder="Escribe tu opinion sobre este producto..." style="width:100%;height:65px;background:transparent;border:none;color:white;outline:none;resize:none;font-size:0.85rem;font-family:inherit;box-sizing:border-box;"></textarea>
-                    <div style="display:flex;justify-content:flex-end;margin-top:6px;">
-                        <button onclick="submitCartComment('${p.id}')" class="cta-primary" style="padding:8px 20px;font-size:0.8rem;border-radius:10px;">Publicar</button>
+            <!-- RESEÑAS + PREGUNTAS (solo lectura pública, escritura con sesión) -->
+            <div style="margin-top:20px;">
+                <!-- RESEÑAS -->
+                <div style="padding:14px;background:rgba(255,255,255,0.02);border-radius:16px;border:1px solid rgba(251,191,36,0.1);margin-bottom:12px;">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+                        <div style="width:7px;height:7px;border-radius:50%;background:#fbbf24;box-shadow:0 0 6px #fbbf24;"></div>
+                        <p style="color:white;font-size:0.78rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;margin:0;">Reseñas del Producto</p>
                     </div>
+                    <div id="commentsContainer" style="max-height:130px;overflow-y:auto;padding-right:4px;">
+                        <p style="color:#64748b;text-align:center;padding:10px;font-size:0.8rem;">Cargando...</p>
+                    </div>
+                </div>
+                <!-- PREGUNTAS -->
+                <div style="padding:14px;background:rgba(255,255,255,0.02);border-radius:16px;border:1px solid rgba(59,130,246,0.1);">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+                        <div style="width:7px;height:7px;border-radius:50%;background:#3b82f6;box-shadow:0 0 6px #3b82f6;"></div>
+                        <p style="color:white;font-size:0.78rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;margin:0;">Preguntas al Vendedor</p>
+                    </div>
+                    <div id="questionsContainerCart" style="max-height:110px;overflow-y:auto;padding-right:4px;margin-bottom:10px;">
+                        <p style="color:#64748b;text-align:center;padding:10px;font-size:0.8rem;">Cargando...</p>
+                    </div>
+                    ${token ? `
+                    <div style="display:flex;gap:8px;">
+                        <textarea id="newQuestionCartTxt" placeholder="Haz una pregunta al vendedor..."
+                            style="flex:1;height:34px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:white;outline:none;resize:none;font-size:0.8rem;border-radius:8px;padding:6px;font-family:inherit;"></textarea>
+                        <button onclick="submitCartQuestion('${p.id}')" class="cta-primary" style="padding:0 12px;font-size:0.75rem;background:#3b82f6;border-radius:8px;white-space:nowrap;">Enviar</button>
+                    </div>` : `
+                    <p style="color:#64748b;font-size:0.78rem;text-align:center;"><a href="/pages/login.html" style="color:var(--primary);">Inicia sesión</a> para hacer preguntas.</p>`}
                 </div>
             </div>
         </div>
@@ -985,7 +1012,16 @@ window.openProductDetail = (p) => {
                 <span style="color:#fbbf24;font-size:1rem;">&#x2605;&#x2605;&#x2605;&#x2605;&#x2605;</span>
                 <span style="color:#64748b;font-size:0.8rem;">Vendedor verificado por Comercial Konrad</span>
             </div>
-            <p style="font-size:2.5rem;font-weight:900;color:white;margin-bottom:20px;text-shadow:0 0 20px rgba(99,102,241,0.2);">$${pText} <span style="font-size:0.9rem;color:#64748b;font-weight:400;">COP</span></p>
+            <p style="font-size:2.5rem;font-weight:900;color:white;margin-bottom:10px;text-shadow:0 0 20px rgba(99,102,241,0.2);">$${pText} <span style="font-size:0.9rem;color:#64748b;font-weight:400;">COP</span></p>
+            ${(() => {
+                const s = p.precio_fijo !== undefined ? (p.cantidad || 0) : (p.cantidad || 0);
+                const label = s <= 0 ? '❌ Agotado' : s <= 5 ? `⚠️ Pocas unidades (${s} disp.)` : `✅ En stock (${s} disponibles)`;
+                const dot   = s <= 0 ? '#ef4444' : s <= 5 ? '#f59e0b' : '#22c55e';
+                const col   = s <= 0 ? '#f87171' : s <= 5 ? '#fbbf24' : '#86efac';
+                const bg    = s <= 0 ? 'rgba(239,68,68,0.08)' : s <= 5 ? 'rgba(245,158,11,0.08)' : 'rgba(34,197,94,0.08)';
+                const bdr   = s <= 0 ? 'rgba(239,68,68,0.2)' : s <= 5 ? 'rgba(245,158,11,0.2)' : 'rgba(34,197,94,0.2)';
+                return `<div style="display:inline-flex;align-items:center;gap:8px;margin-bottom:14px;padding:6px 14px;border-radius:30px;background:${bg};border:1px solid ${bdr};"><div style="width:7px;height:7px;border-radius:50%;background:${dot};"></div><span style="font-size:0.8rem;font-weight:700;color:${col};">${label}</span></div>`;
+            })()}
             <div style="padding:18px;background:rgba(255,255,255,0.02);border-radius:15px;margin-bottom:25px;border:1px solid rgba(255,255,255,0.05);line-height:1.7;">
                 <p style="color:#cbd5e1;font-size:0.95rem;margin:0;">${cleanDesc}</p>
             </div>
@@ -996,6 +1032,8 @@ window.openProductDetail = (p) => {
     </div>`;
 
     loadCartComments(p.id);
+    loadCartQuestions(p.id);
+
     window.currentGalleryPaths = gal;
     window.moveGallery = (delta) => {
         curImg = (curImg + delta + window.currentGalleryPaths.length) % window.currentGalleryPaths.length;
@@ -1012,61 +1050,83 @@ async function loadCartComments(productId) {
     const box = document.getElementById('commentsContainer');
     if (!box) return;
     const tkn = localStorage.getItem('access_token');
-    if (!tkn) {
-        box.innerHTML = `<div style="text-align:center;padding:15px;color:#64748b;font-size:0.85rem;">
-            <a href="/pages/login.html" style="color:var(--primary);">Inicia sesión</a> para ver comentarios.</div>`;
-        return;
-    }
+    const headers = tkn ? { 'Authorization': `Bearer ${tkn}` } : {};
     try {
-        const res = await fetch('http://127.0.0.1:8000/api/v1/products/comentarios/', {
-            headers: { 'Authorization': `Bearer ${tkn}` }
-        });
+        const res = await fetch('http://127.0.0.1:8000/api/v1/products/comentarios/', { headers });
         if (res.ok) {
             const data = await res.json();
             const all = Array.isArray(data) ? data : (data.results || []);
             const mine = all.filter(c => String(c.producto) === String(productId));
             if (mine.length > 0) {
                 box.innerHTML = mine.map(c => `
-                    <div style="background:rgba(255,255,255,0.03);padding:12px;border-radius:10px;margin-bottom:10px;border:1px solid rgba(255,255,255,0.05);">
-                        <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
-                            <span style="color:#818cf8;font-weight:800;font-size:0.8rem;">&#x1F464; ${c.comprador_nombre || 'Estudiante Konrad'}</span>
-                            <span style="color:#fbbf24;font-size:0.75rem;">${'★'.repeat(c.calificacion || 10)}${'☆'.repeat(10 - (c.calificacion || 10))}</span>
+                    <div style="background:rgba(255,255,255,0.03);padding:10px;border-radius:10px;margin-bottom:8px;border:1px solid rgba(255,255,255,0.05);">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                            <span style="color:#818cf8;font-weight:800;font-size:0.78rem;">&#x1F464; ${c.comprador_nombre || 'Estudiante Konrad'}</span>
+                            <span style="color:#fbbf24;font-size:0.72rem;">${'★'.repeat(c.calificacion || 10)}${'☆'.repeat(10 - (c.calificacion || 10))}</span>
                         </div>
-                        <p style="color:#e2e8f0;font-size:0.85rem;line-height:1.5;margin:0;">${c.comentario}</p>
+                        <p style="color:#e2e8f0;font-size:0.82rem;line-height:1.5;margin:0;">${c.comentario}</p>
                     </div>`).join('');
             } else {
-                box.innerHTML = `<div style="text-align:center;padding:20px;color:#64748b;font-size:0.85rem;"><span style="font-size:1.8rem;display:block;margin-bottom:8px;">&#x2728;</span>&#xa1;S&#xe9; el primero en opinar!</div>`;
+                box.innerHTML = `<p style="color:#64748b;text-align:center;padding:10px;font-size:0.8rem;">Aún no hay reseñas para este producto.</p>`;
             }
-        } else if (res.status === 401) {
-            box.innerHTML = `<p style="color:#64748b;text-align:center;padding:15px;font-size:0.8rem;">Sesión requerida para ver comentarios.</p>`;
         } else {
-            box.innerHTML = `<p style="color:#64748b;text-align:center;padding:15px;font-size:0.8rem;">Error ${res.status} al cargar comentarios.</p>`;
+            box.innerHTML = `<p style="color:#64748b;text-align:center;padding:10px;font-size:0.8rem;">Sin reseñas disponibles.</p>`;
         }
-    } catch (e) { box.innerHTML = `<p style="color:#64748b;text-align:center;padding:15px;">Sin conexión.</p>`; }
+    } catch (e) { box.innerHTML = `<p style="color:#64748b;text-align:center;padding:10px;">Sin conexión.</p>`; }
 }
 
-window.submitCartComment = async (productId) => {
-    const txtEl = document.getElementById('newCommentTxt');
-    const txt = txtEl?.value?.trim();
-    if (!txt) return;
-    if (!token) { alert("Inicia sesion para comentar."); return; }
+async function loadCartQuestions(productId) {
+    const box = document.getElementById('questionsContainerCart');
+    if (!box) return;
+    const tkn = localStorage.getItem('access_token');
+    const headers = tkn ? { 'Authorization': `Bearer ${tkn}` } : {};
     try {
-        const res = await fetch('http://127.0.0.1:8000/api/v1/products/comentarios/', {
+        const res = await fetch('http://127.0.0.1:8000/api/v1/products/preguntas/', { headers });
+        if (res.ok) {
+            const data = await res.json();
+            const all = Array.isArray(data) ? data : (data.results || []);
+            const qs = all.filter(q => String(q.producto) === String(productId));
+            if (qs.length > 0) {
+                box.innerHTML = qs.map(q => `
+                    <div style="margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.04);">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+                            <span style="color:#93c5fd;font-weight:700;font-size:0.78rem;">👤 ${q.comprador_nombre}</span>
+                            <span style="color:#64748b;font-size:0.65rem;">${new Date(q.fecha_pregunta).toLocaleDateString('es-CO')}</span>
+                        </div>
+                        <p style="color:#cbd5e1;font-size:0.8rem;margin:0 0 4px;">Q: ${q.pregunta}</p>
+                        ${q.respuesta ? `<p style="color:#86efac;font-size:0.78rem;margin:0;padding:4px 8px;background:rgba(34,197,94,0.05);border-radius:6px;">↩ ${q.respuesta}</p>` : `<p style="color:#64748b;font-size:0.72rem;font-style:italic;margin:0;">Esperando respuesta del vendedor...</p>`}
+                    </div>`).join('');
+            } else {
+                box.innerHTML = `<p style="color:#64748b;text-align:center;padding:10px;font-size:0.8rem;">Aún no hay preguntas. ¡Sé el primero!</p>`;
+            }
+        } else {
+            box.innerHTML = `<p style="color:#64748b;text-align:center;padding:10px;font-size:0.8rem;">Sin preguntas disponibles.</p>`;
+        }
+    } catch (e) { box.innerHTML = `<p style="color:#64748b;text-align:center;padding:10px;font-size:0.8rem;">Sin conexión.</p>`; }
+}
+
+window.submitCartQuestion = async (productId) => {
+    const txtEl = document.getElementById('newQuestionCartTxt');
+    const txt = txtEl?.value?.trim();
+    if (!txt) { showToast('⚠️ Escribe tu pregunta antes de enviar'); return; }
+    if (!token) { window.location.href = '/pages/login.html'; return; }
+    try {
+        const res = await fetch('http://127.0.0.1:8000/api/v1/products/preguntas/', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-            body: JSON.stringify({ producto: parseInt(productId), comentario: txt, calificacion: 10 })
+            body: JSON.stringify({ producto: parseInt(productId), pregunta: txt })
         });
         if (res.ok) {
-            txtEl.value = "";
-            showToast("Comentario publicado");
-            loadCartComments(productId);
+            txtEl.value = '';
+            showToast('✅ Pregunta enviada al vendedor');
+            loadCartQuestions(productId);
         } else {
             const err = await res.json().catch(() => ({}));
-            showToast("Error: " + (err.detail || JSON.stringify(err)));
-            console.error(err);
+            showToast('❌ Error: ' + (err.detail || 'No se pudo enviar'));
         }
-    } catch (e) { showToast("Error de red"); }
+    } catch (e) { showToast('❌ Error de red al enviar'); }
 };
+
 
 
 

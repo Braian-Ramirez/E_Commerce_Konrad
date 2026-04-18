@@ -230,6 +230,9 @@ function renderGrid(containerId, products, showFav = false) {
             const m = p.descripcion.match(/\|\|IMG:(.*?)\|\|/);
             if (m) img = m[1];
         }
+        if (img && img.startsWith('/media/')) {
+            img = `http://127.0.0.1:8000${img}`;
+        }
 
         const cleanDesc = (p.descripcion || '').split('||IMG:')[0];
         const p_id = String(p.id);
@@ -248,16 +251,26 @@ function renderGrid(containerId, products, showFav = false) {
 
         const tplElem = document.getElementById('tpl-product-card');
         if (tplElem) {
+            const isAgotado = (p.cantidad || 0) <= 0;
             let htmlStr = tplElem.innerHTML
                 .replaceAll('{p_id}', p_id)
                 .replaceAll('{nombre}', p.nombre)
                 .replaceAll('{precio}', precio)
+                .replaceAll('{stock}', String(p.cantidad || 0))
                 .replaceAll('{img_content}', img.startsWith('http') ? `<img src="${img}" onerror="this.src='${fallback}'" class="img-cover">` : `<span class="img-fallback-icon">${img}</span>`)
                 .replaceAll('{fav_btn}', token ? `
                     <button id="fav-${p_id}" onclick="handleFav('${p_id}')" class="btn-fav ${favOn ? 'active' : ''}">
                         ${favOn ? '❤️' : '🤍'}
                     </button>
                 ` : '');
+                
+            if (isAgotado) {
+                // Inyectar un overlay de agotado o deshabilitar elementos
+                htmlStr = htmlStr.replace('class="add-cart-btn"', 'class="add-cart-btn disabled" disabled style="background:#4b5563;cursor:not-allowed;filter:grayscale(1);"')
+                                 .replace('🛒 Añadir', 'Agotado')
+                                 .replace('class="qty-selector"', 'class="qty-selector" style="display:none;"');
+            }
+
             return htmlStr;
         }
         return ``;
@@ -266,8 +279,22 @@ function renderGrid(containerId, products, showFav = false) {
 
 // ─── CARRITO ─────────────────────────────────────────────────────────────────
 async function addToCart(id) {
-    const q = parseInt(document.getElementById(`qty-${id}`)?.textContent || 1);
+    const qtyEl = document.getElementById(`qty-${id}`);
+    const q = parseInt(qtyEl?.textContent || 1);
+    const stock = parseInt(qtyEl?.dataset?.stock || '999');
+    
     const cart = getCartItems();
+    const currentQtyInCart = cart.filter(x => String(x) === String(id)).length;
+    
+    if (currentQtyInCart + q > stock) {
+        if (stock - currentQtyInCart <= 0) {
+            showToast(`⚠️ No puedes añadir más. Ya tienes el máximo disponible (${stock}) en tu carrito.`, true);
+        } else {
+            showToast(`⚠️ Solo puedes añadir ${stock - currentQtyInCart} más. El stock total es ${stock}.`, true);
+        }
+        return;
+    }
+
     for (let i = 0; i < q; i++) cart.push(String(id));
     saveCartItems(cart);
     updateCartCount();
@@ -320,8 +347,15 @@ function updateCartCount() {
 function changeQty(id, delta) {
     const el = document.getElementById(`qty-${id}`);
     if (!el) return;
-    const v = Math.max(1, Math.min(10, parseInt(el.textContent) + delta));
-    el.textContent = v;
+    const stock = parseInt(el.dataset.stock || '0');
+    const newVal = Math.max(1, Math.min(stock > 0 ? stock : 1, parseInt(el.textContent) + delta));
+    el.textContent = newVal;
+    if (stock > 0 && newVal >= stock) {
+        el.style.color = '#f59e0b'; // aviso visual: tope de stock
+        if (delta > 0) showToast(`⚠️ Solo hay ${stock} unidades disponibles`);
+    } else {
+        el.style.color = 'white';
+    }
 }
 window.changeQty = changeQty;
 
@@ -495,6 +529,10 @@ window.openProductDetail = (p) => {
         const match = p.descripcion.match(/\|\|IMG:(.*?)\|\|/);
         if (match) mainImg = match[1];
     }
+    
+    if (mainImg && mainImg.startsWith('/media/')) {
+        mainImg = `http://127.0.0.1:8000${mainImg}`;
+    }
 
     if (!mainImg) {
         mainImg = '📦';
@@ -548,7 +586,19 @@ window.openProductDetail = (p) => {
 
     const tplElem = document.getElementById('tpl-product-detail');
     if (tplElem) {
-        c.innerHTML = tplElem.innerHTML
+        const stock = p.cantidad || 0;
+        const stockLabel = stock <= 0 ? '❌ Agotado'
+            : stock <= 5 ? `⚠️ Pocas unidades (${stock} disp.)`
+            : `✅ En stock (${stock} disponibles)`;
+        const stockDot  = stock <= 0 ? '#ef4444' : stock <= 5 ? '#f59e0b' : '#22c55e';
+        const stockColor= stock <= 0 ? '#f87171' : stock <= 5 ? '#fbbf24' : '#86efac';
+        const stockBg   = stock <= 0 ? 'rgba(239,68,68,0.08)' : stock <= 5 ? 'rgba(245,158,11,0.08)' : 'rgba(34,197,94,0.08)';
+        const stockBorder= stock <= 0 ? 'rgba(239,68,68,0.2)' : stock <= 5 ? 'rgba(245,158,11,0.2)' : 'rgba(34,197,94,0.2)';
+        const isAgotado = stock <= 0;
+        const token = localStorage.getItem("access_token");
+        const favOn = isFav(p.id);
+
+        let finalModalHtml = tplElem.innerHTML
             .replaceAll('{main_img}', (mainImg.startsWith('http') || mainImg.startsWith('/')) ? `<img src="${mainImg}" onerror="this.src='https://placehold.co/400x400/0c0f18/white?text=Imagen'" class="img-contain">` : mainImg)
             .replaceAll('{qsHtml}', qsHtml)
             .replaceAll('{p_id}', p.id)
@@ -558,7 +608,22 @@ window.openProductDetail = (p) => {
             .replaceAll('{nombre}', p.nombre)
             .replaceAll('{precioTexto}', pText)
             .replaceAll('{desc}', p.descripcion.split('||IMG:')[0] || 'Calidad Konrad premium seleccionada.')
-            .replaceAll('{btn_fav_modal}', `<button id="modal-fav-${p.id}" onclick="handleFav('${p.id}')" class="btn-fav-large ${isFav(p.id) ? 'active' : ''}">${isFav(p.id) ? '❤️' : '🤍'}</button>`);
+            .replaceAll('{stock_label}', stockLabel)
+            .replaceAll('{stock_dot}', stockDot)
+            .replaceAll('{stock_color}', stockColor)
+            .replaceAll('{stock_bg}', stockBg)
+            .replaceAll('{stock_border}', stockBorder)
+            .replaceAll('{btn_fav_modal}', token ? `
+                <button id="modal-fav-${p.id}" onclick="handleFav('${p.id}')" style="flex:0.5;padding:16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:white;border-radius:15px;cursor:pointer;font-size:1.2rem;transition:all 0.3s ease;">
+                    ${favOn ? '❤️' : '🤍'}
+                </button>
+            ` : '');
+
+        if (isAgotado) {
+            finalModalHtml = finalModalHtml.replace('class="cta-primary"', 'class="cta-primary disabled" disabled style="background:#4b5563;cursor:not-allowed;filter:grayscale(1);"')
+                                           .replace('🛒 Añadir al Carrito', 'Producto Agotado');
+        }
+        c.innerHTML = finalModalHtml;
     } else {
         c.innerHTML = "<p>Error: Plantillas no cargadas correctamente.</p>";
     }
