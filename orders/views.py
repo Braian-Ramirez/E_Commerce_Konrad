@@ -13,8 +13,14 @@ class OrdenViewSet(viewsets.ModelViewSet):
     serializer_class = OrdenSerializer
 
     def get_queryset(self):
-        # Solicitado: Mostrar el historial de todos los usuarios sin filtrar
-        return Orden.objects.all()
+        user = self.request.user
+        if not user.is_authenticated:
+            return Orden.objects.none()
+        if user.is_staff or user.is_superuser:
+            return Orden.objects.all()
+        if hasattr(user, 'persona_profile'):
+            return Orden.objects.filter(comprador=user.persona_profile)
+        return Orden.objects.none()
 
     def perform_create(self, serializer):
         user = self.request.user
@@ -89,11 +95,12 @@ class OrdenViewSet(viewsets.ModelViewSet):
             if tarifa:
                 costo_envio = tarifa.costo
             else:
-                # Tarifa "castigo" por defecto si el administrador no configuró el rango
-                costo_envio = Decimal('15000.00') 
+                # Tarifa "castigo" por defecto (Alineado a la vista estática del Frontend de 12.000)
+                costo_envio = Decimal('12000.00') 
 
         # 6. Actualizamos los totales y terminamos
-        total_final = subtotal + total_iva + total_comision + costo_envio
+        # IMPORTANT: 'subtotal' ya incluye IVA, por lo que NO se debe sumar total_iva al final para no cobrar doble.
+        total_final = subtotal + total_comision + costo_envio
         
         orden.costo_envio = costo_envio
         orden.total_iva = total_iva
