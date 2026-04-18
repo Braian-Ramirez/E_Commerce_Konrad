@@ -94,8 +94,8 @@ async function cargarPedidos() {
         const totalNum = parseFloat(o.total_final || o.total_pedido || 0);
         const total = totalNum > 0 ? '$' + new Intl.NumberFormat('es-CO').format(totalNum) + ' COP' : 'Ver detalle';
         
+        // El estado real viene del backend
         let estado = (o.estado || 'PENDIENTE').toUpperCase();
-        if (estado === 'PENDIENTE') estado = 'PAGADA';
         
         const cfg = estadoConfig[estado] || { color: '#94a3b8', icon: '📦' };
 
