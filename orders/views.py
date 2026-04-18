@@ -137,13 +137,32 @@ class DetalleOrdenViewSet(viewsets.ModelViewSet):
     serializer_class = DetalleOrdenSerializer
 
     def get_queryset(self):
-        # Solicitado: Mostrar detalles de todos los usuarios sin filtrar
-        return DetalleOrden.objects.all()
+        user = self.request.user
+        if not user.is_authenticated:
+            return DetalleOrden.objects.none()
+        if user.is_staff or user.is_superuser:
+            return DetalleOrden.objects.all()
+        if hasattr(user, 'persona_profile'):
+            return DetalleOrden.objects.filter(orden__comprador=user.persona_profile)
+        return DetalleOrden.objects.none()
 
     def perform_destroy(self, instance):
         if instance.orden.estado != 'CARRITO':
             raise PermissionDenied("La orden ya fue procesada")
         instance.delete()    
+
+    @action(detail=False, methods=['get'])
+    def mis_ventas(self, request):
+        user = request.user
+        if not hasattr(user, 'persona_profile'):
+            return Response([])
+        # Filtrar solo productos que le pertenecen al vendedor y de órdenes confirmadas
+        ventas = DetalleOrden.objects.filter(
+            producto__vendedor=user.persona_profile
+        ).exclude(orden__estado='CARRITO').order_by('-orden__fecha')
+        
+        serializer = self.get_serializer(ventas, many=True)
+        return Response(serializer.data)
 
 #Vista CalificacionProducto
 class CalificacionProductoViewSet(viewsets.ModelViewSet):
