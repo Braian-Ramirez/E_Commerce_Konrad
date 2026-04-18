@@ -33,7 +33,7 @@ class ComentarioProductoSerializer(serializers.ModelSerializer):
     class Meta:
         model = ComentarioProducto
         fields = [
-            'id', 'producto', 'comprador', 'comprador_nombre', 
+            'id', 'producto', 'comprador', 'comprador_nombre', 'orden',
             'comentario', 'calificacion', 'respuesta_vendedor', 
             'fecha_respuesta', 'fecha'
         ]
