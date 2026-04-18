@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Ventas - Comercial Konrad</title>
+    <link rel="stylesheet" href="../src/css/style.css">
+    <link rel="stylesheet" href="../src/css/vendor-dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../src/css/vendor-sales.css">
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- Header superior -->
+        <header class="top-nav">
+            <div class="logo">
+                Comercial <span style="color: var(--neo-orange);">Konrad</span>
+            </div>
+            <div class="user-info">
+                <span><b>Mis Ventas</b></span>
+            </div>
+        </header>
+
+        <div class="layout-body">
+            <!-- Sidebar lateral -->
+            <aside class="sidebar">
+                <div class="sidebar-group">
+                    <span class="group-title">NAVEGACIÓN</span>
+                    <nav>
+                        <button class="nav-btn" onclick="window.location.href='/pages/vendor-dashboard.html'">
+                            <span class="icon">🏠</span> Inicio
+                        </button>
+                        <button class="nav-btn active">
+                            <span class="icon">🛍️</span> Mis Ventas
+                        </button>
+                        <button class="nav-btn" onclick="window.location.href='/pages/vendor-products.html'">
+                            <span class="icon">📦</span> Mis Productos
+                        </button>
+                    </nav>
+                </div>
+
+                <div class="sidebar-group">
+                    <span class="group-title">CONFIGURACIÓN</span>
+                    <nav>
+                        <button class="nav-btn" onclick="window.location.href='/pages/vendor-dashboard.html'">
+                            <span class="icon">💳</span> Mi Suscripción
+                        </button>
+                        <button class="nav-btn" onclick="window.location.href='/pages/vendor-profile.html'">
+                            <span class="icon">👤</span> Mi Perfil
+                        </button>
+                    </nav>
+                </div>
+
+                <div class="sidebar-footer">
+                    <button onclick="handleLogout()" class="logout-btn">🚪 Cerrar Sesión</button>
+                </div>
+            </aside>
+
+            <!-- Contenido principal -->
+            <main class="content-area">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2>Rendimiento de Ventas</h2>
+                    <h3 id="total-ganancias" style="color: #10b981;">Total: $0</h3>
+                </div>
+
+                <div class="sales-table-wrapper">
+                    <table class="sales-table">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Fecha</th>
+                                <th>Comprador</th>
+                                <th>Cant.</th>
+                                <th>Total</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sales-tbody">
+                            <!-- Inyectado por JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="../src/js/vendor-sales.js"></script>
+    <script>
+        function handleLogout() {
+            localStorage.clear();
+            window.location.href = '/index.html';
+        }
+    </script>
+</body>
+</html>

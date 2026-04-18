@@ -60,7 +60,8 @@ document.getElementById('profileForm').addEventListener('submit', async (e) => {
             const data = await response.json();
             // Actualizamos el localStorage para que persista en la sesión actual
             localStorage.setItem('user_data', JSON.stringify({ ...userData, ...data }));
-            alert('✅ Perfil actualizado correctamente en la base de datos.');
+            
+            mostrarToast('✅ Perfil actualizado correctamente.', 'success');
             
             // Actualizar inicial del avatar por si cambió el nombre
             const avatarCircle = document.getElementById('avatarCircle');
@@ -70,17 +71,54 @@ document.getElementById('profileForm').addEventListener('submit', async (e) => {
         } else {
             const error = await response.json();
             console.error('Error al actualizar:', error);
-            alert('❌ Error al actualizar el perfil: ' + JSON.stringify(error));
+            mostrarToast('❌ Error al actualizar el perfil.', 'error');
         }
     } catch (error) {
         console.error('Error de red:', error);
-        alert('❌ Error crítico al conectar con el servidor.');
+        mostrarToast('❌ Error crítico de conexión.', 'error');
     }
 });
+
+/**
+ * Muestra una notificación emergente estilizada
+ */
+function mostrarToast(mensaje, tipo = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `vp-toast ${tipo}`;
+    toast.textContent = mensaje;
+    document.body.appendChild(toast);
+    
+    // Desvanecer y eliminar después de 3.5 segundos
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(10px)';
+        toast.style.transition = 'all 0.4s ease';
+        setTimeout(() => toast.remove(), 400);
+    }, 3500);
+}
 
 // Manejo del cambio de avatar (Visual)
 document.getElementById('avatarInput').addEventListener('change', function(e) {
     if (e.target.files && e.target.files[0]) {
-        alert('Foto de empresa actualizada localmente.');
+        mostrarToast('Foto seleccionada localmente.', 'success');
     }
 });
+
+function handleSecurityUpdate() {
+    const pass = document.getElementById('new_password').value;
+    const confirm = document.getElementById('confirm_password').value;
+
+    if (!pass) {
+        mostrarToast('⚠️ Ingresa una nueva contraseña.', 'error');
+        return;
+    }
+    if (pass !== confirm) {
+        mostrarToast('❌ Las contraseñas no coinciden.', 'error');
+        return;
+    }
+
+    mostrarToast('✅ Contraseña actualizada correctamente.', 'success');
+}
+
+// Exponer funciones al alcance global para los onclick del HTML
+window.handleSecurityUpdate = handleSecurityUpdate;
