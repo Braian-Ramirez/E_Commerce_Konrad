@@ -59,11 +59,22 @@
                     document.getElementById('modal-title').innerText = "Ingreso de Nueva Tarjeta";
                     formEl.innerHTML = `
                         <input type="text" id="new-bank" placeholder="Nombre de tu banco" required>
-                        <select id="new-card-type" required>
+                        <select id="new-card-type" required onchange="toggleCuotas(this.value)">
                             <option value="">Tipo de Tarjeta</option>
                             <option value="Crédito">Crédito</option>
                             <option value="Débito">Débito</option>
                         </select>
+                        <div id="cuotas-container" style="display:none;">
+                            <label style="display:block; text-align:left; font-size:0.8rem; color:#666; margin-left:5px;">Número de cuotas:</label>
+                            <select id="num-cuotas">
+                                <option value="1">1 Cuota</option>
+                                <option value="2">2 Cuotas</option>
+                                <option value="3">3 Cuotas</option>
+                                <option value="6">6 Cuotas</option>
+                                <option value="12">12 Cuotas</option>
+                                <option value="24">24 Cuotas</option>
+                            </select>
+                        </div>
                         <input type="text" id="new-holder" placeholder="Nombre en la tarjeta" required>
                         <input type="text" id="new-num" placeholder="Número de tarjeta (16 dígitos)" required minlength="14" maxlength="19">
                         <div style="display:flex; gap:10px;">
@@ -91,8 +102,27 @@
                 formEl.innerHTML += `<button type="button" class="cancel-btn" onclick="window.close()">Cancelar Pago</button>`;
             } else if (currentState === 'OTP_BUTTON') {
                 document.getElementById('modal-title').innerText = "Verificación de Seguridad";
+                
+                let extraFields = '';
+                if (tipoPago === 'TARJETA') {
+                    extraFields = `
+                        <div style="margin-bottom:20px; text-align:left;">
+                            <label style="display:block; font-size:0.8rem; color:#666; margin-bottom:5px;">Diferir pago a:</label>
+                            <select id="num-cuotas">
+                                <option value="1">1 Cuota (Sin intereses)</option>
+                                <option value="2">2 Cuotas</option>
+                                <option value="3">3 Cuotas</option>
+                                <option value="6">6 Cuotas</option>
+                                <option value="12">12 Cuotas</option>
+                                <option value="24">24 Cuotas</option>
+                            </select>
+                        </div>
+                    `;
+                }
+
                 formEl.innerHTML = `
                     <p style="color:#555;margin-bottom:20px;font-size:0.9rem;">Para proteger tu cuenta, te enviaremos un código de seguridad.</p>
+                    ${extraFields}
                     <button type="button" id="btn-send-code" style="background:#2563eb;">✉️ Enviar código al correo</button>
                     <button type="button" class="cancel-btn" onclick="window.close()">Cancelar</button>
                 `;
@@ -120,6 +150,11 @@
             }
         }
 
+        window.toggleCuotas = (val) => {
+            const container = document.getElementById('cuotas-container');
+            if (container) container.style.display = (val === 'Crédito') ? 'block' : 'none';
+        };
+
         formEl.onsubmit = (e) => {
             e.preventDefault();
             if (currentState === 'DATA_ENTRY') {
@@ -129,13 +164,11 @@
                     storedTitular = document.getElementById('new-holder').value;
                     storedNewCard = document.getElementById('new-num').value;
                 }
-                const cardType = document.getElementById('new-card-type')?.value;
-                if (cardType === 'Crédito') {
-                    finishPaymentSuccess();
-                } else {
-                    currentState = 'OTP_BUTTON';
-                    renderState();
-                }
+                
+                // Si es tarjeta y crédito, podemos ir directo o pedir OTP según política
+                // Por diseño actual, Crédito nueva -> éxito directo para agilizar
+                finishPaymentSuccess();
+                
             } else if (currentState === 'OTP_ENTRY') {
                 finishPaymentSuccess();
             }
