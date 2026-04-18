@@ -6,6 +6,7 @@ from django.template.loader import render_to_string
 from django.utils.timezone import localtime
 from .models import CorreoEnviado
 from vendors.models import Persona
+from .models import Notificacion
 
 def _registrar_auditoria_correo(persona, asunto, cuerpo):
     """
@@ -144,7 +145,6 @@ def crear_notificacion(persona, tipo, mensaje):
     """
     Crea una notificación interna en la base de datos para un usuario.
     """
-    from .models import Notificacion
     return Notificacion.objects.create(
         persona=persona,
         tipo=tipo,
@@ -164,8 +164,15 @@ def enviar_notificacion_venta_vendedor(vendedor_persona, orden, detalles_vendedo
     for d in detalles_vendedor:
         productos_texto += f"- {d.producto.nombre} x {d.cantidad}\n"
     
-    direccion = orden.comprador.direccion if orden.tipo_entrega == 'DOMICILIO' else 'Recogida en sede Konrad'
-    if not direccion:
+    direccion_base = orden.comprador.direccion if orden.comprador else ""
+    ciudad_base = orden.comprador.ciudad if orden.comprador else ""
+    
+    if orden.tipo_entrega == 'DOMICILIO':
+        direccion = f"{direccion_base}, {ciudad_base}".strip(', ')
+    else:
+        direccion = 'Recogida en sede Konrad'
+        
+    if not direccion_base and orden.tipo_entrega == 'DOMICILIO':
         direccion = "No especificada por el comprador"
         
     metodo = 'Entrega a domicilio' if orden.tipo_entrega == 'DOMICILIO' else 'Recoger en punto'
@@ -184,3 +191,10 @@ def enviar_notificacion_venta_vendedor(vendedor_persona, orden, detalles_vendedo
 
     _registrar_auditoria_correo(vendedor_persona, asunto, mensaje)
     _enviar_safe(asunto, mensaje, vendedor_persona.email)
+
+    total_articulos = sum(d.cantidad for d in detalles_vendedor)
+    crear_notificacion(
+        vendedor_persona,
+        'COMPRA',
+        f'Has vendido {total_articulos} productos consulta tu historial de ventas.'
+    )
