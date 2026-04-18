@@ -306,8 +306,8 @@ window.submitReview = async (productId, orderId) => {
             const form = document.getElementById(`review-form-${productId}`);
             if (form) {
                 form.innerHTML = `
-                    <div style="background:rgba(34,197,94,0.1); padding:15px; border-radius:10px; border:1px solid rgba(34,197,94,0.2); text-align:center;">
-                        <p style="color:#22c55e; font-weight:700; margin:0;">✅ ¡Reseña guardada en Base de Datos!</p>
+                    <div style="background:rgba(34,197,94,0.1); padding:15px; border-radius:12px; border:1px solid rgba(34,197,94,0.2); text-align:center; animation: scaleIn 0.3s ease-out;">
+                        <p style="color:#22c55e; font-weight:700; margin:0;">✨ ¡Gracias por tu opinión! Tu reseña ha sido publicada con éxito.</p>
                     </div>`;
             }
         } else {
