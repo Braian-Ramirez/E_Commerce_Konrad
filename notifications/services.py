@@ -3,8 +3,10 @@ import time
 from django.core.mail import send_mail
 from django.conf import settings
 from django.template.loader import render_to_string
+from django.utils.timezone import localtime
 from .models import CorreoEnviado
 from vendors.models import Persona
+from .models import Notificacion
 
 def _registrar_auditoria_correo(persona, asunto, cuerpo):
     """
@@ -143,9 +145,56 @@ def crear_notificacion(persona, tipo, mensaje):
     """
     Crea una notificación interna en la base de datos para un usuario.
     """
-    from .models import Notificacion
     return Notificacion.objects.create(
         persona=persona,
         tipo=tipo,
         mensaje=mensaje
+    )
+
+def enviar_notificacion_venta_vendedor(vendedor_persona, orden, detalles_vendedor):
+    """
+    Notifica a un vendedor sobre los productos que vendió en una nueva orden pagada.
+    """
+    asunto = f'🎉 ¡Nueva Venta Realizada! Orden #{orden.id} - Comercial Konrad'
+    
+    fecha_str = localtime(orden.fecha).strftime("%d/%m/%Y %H:%M")
+    nombre_comprador = orden.comprador.nombre if orden.comprador else 'Usuario Konrad'
+    
+    productos_texto = ""
+    for d in detalles_vendedor:
+        productos_texto += f"- {d.producto.nombre} x {d.cantidad}\n"
+    
+    direccion_base = orden.comprador.direccion if orden.comprador else ""
+    ciudad_base = orden.comprador.ciudad if orden.comprador else ""
+    
+    if orden.tipo_entrega == 'DOMICILIO':
+        direccion = f"{direccion_base}, {ciudad_base}".strip(', ')
+    else:
+        direccion = 'Recogida en sede Konrad'
+        
+    if not direccion_base and orden.tipo_entrega == 'DOMICILIO':
+        direccion = "No especificada por el comprador"
+        
+    metodo = 'Entrega a domicilio' if orden.tipo_entrega == 'DOMICILIO' else 'Recoger en punto'
+    
+    context = {
+        'nombre_vendedor': vendedor_persona.nombre,
+        'orden_id': orden.id,
+        'nombre_comprador': nombre_comprador,
+        'fecha': fecha_str,
+        'productos_texto': productos_texto.strip(),
+        'metodo_entrega': metodo,
+        'direccion_envio': direccion
+    }
+    
+    mensaje = render_to_string('notifications/emails/venta_vendedor.txt', context)
+
+    _registrar_auditoria_correo(vendedor_persona, asunto, mensaje)
+    _enviar_safe(asunto, mensaje, vendedor_persona.email)
+
+    total_articulos = sum(d.cantidad for d in detalles_vendedor)
+    crear_notificacion(
+        vendedor_persona,
+        'COMPRA',
+        f'Has vendido {total_articulos} productos consulta tu historial de ventas.'
     )

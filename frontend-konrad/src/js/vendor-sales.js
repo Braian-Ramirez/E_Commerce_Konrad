@@ -45,10 +45,14 @@ function renderSales(ventas) {
         const fechaObj = new Date(v.orden_fecha);
         const fechaStr = fechaObj.toLocaleString('es-CO', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
         
-        // Use placeholder inside src if there is no image or its text
-        const imgUrl = (v.producto_imagen && v.producto_imagen.startsWith('http')) 
-            ? v.producto_imagen 
-            : 'https://placehold.co/40x40/0c0f18/white?text=Img';
+        let imgUrl = 'https://placehold.co/40x40/0c0f18/white?text=Img';
+        if (v.producto_imagen) {
+            if (v.producto_imagen.startsWith('http')) {
+                imgUrl = v.producto_imagen;
+            } else if (v.producto_imagen.startsWith('/media/')) {
+                imgUrl = `http://127.0.0.1:8000${v.producto_imagen}`;
+            }
+        }
 
         h += `
         <tr>

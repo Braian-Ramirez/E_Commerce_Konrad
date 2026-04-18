@@ -45,6 +45,9 @@ function renderCard(p) {
         const m = p.descripcion.match(/\|\|IMG:(.*?)\|\|/);
         if (m) img = m[1];
     }
+    if (img && img.startsWith('/media/')) {
+        img = `http://127.0.0.1:8000${img}`;
+    }
     return `
     <div class="product-card glass-effect" style="animation: fadeInUp 0.5s ease both;">
         <div class="product-image" onclick='openProductDetail(${JSON.stringify(p).replace(/'/g,"&apos;")})' style="cursor:pointer;">
@@ -75,6 +78,9 @@ window.openProductDetail = (p) => {
         const mObj = p.descripcion.match(/\|\|IMG:(.*?)\|\|/);
         if (mObj) mainImg = mObj[1];
     }
+    if (mainImg && mainImg.startsWith('/media/')) {
+        mainImg = `http://127.0.0.1:8000${mainImg}`;
+    }
     
     const gallery = [];
     if (p.imagenes && p.imagenes.length > 0) {
@@ -95,9 +101,22 @@ window.openProductDetail = (p) => {
         <div>
             <h2 style="font-size:2rem;color:white;margin-bottom:10px;">${p.nombre}</h2>
             <div style="color:#fbbf24;margin-bottom:15px;">★★★★★ <span style="color:#64748b;font-size:0.85rem;">(Reputación del Vendedor: 4.9)</span></div>
-            <p style="font-size:2rem;font-weight:900;color:white;margin-bottom:20px;">$${pText} COP</p>
+            <p style="font-size:2rem;font-weight:900;color:white;margin-bottom:10px;">$${pText} COP</p>
+            ${(() => {
+                const s = p.cantidad || 0;
+                const label = s <= 0 ? '❌ Agotado' : s <= 5 ? `⚠️ Pocas unidades (${s} disp.)` : `✅ En stock (${s} disponibles)`;
+                const dot   = s <= 0 ? '#ef4444' : s <= 5 ? '#f59e0b' : '#22c55e';
+                const col   = s <= 0 ? '#f87171' : s <= 5 ? '#fbbf24' : '#86efac';
+                const bg    = s <= 0 ? 'rgba(239,68,68,0.08)' : s <= 5 ? 'rgba(245,158,11,0.08)' : 'rgba(34,197,94,0.08)';
+                const bdr   = s <= 0 ? 'rgba(239,68,68,0.2)' : s <= 5 ? 'rgba(245,158,11,0.2)' : 'rgba(34,197,94,0.2)';
+                return `<div style="display:inline-flex;align-items:center;gap:8px;margin-bottom:16px;padding:6px 14px;border-radius:30px;background:${bg};border:1px solid ${bdr};"><div style="width:7px;height:7px;border-radius:50%;background:${dot};"></div><span style="font-size:0.8rem;font-weight:700;color:${col};">${label}</span></div>`;
+            })()}
             <p style="color:#94a3b8;line-height:1.6;margin-bottom:25px;">${p.descripcion.split('||IMG:')[0] || 'Calidad Konrad Shop premium.'}</p>
+            ${(p.cantidad || 0) > 0 ? `
             <button class="cta-primary" onclick="addToCart('${p.id}'); document.getElementById('productDetailModal').style.display='none';" style="width:100%;padding:18px;font-size:1.1rem;">🛒 Añadir al Carrito</button>
+            ` : `
+            <button class="cta-primary disabled" disabled style="width:100%;padding:18px;font-size:1.1rem;background:#4b5563;cursor:not-allowed;filter:grayscale(1);">Producto Agotado</button>
+            `}
         </div>
     </div>`;
     

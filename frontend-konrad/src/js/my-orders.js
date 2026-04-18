@@ -61,7 +61,11 @@ async function cargarPedidos() {
 
     // Combinar reales + simuladas del localStorage
     const mockOrders = JSON.parse(localStorage.getItem('mock_orders') || '[]');
-    orders = [...orders, ...mockOrders];
+    orders = [...orders, ...mockOrders].sort((a, b) => {
+        const dateA = new Date(a.fecha || a.creado_en || a.fecha_simulada || 0);
+        const dateB = new Date(b.fecha || b.creado_en || b.fecha_simulada || 0);
+        return dateB - dateA;
+    });
 
     list.innerHTML = "";
 
@@ -170,7 +174,15 @@ window.openOrderDetails = async (id) => {
             return `
             <div style="background:rgba(255,255,255,0.03); padding:20px; border-radius:15px; margin-bottom:15px; border:1px solid rgba(255,255,255,0.05); display: flex; gap: 15px; transition: 0.3s;" onmouseenter="this.style.background='rgba(255,255,255,0.06)'" onmouseleave="this.style.background='rgba(255,255,255,0.03)'">
                 <div onclick="window.location.href='${link}'" style="width: 70px; height: 70px; background: rgba(0,0,0,0.5); border-radius: 10px; flex-shrink: 0; display:flex; align-items:center; justify-content:center; overflow:hidden; cursor:pointer; border:1px solid rgba(255,255,255,0.1);">
-                    ${(d.producto_imagen && d.producto_imagen.startsWith('http')) ? `<img src="${d.producto_imagen}" onerror="this.src='https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=800&auto=format&fit=crop'" style="width:100%;height:100%;object-fit:cover;">` : `<span style="font-size:2rem;">${d.producto_imagen || '📦'}</span>`}
+                    ${(() => {
+                        let src = d.producto_imagen || '📦';
+                        if (src.startsWith('/media/')) src = `http://127.0.0.1:8000${src}`;
+                        if (src.startsWith('http')) {
+                            return `<img src="${src}" onerror="this.src='https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=800&auto=format&fit=crop'" style="width:100%;height:100%;object-fit:cover;">`;
+                        } else {
+                            return `<span style="font-size:2rem;">${src}</span>`;
+                        }
+                    })()}
                 </div>
                 <div style="flex: 1;">
                     <div style="display:flex; justify-content:space-between; margin-bottom:15px;">

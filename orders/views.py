@@ -17,9 +17,9 @@ class OrdenViewSet(viewsets.ModelViewSet):
         if not user.is_authenticated:
             return Orden.objects.none()
         if user.is_staff or user.is_superuser:
-            return Orden.objects.all()
+            return Orden.objects.all().order_by('-fecha')
         if hasattr(user, 'persona_profile'):
-            return Orden.objects.filter(comprador=user.persona_profile)
+            return Orden.objects.filter(comprador=user.persona_profile).order_by('-fecha')
         return Orden.objects.none()
 
     def perform_create(self, serializer):
@@ -70,8 +70,13 @@ class OrdenViewSet(viewsets.ModelViewSet):
             # --- D. CÁLCULO DE PESO Y ACTUALIZACIÓN DE ESTADÍSTICAS ---
             peso_total += (producto.peso * detalle.cantidad)
             
-            # --- E. ACTUALIZAR VENTAS TOTALES PARA "DESTACADOS" ---
+            # --- E. ACTUALIZAR ESTADÍSTICAS Y DESCONTAR STOCK ---
             producto.ventas_totales += detalle.cantidad
+            if producto.cantidad >= detalle.cantidad:
+                producto.cantidad -= detalle.cantidad
+            else:
+                producto.cantidad = 0 # Fallback por seguridad para no dejar inventarios negativos
+            
             producto.save()
 
         # 5. Cálculo del costo de envío
@@ -126,6 +131,21 @@ class OrdenViewSet(viewsets.ModelViewSet):
             referencia_transaccion=f"K-PAY-{orden.id}-{int(Decimal(subtotal))}"
         )
 
+        # 8. Notificar a cada vendedor involucrado
+        try:
+            from notifications.services import enviar_notificacion_venta_vendedor
+            vendedores_dict = {}
+            for detalle in detalles:
+                v_persona = detalle.producto.vendedor.persona
+                if v_persona not in vendedores_dict:
+                    vendedores_dict[v_persona] = []
+                vendedores_dict[v_persona].append(detalle)
+                
+            for v_persona, det_agrupados in vendedores_dict.items():
+                enviar_notificacion_venta_vendedor(v_persona, orden, det_agrupados)
+        except Exception as e:
+            print("[EMAIL] Error al enviar notificación de venta a vendedores:", e)
+
         return Response({
             'mensaje': 'Checkout matemático exitoso', 
             'subtotal': subtotal,
@@ -165,7 +185,7 @@ class DetalleOrdenViewSet(viewsets.ModelViewSet):
             return Response([])
         # Filtrar solo productos que le pertenecen al vendedor y de órdenes confirmadas
         ventas = DetalleOrden.objects.filter(
-            producto__vendedor=user.persona_profile
+            producto__vendedor__persona=user.persona_profile
         ).exclude(orden__estado='CARRITO').order_by('-orden__fecha')
         
         serializer = self.get_serializer(ventas, many=True)

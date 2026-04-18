@@ -63,14 +63,29 @@ class ProductoSerializer(serializers.ModelSerializer):
     preguntas = PreguntaProductoSerializer(many=True, read_only=True)
     categoria_nombre = serializers.ReadOnlyField(source='categoria.nombre')
     vendedor_nombre = serializers.ReadOnlyField(source='vendedor.persona.nombre')
-    
+    imagen_principal = serializers.SerializerMethodField()
+
+    def get_imagen_principal(self, obj):
+        img = obj.imagenes.filter(es_principal=True).first()
+        if not img:
+            img = obj.imagenes.first()
+        if img and img.imagen:
+            if 'request' in self.context and self.context['request']:
+                return self.context['request'].build_absolute_uri(img.imagen.url)
+            return img.imagen.url
+        return None
+
+    categoria_aplica_iva = serializers.ReadOnlyField(source='categoria.aplica_iva')
+    categoria_comision = serializers.ReadOnlyField(source='categoria.porcentaje_comision')
+
     class Meta:
         model = Producto
         fields = [
             'id', 'vendedor', 'vendedor_nombre', 'categoria', 'categoria_nombre', 
+            'categoria_aplica_iva', 'categoria_comision',
             'subcategoria', 'nombre', 'marca', 'descripcion', 'autenticidad',
             'color', 'tamano', 'peso', 'talla', 'condicion', 
-            'cantidad', 'valor', 'fecha_publicacion', 'imagenes', 'comentarios', 'preguntas'
+            'cantidad', 'valor', 'fecha_publicacion', 'imagenes', 'comentarios', 'preguntas', 'imagen_principal'
         ]
         extra_kwargs = {
             'vendedor': {'read_only': True}

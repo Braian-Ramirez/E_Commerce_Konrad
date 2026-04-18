@@ -1,0 +1,21 @@
+Hola {{ nombre_vendedor }},
+
+¡Excelentes noticias! Has realizado una venta en Comercial Konrad.
+
+Detalles de la venta:
+----------------------------
+Orden #: {{ orden_id }}
+Comprador: {{ nombre_comprador }}
+Fecha: {{ fecha }}
+
+Productos:
+{{ productos_texto }}
+Método de Entrega: {{ metodo_entrega }}
+Dirección de Envío: {{ direccion_envio }}
+----------------------------
+
+Por favor, prepara el pedido para su despacho o entrega según el método seleccionado.
+Puedes ver más detalles y gestionar tus ventas ingresando a tu panel de vendedor.
+
+Atentamente,
+El Equipo de Comercial Konrad, recuerda que si la orden es de envio a domicilio debe aparecer la dirección para poder hacer el envio
