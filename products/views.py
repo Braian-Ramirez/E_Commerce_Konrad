@@ -196,25 +196,19 @@ class PreguntaProductoViewSet(viewsets.ModelViewSet):
         user = self.request.user
         from vendors.models import Persona
         persona, _ = Persona.objects.get_or_create(user=user)
-        serializer.save(comprador=persona)
-
-    @action(detail=True, methods=['post'], url_path='responder', permission_classes=[IsAuthenticated, IsProductVendor])
-    def responder(self, request, pk=None):
-        comentario = self.get_object()
-        respuesta = request.data.get('respuesta')
+        instance = serializer.save(comprador=persona)
         
-        if not respuesta:
-            return Response({"error": "La respuesta no puede estar vacía."}, status=status.HTTP_400_BAD_REQUEST)
-        
-        comentario.respuesta_vendedor = respuesta
-        comentario.fecha_respuesta = timezone.now()
-        comentario.save()
-        
-        return Response({"status": "Respuesta guardada correctamente."}, status=status.HTTP_200_OK)
-
-class PreguntaProductoViewSet(viewsets.ModelViewSet):
-    queryset = PreguntaProducto.objects.all()
-    serializer_class = PreguntaProductoSerializer
+        # Notificar al vendedor
+        try:
+            from notifications.services import crear_notificacion
+            vendedor_persona = instance.producto.vendedor.persona
+            crear_notificacion(
+                persona=vendedor_persona,
+                tipo='PREGUNTA',
+                mensaje=f"Tienes una nueva pregunta sobre tu producto '{instance.producto.nombre}'."
+            )
+        except Exception as e:
+            print(f"Error al crear notificación para vendedor: {e}")
 
     @action(detail=True, methods=['post'], url_path='responder', permission_classes=[IsAuthenticated, IsProductVendor])
     def responder(self, request, pk=None):
@@ -227,5 +221,16 @@ class PreguntaProductoViewSet(viewsets.ModelViewSet):
         pregunta.respuesta = respuesta
         pregunta.fecha_respuesta = timezone.now()
         pregunta.save()
+
+        # Notificar al comprador
+        try:
+            from notifications.services import crear_notificacion
+            crear_notificacion(
+                persona=pregunta.comprador,
+                tipo='RESPUESTA',
+                mensaje=f"Tu pregunta sobre '{pregunta.producto.nombre}' ha sido respondida."
+            )
+        except Exception as e:
+            print(f"Error al crear notificación para comprador: {e}")
         
         return Response({"status": "Respuesta guardada correctamente."}, status=status.HTTP_200_OK)

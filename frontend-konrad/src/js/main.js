@@ -1,10 +1,10 @@
 const API_PRODUCTS = 'http://127.0.0.1:8000/api/v1/products/productos/';
-const API_ORDERS   = 'http://127.0.0.1:8000/api/v1/orders/ordenes/';
+const API_ORDERS = 'http://127.0.0.1:8000/api/v1/orders/ordenes/';
 const API_DETALLES = 'http://127.0.0.1:8000/api/v1/orders/detalles/';
 const token = localStorage.getItem("access_token");
 
 // ─── UTILIDADES DE SESIÓN ────────────────────────────────────────────────────
-function getUserKey() { 
+function getUserKey() {
     const u = JSON.parse(localStorage.getItem('user_data') || '{}');
     return u.email || u.username || 'guest';
 }
@@ -32,28 +32,37 @@ function isFav(id) { return getFavorites().includes(String(id)); }
 
 function toggleFav(id) {
     const favs = getFavorites();
-    const sid  = String(id);
-    const idx  = favs.indexOf(sid);
+    const sid = String(id);
+    const idx = favs.indexOf(sid);
     if (idx === -1) favs.push(sid);
     else favs.splice(idx, 1);
     saveFavorites(favs);
-    return idx === -1; 
+    return idx === -1;
 }
 
 // ─── INICIALIZACIÓN ──────────────────────────────────────────────────────────
+async function loadHtmlTemplates() {
+    try {
+        const res = await fetch('/pages/components.html');
+        if (!res.ok) return;
+        const html = await res.text();
+        const div = document.createElement('div');
+        div.innerHTML = html;
+        document.body.appendChild(div);
+    } catch(e) { console.error('Error loading centralized templates:', e); }
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
-    // REQUISITO: Obligar a loguearse
-    if (!token) {
-        window.location.href = '/pages/login.html';
-        return;
-    }
+    await loadHtmlTemplates();
 
     // 0. Renderizar la interfaz según la sesión (Perfil vs Login)
     renderAuthUI();
 
-    // 1. Antes de renderizar, sincronizamos para que el badge y el estado sea el real de la BD
-    await syncCartWithBackend();
-    
+    // 1. Sincronizamos el carrito local con el backend si hay sesión
+    if (token) {
+        await syncCartWithBackend();
+    }
+
     fetchRealProducts();
     setupDetailModal();
     updateCartCount();
@@ -76,17 +85,17 @@ async function syncCartWithBackend() {
         const active = orders.find(o => o.estado === 'CARRITO');
         if (active && active.detalles && active.detalles.length > 0) {
             const dbItems = [];
-            active.detalles.forEach(d => { for(let i=0; i<d.cantidad; i++) dbItems.push(String(d.producto)); });
-            
+            active.detalles.forEach(d => { for (let i = 0; i < d.cantidad; i++) dbItems.push(String(d.producto)); });
+
             const local = getCartItems();
             // Si el local está vacío, cargamos lo que diga la base de datos (sesión fresca)
             // Si el local tiene algo, confiamos en el local pero nos aseguramos de no perder nada
-            const merged = local.length === 0 ? dbItems : local; 
-            
+            const merged = local.length === 0 ? dbItems : local;
+
             saveCartItems(merged);
             updateCartCount();
         }
-    } catch(e) { console.warn("Sync error", e); }
+    } catch (e) { console.warn("Sync error", e); }
 }
 
 let allProducts = [];
@@ -102,13 +111,13 @@ async function fetchRealProducts() {
             if (precio <= 0) precio = 2500000;
             return { ...p, id: String(p.id), precio_fijo: precio };
         });
-    } catch(e) {
+    } catch (e) {
         console.error("Error al cargar productos reales:", e);
         allProducts = [];
     }
 
     const topSales = [...allProducts].sort((a, b) => (b.ventas_totales || 0) - (a.ventas_totales || 0));
-    const count = 10; 
+    const count = 10;
 
     if (allProducts.length === 0) {
         const msg = `<p style="grid-column: 1/-1; text-align:center; color:#94a3b8; padding:50px;">Sincronizando con base de datos...</p>`;
@@ -154,7 +163,7 @@ function getMockGallery(img, catData) {
     const gal = [img];
     if (img && (img.startsWith('http') || img.startsWith('/'))) {
         const cLow = (catData || '').toLowerCase();
-        
+
         // Granular matchers for specific products
         if (cLow.includes('nintendo') || cLow.includes('switch')) {
             gal.push('https://images.unsplash.com/photo-1612036782180-6f0b6ce846ce?q=80&w=800&auto=format&fit=crop'); // Switch joycons
@@ -212,8 +221,8 @@ function renderGrid(containerId, products, showFav = false) {
 
     grid.innerHTML = products.map(p => {
         const precio = new Intl.NumberFormat('es-CO').format(p.precio_fijo);
-        const favOn  = isFav(p.id);
-        
+        const favOn = isFav(p.id);
+
         let img = p.imagen_principal || '📦';
         if (p.imagenes && p.imagenes.length > 0 && p.imagenes[0].imagen) {
             img = p.imagenes[0].imagen;
@@ -224,57 +233,40 @@ function renderGrid(containerId, products, showFav = false) {
 
         const cleanDesc = (p.descripcion || '').split('||IMG:')[0];
         const p_id = String(p.id);
-        
+
         // Quitado "Imagen en Proceso" para usar una FOTO REAL de una caja elegante de pedido si hay un error
         const fallback = "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=800&auto=format&fit=crop";
-        
+
         let gal = [];
         if (p.imagenes && p.imagenes.length > 0) gal = p.imagenes.map(i => i.imagen);
-        
+
         const catData = (p.categoria_nombre || '') + ' ' + (p.descripcion || '') + ' ' + (p.nombre || '') + ' ' + (p.marca || '');
         if (gal.length === 0) gal = getMockGallery(img, catData);
         window.cardGalleries[p_id] = { images: gal, index: 0 };
+        window.productDataCache = window.productDataCache || {};
+        window.productDataCache[p_id] = { ...p, descripcion: cleanDesc, imagen_principal: img };
 
-        return `
-        <div class="product-card glass-effect" id="card-${p_id}" style="position:relative;animation: fadeIn 0.4s ease-out;">
-        ${token ? `
-            <button id="fav-${p_id}" onclick="handleFav('${p_id}')"
-                style="position:absolute;top:12px;right:12px;z-index:10;background:${favOn ? 'rgba(239,68,68,0.2)' : 'rgba(255,255,255,0.05)'};border:1px solid ${favOn ? 'rgba(239,68,68,0.4)' : 'rgba(255,255,255,0.1)'};width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;">
-                ${favOn ? '❤️' : '🤍'}
-            </button>
-        ` : ''}
-
-            <div class="product-image" style="position:relative; cursor:pointer; background: #0c0f18; display:flex; align-items:center; justify-content:center; border-radius:15px; overflow:hidden; border:1px solid rgba(255,255,255,0.03);">
-                <button onclick="event.stopPropagation(); flipCardImg('${p_id}', -1)" style="position:absolute;left:5px;z-index:20;background:rgba(0,0,0,0.5);border:none;color:white;width:30px;height:30px;border-radius:50%;cursor:pointer;">‹</button>
-                <div id="card-img-container-${p_id}" onclick='openProductDetail(${JSON.stringify({...p, descripcion: cleanDesc, imagen_principal: img}).replace(/'/g,"&apos;")})' style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
-                    ${img.startsWith('http') ? `<img src="${img}" onerror="this.src='${fallback}'" style="width:100%; height:100%; object-fit:cover;">` : `<span style="font-size:3rem;">${img}</span>`}
-                </div>
-                <button onclick="event.stopPropagation(); flipCardImg('${p_id}', 1)" style="position:absolute;right:5px;z-index:20;background:rgba(0,0,0,0.5);border:none;color:white;width:30px;height:30px;border-radius:50%;cursor:pointer;">›</button>
-            </div>
-
-            <div style="padding:5px 0;">
-                <h4 class="product-title" style="margin-top:8px;font-weight:700;color:white;font-size:1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.nombre}</h4>
-                <div style="color:#fbbf24;font-size:0.85rem;margin:3px 0;">★★★★★ <span style="color:#64748b;font-size:0.75rem;">(12)</span></div>
-                <div class="product-price" style="margin-bottom:12px;color:white;font-weight:800;font-size:1.1rem;">$${precio} <span style="font-size:0.7rem;color:#64748b;">COP</span></div>
-            </div>
-
-            <div class="qty-selector" style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:12px;background:rgba(255,255,255,0.05);padding:6px;border-radius:12px;">
-                <button onclick="changeQty('${p_id}',-1)" style="background:transparent;border:none;color:white;font-size:1.2rem;cursor:pointer;">−</button>
-                <span id="qty-${p_id}" style="font-weight:800;color:white;">1</span>
-                <button onclick="changeQty('${p_id}',1)" style="background:transparent;border:none;color:white;font-size:1.2rem;cursor:pointer;">+</button>
-            </div>
-
-            <div style="display:flex;gap:8px;">
-                <button class="add-cart-btn" id="addBtn-${p_id}" onclick="addToCart('${p_id}')" style="flex:3;font-weight:800;cursor:pointer;">🛒 Añadir</button>
-                <button onclick='openProductDetail(${JSON.stringify({...p, descripcion: cleanDesc, imagen_principal: img}).replace(/'/g,"&apos;")})' style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:white;border-radius:10px;cursor:pointer;">🔎</button>
-            </div>
-        </div>`;
+        const tplElem = document.getElementById('tpl-product-card');
+        if (tplElem) {
+            let htmlStr = tplElem.innerHTML
+                .replaceAll('{p_id}', p_id)
+                .replaceAll('{nombre}', p.nombre)
+                .replaceAll('{precio}', precio)
+                .replaceAll('{img_content}', img.startsWith('http') ? `<img src="${img}" onerror="this.src='${fallback}'" class="img-cover">` : `<span class="img-fallback-icon">${img}</span>`)
+                .replaceAll('{fav_btn}', token ? `
+                    <button id="fav-${p_id}" onclick="handleFav('${p_id}')" class="btn-fav ${favOn ? 'active' : ''}">
+                        ${favOn ? '❤️' : '🤍'}
+                    </button>
+                ` : '');
+            return htmlStr;
+        }
+        return ``;
     }).join('');
 }
 
 // ─── CARRITO ─────────────────────────────────────────────────────────────────
 async function addToCart(id) {
-    const q    = parseInt(document.getElementById(`qty-${id}`)?.textContent || 1);
+    const q = parseInt(document.getElementById(`qty-${id}`)?.textContent || 1);
     const cart = getCartItems();
     for (let i = 0; i < q; i++) cart.push(String(id));
     saveCartItems(cart);
@@ -286,14 +278,14 @@ async function addToCart(id) {
         try {
             const resO = await fetch(API_ORDERS, { headers: { 'Authorization': `Bearer ${token}` } });
             if (!resO.ok) throw new Error("API Orders Error");
-            
+
             const raw = await resO.json();
             const orders = (Array.isArray(raw) ? raw : (raw.results || []));
             let active = orders.find(o => o.estado === 'CARRITO');
-            
+
             if (!active) {
-                const resN = await fetch(API_ORDERS, { 
-                    method: 'POST', 
+                const resN = await fetch(API_ORDERS, {
+                    method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify({ estado: 'CARRITO' })
                 });
@@ -308,8 +300,8 @@ async function addToCart(id) {
                     body: JSON.stringify({ orden: active.id, producto: id, cantidad: q, valor_unitario: findProductPrice(id) })
                 });
             }
-        } catch(e) { 
-            console.warn("Persistencia solo local (posible falta de perfil de Persona):", e.message); 
+        } catch (e) {
+            console.warn("Persistencia solo local (posible falta de perfil de Persona):", e.message);
         }
     }
 }
@@ -338,19 +330,19 @@ window.handleFav = (id) => {
     const added = toggleFav(id);
     updateFavoritesPanel();
     showToast(added ? '❤️ Añadido a favoritos' : '💔 Quitado de favoritos');
-    
+
     // Actualizar botón en el GRID
     const btnGrid = document.getElementById(`fav-${id}`);
     if (btnGrid) {
         btnGrid.innerHTML = added ? '❤️' : '🤍';
-        btnGrid.style.background = added ? 'rgba(239,68,68,0.2)' : 'rgba(255,255,255,0.05)';
+        btnGrid.className = `btn-fav ${added ? 'active' : ''}`;
     }
 
     // Actualizar botón en el MODAL DETALLE
     const btnModal = document.getElementById(`modal-fav-${id}`);
     if (btnModal) {
         btnModal.innerHTML = added ? '❤️' : '🤍';
-        btnModal.style.background = added ? 'rgba(239,68,68,0.1)' : 'rgba(255,255,255,0.05)';
+        btnModal.className = `btn-fav-large ${added ? 'active' : ''}`;
     }
 };
 
@@ -359,8 +351,7 @@ function injectFavoritesSection() {
     if (!sidebar || document.getElementById('favsSection')) return;
     const sec = document.createElement('div');
     sec.id = 'favsSection';
-    sec.className = 'sidebar-section';
-    sec.style = 'margin-top:25px;border-top:1px solid rgba(255,255,255,0.05);padding-top:20px;';
+    sec.className = 'sidebar-section fav-sidebar-sec';
     sec.innerHTML = `<p class="section-title">Mis Favoritos</p><div id="favsList"></div>`;
     sidebar.insertBefore(sec, sidebar.querySelector('.logout-btn') || sidebar.lastChild);
 }
@@ -370,7 +361,7 @@ function updateFavoritesPanel() {
     if (!list) return;
     const favIds = getFavorites();
     const favProds = allProducts.filter(p => favIds.includes(String(p.id)));
-    list.innerHTML = favProds.slice(0, 5).map(p => `<div style="color:white;font-size:0.8rem;margin:5px 0;">♥ ${p.nombre}</div>`).join('') || '<p style="color:#64748b;font-size:0.7rem;">Vacío</p>';
+    list.innerHTML = favProds.slice(0, 5).map(p => `<div class="fav-item">♥ ${p.nombre}</div>`).join('') || '<p class="fav-empty">Vacío</p>';
 }
 
 // ─── FILTROS & DETALLES (BÁSICO) ─────────────────────────────────────────────
@@ -378,7 +369,7 @@ function setupFilters() {
     const range = document.getElementById('priceRange');
     const label = document.getElementById('priceValue');
     const boxes = document.querySelectorAll('.cat-filter');
-    const allC  = document.getElementById('cat-all');
+    const allC = document.getElementById('cat-all');
 
     const apply = () => {
         const max = range ? parseFloat(range.value) : 20000000;
@@ -386,7 +377,7 @@ function setupFilters() {
 
         const normalize = (str) => (str || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         const selected = Array.from(boxes).filter(c => c.checked).map(c => normalize(c.value));
-        
+
         // DETERMINAR ORIGEN DE DATOS CORRECTO
         const isHomePage = !!document.getElementById('productHighlights');
         const sourceProducts = isHomePage ? [...allProducts].sort((a, b) => (b.ventas_totales || 0) - (a.ventas_totales || 0)).slice(0, 10) : allProducts;
@@ -394,7 +385,7 @@ function setupFilters() {
         const filtered = sourceProducts.filter(p => {
             const matchesPrice = p.precio_fijo <= max;
             const pCat = normalize(p.categoria_nombre);
-            const matchesCat   = (allC && allC.checked) || selected.length === 0 || selected.includes(pCat);
+            const matchesCat = (allC && allC.checked) || selected.length === 0 || selected.includes(pCat);
             return matchesPrice && matchesCat;
         });
 
@@ -414,22 +405,14 @@ function setupFilters() {
     }
 
     // SOPORTE PARA BOTONES NUEVOS (PÁGINA PÚBLICA)
-    const btnAll  = document.getElementById('cat-all-btn');
+    const btnAll = document.getElementById('cat-all-btn');
     const catBtns = document.querySelectorAll('.cat-filter-btn');
 
     const updateBtns = (activeBtn) => {
         [btnAll, ...catBtns].forEach(b => {
-             if (b) {
-                b.classList.remove('active');
-                b.style.background = 'transparent';
-                b.style.color = '#94a3b8';
-             }
+             if (b) b.classList.remove('active');
         });
-        if (activeBtn) {
-            activeBtn.classList.add('active');
-            activeBtn.style.background = 'var(--primary)';
-            activeBtn.style.color = 'white';
-        }
+        if (activeBtn) activeBtn.classList.add('active');
     };
 
     btnAll?.addEventListener('click', () => {
@@ -472,26 +455,18 @@ function setupSearch() {
 window.changeHighlightsTime = (period) => {
     const tabW = document.getElementById('tab-weekly');
     const tabM = document.getElementById('tab-monthly');
-    
+
     if (!tabW || !tabM) return;
 
     // Reset visual
-    [tabW, tabM].forEach(t => {
-        t.style.background = 'transparent';
-        t.style.color = '#94a3b8';
-        t.style.boxShadow = 'none';
-    });
+    [tabW, tabM].forEach(t => t.classList.remove('active'));
 
     let sorted;
     if (period === 'mensual') {
-        tabM.style.background = 'var(--primary)';
-        tabM.style.color = 'white';
-        tabM.style.boxShadow = '0 4px 15px rgba(139,92,246,0.3)';
+        tabM.classList.add('active');
         sorted = [...allProducts].sort((a, b) => (b.ventas_totales || 0) - (a.ventas_totales || 0));
     } else {
-        tabW.style.background = 'var(--primary)';
-        tabW.style.color = 'white';
-        tabW.style.boxShadow = '0 4px 15px rgba(139,92,246,0.3)';
+        tabW.classList.add('active');
         sorted = [...allProducts].sort(() => Math.random() - 0.5);
     }
     renderGrid('productHighlights', sorted.slice(0, 10), true);
@@ -511,7 +486,7 @@ window.openProductDetail = (p) => {
     const m = document.getElementById('productDetailModal');
     const c = document.getElementById('modalContent');
     const pText = new Intl.NumberFormat('es-CO').format(p.precio_fijo);
-    
+
     // Extracción de imagen con alta prioridad
     let mainImg = p.imagen_principal;
     if (p.imagenes && p.imagenes.length > 0) {
@@ -520,11 +495,11 @@ window.openProductDetail = (p) => {
         const match = p.descripcion.match(/\|\|IMG:(.*?)\|\|/);
         if (match) mainImg = match[1];
     }
-    
+
     if (!mainImg) {
         mainImg = '📦';
     }
-    
+
     let gallery = [];
     if (p.imagenes && p.imagenes.length > 0) {
         gallery.push(...p.imagenes.map(i => i.imagen));
@@ -542,116 +517,60 @@ window.openProductDetail = (p) => {
     // Generar HTML de RESEÑAS (Historial de comentarios con estrellas)
     const reviewsHtml = (p.comentarios && p.comentarios.length > 0)
         ? p.comentarios.map(r => `
-            <div style="margin-bottom:12px; padding:10px; background:rgba(255,191,36,0.03); border-radius:10px; border:1px solid rgba(255,191,36,0.05);">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-                    <span style="color:white; font-weight:800; font-size:0.8rem;">${r.comprador_nombre}</span>
-                    <span style="color:#64748b; font-size:0.6rem;">${new Date(r.fecha).toLocaleDateString()}</span>
+            <div class="review-card">
+                <div class="review-header">
+                    <span class="review-author">${r.comprador_nombre}</span>
+                    <span class="review-date">${new Date(r.fecha).toLocaleDateString()}</span>
                 </div>
-                <div style="margin-bottom:5px;">
-                    <span style="color:#fbbf24; font-size:0.7rem;">${'★'.repeat(Math.min(10, r.calificacion || 10))}${'☆'.repeat(Math.max(0, 10 - (r.calificacion || 10)))}</span>
+                <div class="review-stars-wrap">
+                    <span class="review-stars">${'★'.repeat(Math.min(10, r.calificacion || 10))}${'☆'.repeat(Math.max(0, 10 - (r.calificacion || 10)))}</span>
                 </div>
-                <p style="color:#e2e8f0; font-size:0.75rem; margin:0; line-height:1.4;">${r.comentario}</p>
+                <p class="review-text">${r.comentario}</p>
             </div>`).join('')
-        : '<p style="color:#64748b; font-size:0.75rem;">Aún no hay reseñas de compradores.</p>';
+        : '<p class="empty-msg">Aún no hay reseñas de compradores.</p>';
 
     // Generar HTML de PREGUNTAS reales de la BD
-    const qsHtml = (p.preguntas && p.preguntas.length > 0) 
+    const qsHtml = (p.preguntas && p.preguntas.length > 0)
         ? p.preguntas.map(q => `
-            <div style="margin-bottom:15px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.03);">
-                <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
-                    <span style="color:white;font-weight:700;font-size:0.85rem;">👤 ${q.comprador_nombre}</span>
-                    <span style="color:#64748b;font-size:0.65rem;">${new Date(q.fecha_pregunta).toLocaleDateString()}</span>
+            <div class="q-card">
+                <div class="q-header">
+                    <span class="q-author">👤 ${q.comprador_nombre}</span>
+                    <span class="q-date">${new Date(q.fecha_pregunta).toLocaleDateString()}</span>
                 </div>
-                <p style="color:#cbd5e1;font-size:0.8rem;line-height:1.4;margin:0;">Q: ${q.pregunta}</p>
+                <p class="q-text">Q: ${q.pregunta}</p>
                 ${q.respuesta ? `
-                <div style="margin-top:8px;padding-left:15px;border-left:2px solid #3b82f6;animation:slideIn 0.3s ease;">
-                    <p style="color:#3b82f6;font-size:0.75rem;font-weight:800;margin:0;">Vendedor responde:</p>
-                    <p style="color:#94a3b8;font-size:0.75rem;margin:0;">${q.respuesta}</p>
+                <div class="a-wrap">
+                    <p class="a-author">${sellerName}:</p>
+                    <p class="a-text">${q.respuesta}</p>
                 </div>` : ''}
             </div>`).join('')
-        : '<p style="color:#64748b; font-size:0.8rem;">Aún no hay preguntas. ¡Sé el primero!</p>';
+        : '<p class="empty-msg">Aún no hay preguntas. ¡Sé el primero!</p>';
 
-    c.innerHTML = `
-    <div style="display:grid;grid-template-columns:1fr 1.2fr;gap:40px;padding:5px;">
-        <div>
-            <div style="position:relative;width:100%;height:350px;background:#0c0f18;border-radius:25px;overflow:hidden;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.05);">
-                <button onclick="moveGallery(-1)" style="position:absolute;left:15px;z-index:20;background:rgba(0,0,0,0.6);border:none;color:white;width:40px;height:40px;border-radius:50%;cursor:pointer;">‹</button>
-                <div id="detailMainImageContainer" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:8rem;">
-                    ${(mainImg.startsWith('http') || mainImg.startsWith('/')) ? `<img src="${mainImg}" onerror="this.src='https://placehold.co/400x400/0c0f18/white?text=Imagen'" style="width:100%;height:100%;object-fit:contain;">` : mainImg}
-                </div>
-                <button onclick="moveGallery(1)" style="position:absolute;right:15px;z-index:20;background:rgba(0,0,0,0.6);border:none;color:white;width:40px;height:40px;border-radius:50%;cursor:pointer;">›</button>
-            </div>
-            
-            <div style="margin-top:25px; display:grid; grid-template-columns:1fr 1fr; gap:20px;">
-                <!-- SECCIÓN IZQ: PREGUNTAS -->
-                <div style="padding:15px; background:rgba(255,255,255,0.01); border-radius:20px; border:1px solid rgba(255,255,255,0.03);">
-                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
-                        <div style="width:8px;height:8px;border-radius:50%;background:#3b82f6;box-shadow:0 0 8px #3b82f6;"></div>
-                        <p style="color:white;font-size:0.8rem;font-weight:800;text-transform:uppercase;">Preguntas</p>
-                    </div>
-                    <div id="questionsContainer" style="max-height:180px;overflow-y:auto;padding-right:5px;margin-bottom:12px;">
-                        ${qsHtml}
-                    </div>
-                    <div style="background:rgba(255,255,255,0.02);padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,0.05);">
-                        <textarea id="newQuestionTxt" placeholder="Pregunta algo..." 
-                            style="width:100%;height:45px;background:transparent;border:none;color:white;outline:none;resize:none;font-size:0.8rem;"></textarea>
-                        <button onclick="submitUserQuestion('${p.id}')" class="cta-primary" style="width:100%; padding:6px; font-size:0.7rem; background:#3b82f6; border-radius:8px;">Enviar Pregunta</button>
-                    </div>
-                </div>
-
-                <!-- SECCIÓN DER: RESEÑAS -->
-                <div style="padding:15px; background:rgba(255,255,255,0.01); border-radius:20px; border:1px solid rgba(255,255,255,0.03);">
-                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
-                        <div style="width:8px;height:8px;border-radius:50%;background:#fbbf24;box-shadow:0 0 8px #fbbf24;"></div>
-                        <p style="color:white;font-size:0.8rem;font-weight:800;text-transform:uppercase;">Reseñas</p>
-                    </div>
-                    <div id="reviewsContainer" style="max-height:300px;overflow-y:auto;padding-right:5px;">
-                        ${reviewsHtml}
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div style="display:flex;flex-direction:column;justify-content:flex-start;">
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;background:rgba(139,92,246,0.05);padding:10px 15px;border-radius:15px;border:1px solid rgba(139,92,246,0.1);width:fit-content;">
-                <div style="width:35px;height:35px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;">👤</div>
-                <div>
-                    <p style="color:#94a3b8;font-size:0.65rem;margin:0;font-weight:800;letter-spacing:1px;text-transform:uppercase;">Vendedor Oficial</p>
-                    <p style="color:white;font-size:0.95rem;font-weight:700;margin:0;"><a href="/pages/seller-profile.html?vendor_id=${sellerId}" style="color:white;text-decoration:none;border-bottom:1px dashed rgba(255,255,255,0.4);padding-bottom:2px;">${sellerName} &rarr;</a></p>
-                </div>
-            </div>
-
-            <h2 style="font-size:2.5rem;font-weight:900;color:white;margin-bottom:10px;letter-spacing:-1px;">${p.nombre}</h2>
-            <div style="display:flex;align-items:center;gap:15px;margin-bottom:25px;">
-                <span style="color:#fbbf24;font-size:1.1rem;">★★★★★</span>
-                <span style="color:#64748b;font-size:0.85rem;">(Vendedor verificado por Comercial Konrad)</span>
-            </div>
-
-            <p style="font-size:2.8rem;font-weight:900;color:white;margin-bottom:25px;text-shadow:0 0 20px rgba(99,102,241,0.3);">$${pText} <span style="font-size:1rem;color:#64748b;font-weight:400;">COP</span></p>
-            
-            <div style="padding:22px;background:rgba(255,255,255,0.02);border-radius:15px;margin-bottom:30px;border:1px solid rgba(255,255,255,0.05);line-height:1.7;">
-                <p style="color:#cbd5e1;font-size:1rem;margin:0;">${p.descripcion.split('||IMG:')[0] || 'Calidad Konrad premium seleccionada.'}</p>
-            </div>
-
-            <div style="display:flex;gap:15px;margin-bottom:20px;">
-                <button class="cta-primary" onclick="addToCart('${p.id}'); document.getElementById('productDetailModal').style.display='none';" style="flex:2;padding:20px;font-size:1.2rem;font-weight:800;">🛒 Añadir al Carrito</button>
-                <button id="modal-fav-${p.id}" onclick="handleFav('${p.id}')" style="flex:0.5;background:${isFav(p.id) ? 'rgba(239,68,68,0.1)' : 'rgba(255,255,255,0.05)'};border:1px solid ${isFav(p.id) ? 'rgba(239,68,68,0.3)' : 'rgba(255,255,255,0.1)'};border-radius:18px;cursor:pointer;font-size:1.8rem;display:flex;align-items:center;justify-content:center;transition:0.3s;">
-                    ${isFav(p.id) ? '❤️' : '🤍'}
-                </button>
-            </div>
-            
-            <p style="font-size:0.8rem;color:#64748b;display:flex;align-items:center;gap:8px;">📦 Envío prioritario Konrad • 🛡️ Garantía Premium • 💳 SSL</p>
-        </div>
-    </div>`;
+    const tplElem = document.getElementById('tpl-product-detail');
+    if (tplElem) {
+        c.innerHTML = tplElem.innerHTML
+            .replaceAll('{main_img}', (mainImg.startsWith('http') || mainImg.startsWith('/')) ? `<img src="${mainImg}" onerror="this.src='https://placehold.co/400x400/0c0f18/white?text=Imagen'" class="img-contain">` : mainImg)
+            .replaceAll('{qsHtml}', qsHtml)
+            .replaceAll('{p_id}', p.id)
+            .replaceAll('{reviewsHtml}', reviewsHtml)
+            .replaceAll('{sellerId}', sellerId)
+            .replaceAll('{sellerName}', sellerName)
+            .replaceAll('{nombre}', p.nombre)
+            .replaceAll('{precioTexto}', pText)
+            .replaceAll('{desc}', p.descripcion.split('||IMG:')[0] || 'Calidad Konrad premium seleccionada.')
+            .replaceAll('{btn_fav_modal}', `<button id="modal-fav-${p.id}" onclick="handleFav('${p.id}')" class="btn-fav-large ${isFav(p.id) ? 'active' : ''}">${isFav(p.id) ? '❤️' : '🤍'}</button>`);
+    } else {
+        c.innerHTML = "<p>Error: Plantillas no cargadas correctamente.</p>";
+    }
 
     window.currentGalleryPaths = gallery;
-    window.moveGallery = (delta) => { 
+    window.moveGallery = (delta) => {
         currentGalleryIndex = (currentGalleryIndex + delta + window.currentGalleryPaths.length) % window.currentGalleryPaths.length;
         const container = document.getElementById('detailMainImageContainer');
         if (container) {
             const src = window.currentGalleryPaths[currentGalleryIndex];
-            container.innerHTML = (src.startsWith('http') || src.startsWith('/')) 
-                ? `<img src="${src}" onerror="this.src='https://placehold.co/400x400/0c0f18/white?text=Imagen'" style="width:100%;height:100%;object-fit:contain;">`
+            container.innerHTML = (src.startsWith('http') || src.startsWith('/'))
+                ? `<img src="${src}" onerror="this.src='https://placehold.co/400x400/0c0f18/white?text=Imagen'" class="img-contain">`
                 : src;
         }
     };
@@ -660,11 +579,11 @@ window.openProductDetail = (p) => {
 
 window.submitUserQuestion = async (productId) => {
     const txt = document.getElementById('newQuestionTxt').value;
-    if(!txt.trim()) return;
+    if (!txt.trim()) return;
     const tkn = localStorage.getItem("access_token");
-    if(!tkn) { 
+    if (!tkn) {
         showToast("🔐 Inicia sesión para preguntar.", false);
-        return; 
+        return;
     }
     try {
         const res = await fetch(`http://127.0.0.1:8000/api/v1/products/preguntas/`, {
@@ -672,10 +591,10 @@ window.submitUserQuestion = async (productId) => {
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${tkn}` },
             body: JSON.stringify({ producto: productId, pregunta: txt })
         });
-        if(res.ok) {
+        if (res.ok) {
             const container = document.getElementById('questionsContainer');
-            if(container) {
-                if(container.textContent.includes('Aún no hay preguntas')) container.innerHTML = '';
+            if (container) {
+                if (container.textContent.includes('Aún no hay preguntas')) container.innerHTML = '';
                 const newQ = document.createElement('div');
                 newQ.style = "margin-bottom:15px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.03); animation: fadeIn 0.5s ease;";
                 newQ.innerHTML = `
@@ -691,7 +610,7 @@ window.submitUserQuestion = async (productId) => {
             document.getElementById('newQuestionTxt').value = "";
             showToast("✅ Pregunta enviada al vendedor");
         }
-    } catch(e) { }
+    } catch (e) { }
 };
 
 // ─── SESIÓN & LOGOUT ──────────────────────────────────────────────────────────
@@ -703,54 +622,147 @@ window.handleLogout = () => {
 };
 
 function renderAuthUI() {
-    const authLinks  = document.getElementById('authLinks');
-    const token      = localStorage.getItem('access_token');
-    const rol        = (localStorage.getItem('rol') || '').toUpperCase();
-
+    const authLinks = document.getElementById('authLinks');
     if (!authLinks) return;
 
-    if (token) {
-        if (rol === 'DIRECTOR_COMERCIAL' || rol === 'ADMIN') {
-            authLinks.innerHTML = `
-                <a href="/pages/director-dashboard.html" class="nav-item">📊 <span>Director</span></a>
-                <button onclick="handleLogout()" class="nav-item" style="background:none;border:none;cursor:pointer;color:#ef4444;font-weight:700;">
-                    🚪 <span>Salir</span>
+    const sessionToken = localStorage.getItem('access_token');
+    const sessionRole = (localStorage.getItem('rol') || '').toUpperCase();
+
+    if (sessionToken) {
+        // Solo mostrar campana en dashboards, no en el index principal ni login/register
+        const path = window.location.pathname;
+        const isPublicPage = path === '/' || path.endsWith('index.html') || path.endsWith('login.html') || path.endsWith('register.html');
+        const showBell = !isPublicPage;
+
+        const notifHTML = showBell ? `
+            <div class="nav-item tooltip nav-bell-wrap" id="nav-bell">
+                <button id="btnNotificaciones" class="notif-bell-btn">
+                    🔔
+                    <span id="notifCount" class="notif-badge" style="display:none;">0</span>
                 </button>
-            `;
-        } else if (rol === 'VENDEDOR') {
-            authLinks.innerHTML = `
-                <a href="/pages/vendor-dashboard.html" class="nav-item">🏬 <span>Vendedor</span></a>
-                <button onclick="handleLogout()" class="nav-item" style="background:none;border:none;cursor:pointer;color:#ef4444;font-weight:700;">
-                    🚪 <span>Salir</span>
-                </button>
-            `;
+                <div id="notifDropdown" class="notif-dropdown">
+                    <div class="notif-header">
+                        <h4>Notificaciones</h4>
+                    </div>
+                    <div id="notifList" class="notif-list">
+                        <!-- Se llena dinámicamente -->
+                    </div>
+                </div>
+            </div>
+        ` : '';
+
+        if (sessionRole === 'DIRECTOR_COMERCIAL' || sessionRole === 'ADMIN') {
+            authLinks.innerHTML = notifHTML + `
+                    <a href="/pages/director-dashboard.html" class="nav-item">📊 <span>Director</span></a>
+                    <button onclick="handleLogout()" class="nav-item btn-logout">
+                        🚪 <span>Salir</span>
+                    </button>
+                `;
+        } else if (sessionRole === 'VENDEDOR') {
+            authLinks.innerHTML = notifHTML + `
+                    <a href="/pages/vendor-dashboard.html" class="nav-item">🏬 <span>Vendedor</span></a>
+                    <button onclick="handleLogout()" class="nav-item btn-logout">
+                        🚪 <span>Salir</span>
+                    </button>
+                `;
         } else {
-            authLinks.innerHTML = `
-                <a href="/pages/profile.html" class="nav-item">👤 <span>Mi Perfil</span></a>
-                <button onclick="handleLogout()" class="nav-item" style="background:none;border:none;cursor:pointer;color:#ef4444;font-weight:700;">
-                    🚪 <span>Salir</span>
-                </button>
-            `;
+            authLinks.innerHTML = notifHTML + `
+                    <a href="/pages/profile.html" class="nav-item">👤 <span>Mi Perfil</span></a>
+                    <button onclick="handleLogout()" class="nav-item btn-logout">
+                        🚪 <span>Salir</span>
+                    </button>
+                `;
         }
+        if (showBell) initNotifications();
     } else {
         authLinks.innerHTML = `
-            <a href="/pages/login.html" class="nav-item" style="color:var(--primary);">
-                🔐 <span>Ingresar</span>
-            </a>
-            <a href="/pages/register.html" class="nav-item">
-                ✨ <span>Registrarse</span>
-            </a>
-        `;
+                <a href="/pages/login.html" class="nav-item btn-login">
+                    🔐 <span>Ingresar</span>
+                </a>
+                <a href="/pages/register.html" class="nav-item">
+                    ✨ <span>Registrarse</span>
+                </a>
+            `;
     }
 }
 
 function showToast(msg) {
     let t = document.getElementById('toast');
     if (!t) {
-        t = document.createElement('div'); t.id = 'toast';
-        t.style = "position:fixed;top:100px;right:30px;padding:14px 28px;background:rgba(139,92,246,0.9);border-radius:15px;z-index:9999;color:white;transform:translateX(200%);transition:0.3s;";
+        t = document.createElement('div');
+        t.id = 'toast';
+        t.className = 'toast-msg';
         document.body.appendChild(t);
     }
-    t.textContent = msg; t.style.transform = "translateX(0)";
-    setTimeout(() => t.style.transform = "translateX(200%)", 3000);
+    t.textContent = msg; 
+    setTimeout(() => t.classList.add('show'), 10);
+    setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function initNotifications() {
+    const notifToken = localStorage.getItem('access_token');
+    if (!notifToken) return;
+
+    const btnNotif = document.getElementById('btnNotificaciones');
+    const dropdownNotif = document.getElementById('notifDropdown');
+    const notifCount = document.getElementById('notifCount');
+    const notifList = document.getElementById('notifList');
+
+    if (!btnNotif || !dropdownNotif) return;
+
+    // Cerrar al hacer click fuera
+    document.addEventListener('click', (e) => {
+        if (!btnNotif.contains(e.target) && !dropdownNotif.contains(e.target)) {
+            dropdownNotif.classList.remove('show');
+        }
+    });
+
+    const cargarNotificaciones = () => {
+        fetch('http://127.0.0.1:8000/api/v1/notifications/notificaciones/', {
+            headers: { 'Authorization': `Bearer ${notifToken}` }
+        })
+            .then(res => res.json())
+            .then(data => {
+                const listado = Array.isArray(data) ? data : (data.results || []);
+                const noLeidas = listado.filter(n => !n.leida).length;
+
+                if (noLeidas > 0) {
+                    notifCount.textContent = noLeidas;
+                    notifCount.style.display = 'flex';
+                } else {
+                    notifCount.style.display = 'none';
+                }
+
+                if (listado.length === 0) {
+                    notifList.innerHTML = '<div class="notif-empty">No tienes notificaciones.</div>';
+                    return;
+                }
+
+                notifList.innerHTML = listado.map(n => `
+                <div class="notif-item ${n.leida ? '' : 'unread'}" onclick="marcarComoLeida(${n.id})">
+                    <div class="notif-item-title">${n.tipo.replace('_', ' ')}</div>
+                    <div class="notif-item-msg">${n.mensaje}</div>
+                    <div class="notif-item-date">${new Date(n.fecha_creacion).toLocaleString()}</div>
+                </div>
+            `).join('');
+            })
+            .catch(err => console.error("Error cargando notificaciones:", err));
+    };
+
+    window.marcarComoLeida = (id) => {
+        fetch(`http://127.0.0.1:8000/api/v1/notifications/notificaciones/${id}/marcar-leida/`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${notifToken}` }
+        })
+            .then(() => cargarNotificaciones())
+            .catch(err => console.error("Error al marcar como leída:", err));
+    };
+
+    btnNotif.onclick = (e) => {
+        e.stopPropagation();
+        dropdownNotif.classList.toggle('show');
+        if (dropdownNotif.classList.contains('show')) cargarNotificaciones();
+    };
+
+    cargarNotificaciones();
 }

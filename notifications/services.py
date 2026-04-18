@@ -138,3 +138,14 @@ def enviar_notificacion_pago_suscripcion(persona, plan, valor, vencimiento):
     )
     
     _enviar_safe(asunto, mensaje, persona.email)
+
+def crear_notificacion(persona, tipo, mensaje):
+    """
+    Crea una notificación interna en la base de datos para un usuario.
+    """
+    from .models import Notificacion
+    return Notificacion.objects.create(
+        persona=persona,
+        tipo=tipo,
+        mensaje=mensaje
+    )

@@ -7,6 +7,9 @@ class DetalleOrdenSerializer(serializers.ModelSerializer):
     producto_nombre = serializers.ReadOnlyField(source='producto.nombre')
     producto_imagen = serializers.SerializerMethodField()
     ya_calificado = serializers.SerializerMethodField()
+    orden_estado = serializers.ReadOnlyField(source='orden.estado')
+    orden_fecha = serializers.ReadOnlyField(source='orden.fecha')
+    comprador_nombre = serializers.ReadOnlyField(source='orden.comprador.nombre')
     
     def get_ya_calificado(self, obj):
         from products.models import ComentarioProducto
@@ -27,7 +30,7 @@ class DetalleOrdenSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DetalleOrden
-        fields = ['id', 'orden', 'producto', 'producto_nombre', 'producto_imagen', 'cantidad', 'valor_unitario', 'ya_calificado']
+        fields = ['id', 'orden', 'producto', 'producto_nombre', 'producto_imagen', 'cantidad', 'valor_unitario', 'ya_calificado', 'orden_estado', 'orden_fecha', 'comprador_nombre']
 
     def validate(self, attrs):
         # Para creación (self.instance es None), obtenemos de attrs directamente
