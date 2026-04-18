@@ -1,6 +1,6 @@
 const API_PRODUCTS = 'http://127.0.0.1:8000/api/v1/products/productos/';
-const API_MEDIOS   = 'http://127.0.0.1:8000/api/v1/buyers/medios-pago/';
-const API_ORDERS   = 'http://127.0.0.1:8000/api/v1/orders/ordenes/';
+const API_MEDIOS = 'http://127.0.0.1:8000/api/v1/buyers/medios-pago/';
+const API_ORDERS = 'http://127.0.0.1:8000/api/v1/orders/ordenes/';
 const API_DETALLES = 'http://127.0.0.1:8000/api/v1/orders/detalles/';
 const token = localStorage.getItem("access_token");
 let allMyMedios = [];
@@ -21,7 +21,7 @@ if (!token && !window.location.pathname.includes('login.html')) {
 }
 
 // ─── CARRITO PERSISTENTE POR USUARIO (SINCRONIZADO CON MAIN.JS) ──────────────
-function getUserKey() { 
+function getUserKey() {
     const u = JSON.parse(localStorage.getItem('user_data') || '{}');
     return u.email || u.username || 'guest';
 }
@@ -44,7 +44,7 @@ function updateBadge() {
 document.addEventListener("DOMContentLoaded", async () => {
     // 1. Sincronizar primero con la BD para reconocer datos existentes
     await syncCartWithBackend();
-    
+
     // 2. Cargar UI
     updateBadge();
     await loadCart();
@@ -75,17 +75,21 @@ async function syncCartWithBackend() {
         const active = orders.find(o => o.estado === 'CARRITO');
         if (active && active.detalles && active.detalles.length > 0) {
             const dbItems = [];
-            active.detalles.forEach(d => { for(let i=0; i<d.cantidad; i++) dbItems.push(String(d.producto)); });
-            
+            active.detalles.forEach(d => { for (let i = 0; i < d.cantidad; i++) dbItems.push(String(d.producto)); });
+
             const local = getCartItems();
-            // Sincronización: Si local está vacío, traemos DB (sesión fresca). 
-            // Si local ya tiene algo, mantenemos local (estado de compra activo) para no recibir fantasmas.
-            const merged = local.length === 0 ? dbItems : local; 
-            
+            // Si el local está vacío (sesión fresca), cargamos lo que diga la BD.
+            // Si el local ya tiene items, confiamos en el local (estado activo de compra).
+            // IMPORTANTE: Solo sincronizamos desde órdenes en estado CARRITO,
+            // nunca desde órdenes PENDIENTE o PAGADA (ya fueron procesadas).
+            const merged = local.length === 0 ? dbItems : local;
+
             saveCartItems(merged);
             console.log("Sincronización exitosa:", merged.length, "ítems");
         }
-    } catch(e) { console.warn("Error sync", e); }
+        // Si no hay CARRITO activo, NO tocamos el carrito local.
+        // Puede que el usuario tenga items añadidos localmente que aún no se sincronizaron.
+    } catch (e) { console.warn("Error sync", e); }
 }
 
 // ───────────────────────────────────────────────────────
@@ -95,7 +99,7 @@ async function loadCart() {
     const list = document.getElementById('cartItems');
     if (!list) return;
     const rawIds = getCartItems();
-    
+
     if (rawIds.length === 0) {
         list.innerHTML = `<div style="padding:60px;text-align:center;color:#94a3b8;">
             <div style="font-size:4rem;margin-bottom:15px;">🛒</div>
@@ -110,12 +114,12 @@ async function loadCart() {
             const res = await fetch(API_PRODUCTS);
             const data = await res.json();
             window.allProductsCache = Array.isArray(data) ? data : (data.results || []);
-        } catch(e) { console.error("Error al cargar productos", e); }
+        } catch (e) { console.error("Error al cargar productos", e); }
     }
     const all = window.allProductsCache || [];
 
     // Validar visualmente (pero NO limpiar la persistencia local por fallos de API)
-    const validIds = rawIds; 
+    const validIds = rawIds;
 
     if (validIds.length === 0) {
         list.innerHTML = `<div style="padding:60px;text-align:center;color:#94a3b8;"><p style="font-size:1.2rem;">Carrito vacío (datos actualizados)</p></div>`;
@@ -180,20 +184,20 @@ function updateSummary(sum) {
     const delivery = document.getElementById('deliveryType')?.value || 'RECOGER';
     const env = sum > 0 ? (delivery === 'DOMICILIO' ? 12000 : 0) : 0;
     const base = sum / 1.19;
-    const i = sum - base; 
+    const i = sum - base;
     const c = sum * 0.05; // 5% Comisión
-    
+
     const fmt = (n) => '$' + new Intl.NumberFormat('es-CO').format(Math.round(n));
-    
-    document.getElementById("subtotalVal").textContent   = fmt(sum);
+
+    document.getElementById("subtotalVal").textContent = fmt(sum);
     document.getElementById("commissionVal").textContent = fmt(c);
-    document.getElementById("ivaVal").textContent        = fmt(i);
-    document.getElementById("shippingVal").textContent   = env > 0 ? fmt(env) : 'GRATIS';
-    document.getElementById("totalVal").textContent      = fmt(sum + c + env);
+    document.getElementById("ivaVal").textContent = fmt(i);
+    document.getElementById("shippingVal").textContent = env > 0 ? fmt(env) : 'GRATIS';
+    document.getElementById("totalVal").textContent = fmt(sum + c + env);
 }
 
 function setupDeliveryToggle() {
-    const sel  = document.getElementById('deliveryType');
+    const sel = document.getElementById('deliveryType');
     const addr = document.getElementById('addressSection');
     const branch = document.getElementById('branchSection');
     if (!sel) return;
@@ -226,7 +230,7 @@ async function loadPaymentMethods() {
             console.error("Cart payment methods HTTP status:", res.status);
             allMyMedios = [];
         }
-    } catch(e) {
+    } catch (e) {
         console.error("Error loading cart payment methods:", e);
         allMyMedios = [];
     }
@@ -247,7 +251,7 @@ function renderPaymentSelector(f = "ALL") {
     } else if (f === "PSE") {
         list = allMyMedios.filter(m => m.tipo === 'BILLETERA' || m.tipo === 'CUENTA');
     } else if (f === "CONSIGNACION") {
-        container.style.display = 'none'; 
+        container.style.display = 'none';
         const msg = document.getElementById('consignationMsg');
         if (msg) msg.style.display = 'block';
         return;
@@ -260,7 +264,7 @@ function renderPaymentSelector(f = "ALL") {
 
     s.innerHTML = `<option value="">— Selecciona tu ${f === 'PSE' ? 'billetera o cuenta' : 'tarjeta'} —</option>`;
     list.forEach(m => {
-        const num  = String(m.numero_cuenta_tarjeta).slice(-4);
+        const num = String(m.numero_cuenta_tarjeta).slice(-4);
         const icon = m.tipo === 'TARJETA' ? '💳' : m.tipo === 'BILLETERA' ? '📱' : '🏦';
         s.innerHTML += `<option value="${m.id}">${icon} ${m.banco_nombre} ****${num}</option>`;
     });
@@ -296,12 +300,12 @@ function setupPaymentFilters() {
 
             const cardCont = document.getElementById('cardSection');
             const consigCont = document.getElementById('inline-consignacion-form');
-            
+
             if (selectedPaymentType === 'CONSIGNACION') {
-                if(cardCont) cardCont.style.display = 'none';
-                if(consigCont) consigCont.style.display = 'block';
+                if (cardCont) cardCont.style.display = 'none';
+                if (consigCont) consigCont.style.display = 'block';
             } else {
-                if(consigCont) consigCont.style.display = 'none';
+                if (consigCont) consigCont.style.display = 'none';
                 renderPaymentSelector(selectedPaymentType); // Muestra el cardSection adentro
             }
         });
@@ -335,25 +339,25 @@ function injectPaymentModal() {
 }
 
 function showPayResult(aprobado, totalStr, backendOrdenId = null) {
-    const modal   = document.getElementById('payResultModal');
-    const box     = document.getElementById('payResultBox');
-    const ref     = 'KS-' + Date.now().toString(36).toUpperCase();
-    const medio   = document.getElementById('paymentSelector');
+    const modal = document.getElementById('payResultModal');
+    const box = document.getElementById('payResultBox');
+    const ref = 'KS-' + Date.now().toString(36).toUpperCase();
+    const medio = document.getElementById('paymentSelector');
     const medioNombre = medio?.selectedOptions[0]?.text || 'Método seleccionado';
 
     modal.style.display = 'flex';
     setTimeout(() => box.style.transform = 'scale(1)', 10);
 
     if (aprobado) {
-        document.getElementById('payIcon').textContent    = '✅';
-        document.getElementById('payTitle').textContent   = '¡Pago Aprobado!';
-        document.getElementById('payTitle').style.color   = '#22c55e';
+        document.getElementById('payIcon').textContent = '✅';
+        document.getElementById('payTitle').textContent = '¡Pago Aprobado!';
+        document.getElementById('payTitle').style.color = '#22c55e';
         document.getElementById('paySubtitle').textContent = `Tu pedido fue procesado exitosamente por ${totalStr} vía ${medioNombre}.`;
-        document.getElementById('payRef').textContent     = `Referencia: ${ref}`;
-        
+        document.getElementById('payRef').textContent = `Referencia: ${ref}`;
+
         // Si el medio es nuevo, preguntamos si desea guardarlo
         if (window._wasNewPayment) {
-            document.getElementById('payActions').innerHTML   = `
+            document.getElementById('payActions').innerHTML = `
                 <div style="width:100%; text-align:center;">
                     <p style="color:white; margin-bottom:15px; font-weight:600;">¿Deseas guardar este medio de pago para futuras compras?</p>
                     <div style="display:flex; gap:10px; justify-content:center;">
@@ -362,7 +366,7 @@ function showPayResult(aprobado, totalStr, backendOrdenId = null) {
                     </div>
                 </div>`;
         } else {
-            document.getElementById('payActions').innerHTML   = `
+            document.getElementById('payActions').innerHTML = `
                 <button onclick="pagoExitoso(${backendOrdenId ? backendOrdenId : 'null'})" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9);color:white;border:none;padding:15px 30px;border-radius:12px;font-weight:800;cursor:pointer;font-size:1rem;">
                     📦 Ver mis pedidos
                 </button>`;
@@ -370,12 +374,12 @@ function showPayResult(aprobado, totalStr, backendOrdenId = null) {
         }
 
     } else {
-        document.getElementById('payIcon').textContent    = '❌';
-        document.getElementById('payTitle').textContent   = 'Pago Rechazado';
-        document.getElementById('payTitle').style.color   = '#ef4444';
+        document.getElementById('payIcon').textContent = '❌';
+        document.getElementById('payTitle').textContent = 'Pago Rechazado';
+        document.getElementById('payTitle').style.color = '#ef4444';
         document.getElementById('paySubtitle').textContent = 'Tu banco no autorizó la transacción. Verifica tus fondos o intenta con otro medio de pago.';
-        document.getElementById('payRef').textContent     = `Código de error: E-${Math.floor(Math.random()*9000)+1000}`;
-        document.getElementById('payActions').innerHTML   = `
+        document.getElementById('payRef').textContent = `Código de error: E-${Math.floor(Math.random() * 9000) + 1000}`;
+        document.getElementById('payActions').innerHTML = `
             <button onclick="document.getElementById('payResultModal').style.display='none'; document.getElementById('checkoutBtn').disabled=false; document.getElementById('checkoutBtn').textContent='Realizar Pago Seguro';"
                 style="background:rgba(255,255,255,0.05);color:white;border:1px solid rgba(255,255,255,0.1);padding:15px 25px;border-radius:12px;font-weight:700;cursor:pointer;">
                 ← Intentar de nuevo
@@ -425,7 +429,7 @@ function setupCheckout() {
         // 3. Validar medio de pago seleccionado
         const type = selectedPaymentType || document.querySelector('input[name="paymentType"]:checked')?.value;
         const medioSel = document.getElementById('paymentSelector')?.value;
-        
+
         let refConsig = '';
         if (type === 'CONSIGNACION') {
             refConsig = document.getElementById('inline-consignacion-ref')?.value;
@@ -441,7 +445,7 @@ function setupCheckout() {
         if (type === 'PSE' || type === 'TARJETA') {
             let numCuenta = '';
             let bancoName = '';
-            
+
             if (medioSel === 'NEW') {
                 numCuenta = 'NEW';
                 bancoName = type === 'TARJETA' ? 'Emisor de Tarjeta' : 'Nuevo Banco (PSE)';
@@ -477,11 +481,11 @@ window.procesarPagoFinal = async (type, modalOutCardNum = null, modalOutRefConsi
         const option = document.getElementById('paymentSelector')?.selectedOptions[0]?.text || '';
         cardNum = option.includes('****') ? option.split('****').pop() : 'N/A';
     }
-    
+
     let refParam = modalOutRefConsig || '';
 
     try {
-        const payload = { 
+        const payload = {
             metodo: type === 'TARJETA' ? 'Tarjeta' : (type === 'PSE' ? 'PSE' : 'Consignacion'),
             numero_tarjeta: cardNum,
             referencia_consignacion: refParam
@@ -496,31 +500,48 @@ window.procesarPagoFinal = async (type, modalOutCardNum = null, modalOutRefConsi
             showPayResult(false, "$0", null);
             return;
         }
-    } catch(e) {
+    } catch (e) {
         // Fallback local si el mock no responde
-        await sleep(1500); 
+        await sleep(1500);
     }
 
     // 2. Afectación Real a Base de Datos
+    // IMPORTANTE: leer el token dinámicamente para siempre usar la sesión activa correcta
+    const currentToken = localStorage.getItem("access_token");
+    const userData = JSON.parse(localStorage.getItem("user_data") || "{}");
+    console.log("[CHECKOUT] Usuario activo:", userData.email, "| Token presente:", !!currentToken);
+
     let backendOk = false;
     let ordenId = null;
     try {
         const delivery = document.getElementById('deliveryType')?.value || 'RECOGER';
+        console.log("[CHECKOUT] Creando orden para:", userData.email, "| Entrega:", delivery);
+
         const resO = await fetch(API_ORDERS, {
             method: "POST", signal: AbortSignal.timeout(4000),
-            headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+            headers: { "Content-Type": "application/json", "Authorization": `Bearer ${currentToken}` },
             body: JSON.stringify({ tipo_entrega: delivery })
         });
+
+        console.log("[CHECKOUT] POST /ordenes/ →", resO.status);
+
         if (resO.ok) {
             const od = await resO.json();
             ordenId = od.id;
+            console.log("[CHECKOUT] Orden creada ID:", ordenId, "| Items a agregar:", cartDetails.length);
+
             for (const det of cartDetails) {
-                await fetch(API_DETALLES, {
+                const resD = await fetch(API_DETALLES, {
                     method: "POST", signal: AbortSignal.timeout(4000),
-                    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+                    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${currentToken}` },
                     body: JSON.stringify({ orden: ordenId, ...det })
-                }).catch(() => {});
+                });
+                if (!resD.ok) {
+                    const errD = await resD.json().catch(() => ({}));
+                    console.warn("[CHECKOUT] Error al agregar detalle:", det.producto, "| Status:", resD.status, "| Error:", JSON.stringify(errD));
+                }
             }
+
             // Determinar nombre del banco para el backend
             let bankNameForBackend = 'Pago Konrad';
             if (type === 'TARJETA') {
@@ -533,17 +554,29 @@ window.procesarPagoFinal = async (type, modalOutCardNum = null, modalOutRefConsi
                 bankNameForBackend = 'Consignación Konrad';
             }
 
+            console.log("[CHECKOUT] Ejecutando checkout de la orden", ordenId);
             const resC = await fetch(`${API_ORDERS}${ordenId}/checkout/`, {
                 method: "POST", signal: AbortSignal.timeout(4000),
-                headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-                body: JSON.stringify({ 
+                headers: { "Content-Type": "application/json", "Authorization": `Bearer ${currentToken}` },
+                body: JSON.stringify({
                     metodo_pago: type,
                     banco_nombre: bankNameForBackend
                 })
             });
+            console.log("[CHECKOUT] POST /checkout/ →", resC.status);
+            if (!resC.ok) {
+                const errC = await resC.json().catch(() => ({}));
+                console.error("[CHECKOUT] Error en checkout:", JSON.stringify(errC));
+            }
             backendOk = resC.ok;
+        } else {
+            const errO = await resO.json().catch(() => ({}));
+            console.error("[CHECKOUT] Error al crear orden:", JSON.stringify(errO));
         }
-    } catch(e) { /* Backend no disponible → modo simulado */ }
+    } catch (e) {
+        alert("¡HOLAA VIVIANA! POR FAVOR CÓPIAME ESTE TEXTO EXACTO: [ERROR CÓDIGO 2] " + e.message);
+        console.error("[CHECKOUT] Excepción en backend:", e.message);
+    }
 
     // 3. Resultado Final
     closeProcessingScreen();
@@ -552,55 +585,58 @@ window.procesarPagoFinal = async (type, modalOutCardNum = null, modalOutRefConsi
     showPayResult(true, totalStr, backendOk ? ordenId : null);
 };
 
-// Listener para el popup de PSE/Tarjeta (bank-mock.html)
 window.addEventListener('message', async (event) => {
-    const btn = document.getElementById("checkoutBtn");
-    
-    if (event.data === 'pago_mock_cancelado') {
-        if(btn) btn.disabled = false;
-        return;
-    }
+    try {
+        const btn = document.getElementById("checkoutBtn");
 
-    let isSuccess = false;
-    let cardDataFromMock = 'N/A';
+        if (event.data === 'pago_mock_cancelado') {
+            if (btn) btn.disabled = false;
+            return;
+        }
 
-    // Parseamos posibles objetos JSON (usado por pago de tarjeta nueva)
-    if (typeof event.data === 'string' && event.data.startsWith('{')) {
-        try {
-            const parsed = JSON.parse(event.data);
-            if (parsed.status === 'pago_mock_exitoso') {
-                isSuccess = true;
-                if (parsed.newCardNum) cardDataFromMock = parsed.newCardNum;
-                // Guardamos la DATA COMPLETA para el guardado automático posterior
-                window._lastNewPaymentData = parsed;
-            }
-        } catch(e) {}
-    } else if (event.data === 'pago_mock_exitoso' || event.data === 'pago_pse_exitoso') {
-        isSuccess = true;
-    }
+        let isSuccess = false;
+        let cardDataFromMock = 'N/A';
 
-    if (isSuccess && window._tempCartPaymentData) {
-        if(btn) btn.disabled = true;
-        
-        // Guardar si era un medio nuevo para preguntar al final
-        window._wasNewPayment = window._tempCartPaymentData.isNew;
+        // Parseamos posibles objetos JSON (usado por pago de tarjeta nueva)
+        if (typeof event.data === 'string' && event.data.startsWith('{')) {
+            try {
+                const parsed = JSON.parse(event.data);
+                if (parsed.status === 'pago_mock_exitoso') {
+                    isSuccess = true;
+                    if (parsed.newCardNum) cardDataFromMock = parsed.newCardNum;
+                    // Guardamos la DATA COMPLETA para el guardado automático posterior
+                    window._lastNewPaymentData = parsed;
+                }
+            } catch (e) { }
+        } else if (event.data === 'pago_mock_exitoso' || event.data === 'pago_pse_exitoso') {
+            isSuccess = true;
+        }
 
-        // Si ingresaron tarjeta nueva, usa cardDataFromMock. Si no, usa el temp de la config
-        const finalCardNum = cardDataFromMock !== 'N/A' ? cardDataFromMock : window._tempCartPaymentData.cardNum;
-        const finalType = window._tempCartPaymentData.type;
-        const finalRef = window._tempCartPaymentData.refConsig;
-        
-        // RESET EARLY
-        window._tempCartPaymentData = null; 
+        if (isSuccess && window._tempCartPaymentData) {
+            if (btn) btn.disabled = true;
 
-        await window.procesarPagoFinal(finalType, finalCardNum, finalRef);
+            // Guardar si era un medio nuevo para preguntar al final
+            window._wasNewPayment = window._tempCartPaymentData.isNew;
+
+            // Si ingresaron tarjeta nueva, usa cardDataFromMock. Si no, usa el temp de la config
+            const finalCardNum = cardDataFromMock !== 'N/A' ? cardDataFromMock : window._tempCartPaymentData.cardNum;
+            const finalType = window._tempCartPaymentData.type;
+            const finalRef = window._tempCartPaymentData.refConsig;
+
+            // RESET EARLY
+            window._tempCartPaymentData = null;
+
+            await window.procesarPagoFinal(finalType, finalCardNum, finalRef);
+        }
+    } catch (criticalError) {
+        alert("¡HOLAA VIVIANA! POR FAVOR CÓPIAME ESTE TEXTO EXACTO: [ERROR CÓDIGO 1] " + criticalError.message);
     }
 });
 
 // FUNCIÓN PARA GUARDAR EL MEDIO AUTOMÁTICAMENTE
 window.guardarMedioDePago = async (backendOrdenId) => {
     const btn = document.getElementById('btnSavePayment');
-    if(btn) { btn.disabled = true; btn.textContent = 'Guardando...'; }
+    if (btn) { btn.disabled = true; btn.textContent = 'Guardando...'; }
 
     if (!window._lastNewPaymentData) {
         showToast("No hay datos para guardar", true);
@@ -609,11 +645,12 @@ window.guardarMedioDePago = async (backendOrdenId) => {
     }
 
     try {
+        const dynamicToken = localStorage.getItem("access_token");
         const res = await fetch('http://127.0.0.1:8000/api/v1/buyers/medios-pago/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
+                'Authorization': `Bearer ${dynamicToken}`
             },
             body: JSON.stringify({
                 banco_nombre: window._lastNewPaymentData.banco_nombre,
@@ -626,76 +663,93 @@ window.guardarMedioDePago = async (backendOrdenId) => {
         if (res.ok) {
             showToast("✅ Medio de pago guardado correctamente");
             setTimeout(() => {
-                window.location.href = "/pages/payment-methods.html";
+                // REDIRIGIR a pagoExitoso en lugar de payment-methods
+                // ¡Esto corrige el error de que se perdieran las órdenes simuladas al guardar la tarjeta!
+                pagoExitoso(backendOrdenId);
             }, 1000);
         } else {
             showToast("❌ No se pudo guardar el medio", true);
             pagoExitoso(backendOrdenId);
         }
-    } catch(e) {
+    } catch (e) {
         pagoExitoso(backendOrdenId);
     }
 };
 
 window.pagoExitoso = async (backendOrdenId) => {
-    // Refresh token
-    const currentToken = localStorage.getItem("access_token");
-
-    // Si el backend no creó la orden, guardar una orden simulada en localStorage
-    if (!backendOrdenId) {
-        const mockOrders = JSON.parse(localStorage.getItem('mock_orders') || '[]');
-        const sub = cartDetails.reduce((a, d) => a + (d.valor_unitario * d.cantidad), 0);
-        const base = sub / 1.19;
-        const iva = sub - base;
-        const com = sub * 0.05;
-        const env = document.getElementById('deliveryType')?.value === 'DOMICILIO' ? 12000 : 0;
-        
-        // Determinar el nombre del medio para el mock
-        const medioSel = document.getElementById('paymentSelector');
-        const medioNombreRaw = medioSel?.selectedOptions[0]?.text || 'Pago Electrónico';
-        const metodoTxt = window._lastNewPaymentData?.banco_nombre || (medioNombreRaw.split('****')[0].trim());
-
-        mockOrders.unshift({
-            id: 'M' + Date.now().toString(36).toUpperCase(),
-            estado: 'PAGADA',
-            tipo_entrega: document.getElementById('deliveryType')?.value || 'RECOGER',
-            fecha_simulada: new Date().toISOString(),
-            total_final: sub + com + env,
-            total_iva: iva,
-            total_comision: com,
-            costo_envio: env,
-            detalles: cartDetails.map(d => ({ ...d, producto_nombre: 'Producto #' + d.producto })),
-            pagos: [{ metodo_pago: 'TARJETA', banco_nombre: metodoTxt }], // Para que el detalle lo muestre
-            simulado: true
-        });
-        localStorage.setItem('mock_orders', JSON.stringify(mockOrders));
-    }
-    
-    // VACIAMOS EL CARRITO DE LA MEMORIA DEL NAVEGADOR
-    saveCartItems([]); 
-    updateBadge();
-    
-    // CAZA DE FANTASMAS (Ghost Carts):
-    // El redirect inmediato puede cancelar peticiones de red (Race Condition).
-    // Esperamos asíncronamente a que el DB despache el carrito huérfano.
+    console.log("[CHECKOUT] Finalizando flujo exitoso para orden:", backendOrdenId);
     try {
-        if (currentToken) {
-            // Buscamos específicamente cualquier orden en CARRITO para eliminarla
-            const r = await fetch(`${API_ORDERS}?estado=CARRITO&page_size=100`, { 
-                headers: { 'Authorization': `Bearer ${currentToken}` } 
-            });
-            const data = await r.json();
-            const arr = Array.isArray(data) ? data : (data.results || []);
-            
-            const deleteOps = arr.map(o => 
-                fetch(`${API_ORDERS}${o.id}/`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${currentToken}` } })
-            );
-            await Promise.all(deleteOps);
-        }
-    } catch(e) { }
+        // Refresh token
+        const currentToken = localStorage.getItem("access_token");
 
-    window.location.href = "/pages/my-orders.html";
-}
+        // Si el backend no creó la orden, guardar una orden simulada en localStorage
+        if (!backendOrdenId) {
+            try {
+                const mockOrders = JSON.parse(localStorage.getItem('mock_orders') || '[]');
+                const sub = cartDetails.reduce((a, d) => a + (d.valor_unitario * d.cantidad), 0);
+                const base = sub / 1.19;
+                const iva = sub - base;
+                const com = sub * 0.05;
+                const env = document.getElementById('deliveryType')?.value === 'DOMICILIO' ? 12000 : 0;
+
+                // Determinar el nombre del medio para el mock
+                const medioSel = document.getElementById('paymentSelector');
+                const medioNombreRaw = medioSel?.selectedOptions[0]?.text || 'Pago Electrónico';
+                const metodoTxt = window._lastNewPaymentData?.banco_nombre || (medioNombreRaw.split('****')[0].trim());
+
+                mockOrders.unshift({
+                    id: 'M' + Date.now().toString(36).toUpperCase(),
+                    estado: 'PAGADA',
+                    tipo_entrega: document.getElementById('deliveryType')?.value || 'RECOGER',
+                    fecha_simulada: new Date().toISOString(),
+                    total_final: sub + com + env,
+                    total_iva: iva,
+                    total_comision: com,
+                    costo_envio: env,
+                    detalles: cartDetails.map(d => ({ ...d, producto_nombre: 'Producto #' + d.producto })),
+                    pagos: [{ metodo_pago: 'TARJETA', banco_nombre: metodoTxt }], // Para que el detalle lo muestre
+                    simulado: true
+                });
+                localStorage.setItem('mock_orders', JSON.stringify(mockOrders));
+            } catch (errMock) {
+                console.warn("Error creando orden simulada:", errMock.message);
+            }
+        }
+
+        // VACIAMOS EL CARRITO DE LA MEMORIA DEL NAVEGADOR
+        saveCartItems([]);
+        if (typeof updateBadge === 'function') updateBadge();
+
+        // Vaciamos del servidor si existia (silenciosamente)
+        if (currentToken) {
+            try {
+                const res = await fetch(API_ORDERS, {
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    const list = Array.isArray(data) ? data : (data.results || []);
+                    if (Array.isArray(list)) {
+                        const ord = list.find(o => o.estado === 'CARRITO');
+                        if (ord) {
+                            await fetch(`${API_DETALLES}?orden=${ord.id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${currentToken}` } });
+                            await fetch(`${API_ORDERS}${ord.id}/`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${currentToken}` } });
+                        }
+                    }
+                }
+            } catch (e) {
+                console.warn("[CHECKOUT] Error limpiando carrito backend:", e.message);
+            }
+        }
+
+        // Redirect a Mis Compras
+        setTimeout(() => {
+            window.location.href = "/pages/my-orders.html";
+        }, 800);
+    } catch (generalError) {
+        alert("¡HOLAA VIVIANA! POR FAVOR CÓPIAME ESTE TEXTO EXACTO: [ERROR CÓDIGO 3] " + generalError.message);
+    }
+};
 
 // ───────────────────────────────────────────────────────
 // PANTALLA "PROCESANDO PAGO"
@@ -738,7 +792,7 @@ window.updateQty = async (id, delta) => {
     saveCartItems(items);
     loadCart();
     updateBadge();
-    
+
     if (token) {
         try {
             const resO = await fetch(API_ORDERS, { headers: { 'Authorization': `Bearer ${token}` } });
@@ -762,7 +816,7 @@ window.updateQty = async (id, delta) => {
                     }
                 }
             }
-        } catch(e) {}
+        } catch (e) { }
     }
 };
 
@@ -771,7 +825,7 @@ window.removeItemById = async (id) => {
     saveCartItems(items);
     loadCart();
     updateBadge();
-    
+
     if (token) {
         try {
             const resO = await fetch(API_ORDERS, { headers: { 'Authorization': `Bearer ${token}` } });
@@ -786,7 +840,7 @@ window.removeItemById = async (id) => {
                     });
                 }
             }
-        } catch(e) {}
+        } catch (e) { }
     }
 };
 
@@ -821,11 +875,11 @@ function setupDetailModal() {
 }
 
 function setupPaymentModal() {
-    const modal  = document.getElementById("addPaymentModal");
+    const modal = document.getElementById("addPaymentModal");
     const openBtn = document.getElementById("openModalBtn");
     const cancelBtn = document.getElementById("cancelBtn");
-    const form   = document.getElementById("paymentForm");
-    if (openBtn)   openBtn.onclick   = () => modal.style.display = "flex";
+    const form = document.getElementById("paymentForm");
+    if (openBtn) openBtn.onclick = () => modal.style.display = "flex";
     if (cancelBtn) cancelBtn.onclick = () => modal.style.display = "none";
     form?.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -855,7 +909,7 @@ function setupPaymentModal() {
                 modal.style.display = "none"; form.reset();
                 showToast("✅ Medio agregado (demo)");
             }
-        } catch(err) {
+        } catch (err) {
             // Sin internet → agregar localmente
             const newMedio = { ...payload, id: 'sim-' + Date.now(), tipo: payload.tipo, simulado: true };
             allMyMedios.push(newMedio);
@@ -868,9 +922,9 @@ function setupPaymentModal() {
 
 let curImg = 0;
 window.openProductDetail = (p) => {
-    const modal   = document.getElementById('productDetailModal');
+    const modal = document.getElementById('productDetailModal');
     const content = document.getElementById('modalContent');
-    if(!modal || !content) return;
+    if (!modal || !content) return;
 
     const cleanDesc = (p.descripcion || '').split('||IMG:')[0].trim() || 'Producto de alta calidad Konrad Shop.';
     let the_img = p.imagen_principal || '';
@@ -956,9 +1010,9 @@ window.openProductDetail = (p) => {
 
 async function loadCartComments(productId) {
     const box = document.getElementById('commentsContainer');
-    if(!box) return;
+    if (!box) return;
     const tkn = localStorage.getItem('access_token');
-    if(!tkn) {
+    if (!tkn) {
         box.innerHTML = `<div style="text-align:center;padding:15px;color:#64748b;font-size:0.85rem;">
             <a href="/pages/login.html" style="color:var(--primary);">Inicia sesión</a> para ver comentarios.</div>`;
         return;
@@ -967,11 +1021,11 @@ async function loadCartComments(productId) {
         const res = await fetch('http://127.0.0.1:8000/api/v1/products/comentarios/', {
             headers: { 'Authorization': `Bearer ${tkn}` }
         });
-        if(res.ok) {
+        if (res.ok) {
             const data = await res.json();
             const all = Array.isArray(data) ? data : (data.results || []);
             const mine = all.filter(c => String(c.producto) === String(productId));
-            if(mine.length > 0) {
+            if (mine.length > 0) {
                 box.innerHTML = mine.map(c => `
                     <div style="background:rgba(255,255,255,0.03);padding:12px;border-radius:10px;margin-bottom:10px;border:1px solid rgba(255,255,255,0.05);">
                         <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
@@ -983,26 +1037,26 @@ async function loadCartComments(productId) {
             } else {
                 box.innerHTML = `<div style="text-align:center;padding:20px;color:#64748b;font-size:0.85rem;"><span style="font-size:1.8rem;display:block;margin-bottom:8px;">&#x2728;</span>&#xa1;S&#xe9; el primero en opinar!</div>`;
             }
-        } else if(res.status === 401) {
+        } else if (res.status === 401) {
             box.innerHTML = `<p style="color:#64748b;text-align:center;padding:15px;font-size:0.8rem;">Sesión requerida para ver comentarios.</p>`;
         } else {
             box.innerHTML = `<p style="color:#64748b;text-align:center;padding:15px;font-size:0.8rem;">Error ${res.status} al cargar comentarios.</p>`;
         }
-    } catch(e) { box.innerHTML = `<p style="color:#64748b;text-align:center;padding:15px;">Sin conexión.</p>`; }
+    } catch (e) { box.innerHTML = `<p style="color:#64748b;text-align:center;padding:15px;">Sin conexión.</p>`; }
 }
 
 window.submitCartComment = async (productId) => {
     const txtEl = document.getElementById('newCommentTxt');
     const txt = txtEl?.value?.trim();
-    if(!txt) return;
-    if(!token) { alert("Inicia sesion para comentar."); return; }
+    if (!txt) return;
+    if (!token) { alert("Inicia sesion para comentar."); return; }
     try {
         const res = await fetch('http://127.0.0.1:8000/api/v1/products/comentarios/', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify({ producto: parseInt(productId), comentario: txt, calificacion: 10 })
         });
-        if(res.ok) {
+        if (res.ok) {
             txtEl.value = "";
             showToast("Comentario publicado");
             loadCartComments(productId);
@@ -1011,7 +1065,7 @@ window.submitCartComment = async (productId) => {
             showToast("Error: " + (err.detail || JSON.stringify(err)));
             console.error(err);
         }
-    } catch(e) { showToast("Error de red"); }
+    } catch (e) { showToast("Error de red"); }
 };
 
 

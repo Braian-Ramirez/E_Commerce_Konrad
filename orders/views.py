@@ -13,14 +13,8 @@ class OrdenViewSet(viewsets.ModelViewSet):
     serializer_class = OrdenSerializer
 
     def get_queryset(self):
-        user = self.request.user
-        if not user.is_authenticated:
-            return Orden.objects.none()
-        if user.is_staff or user.is_superuser:
-            return Orden.objects.all()
-        if hasattr(user, 'persona_profile'):
-            return Orden.objects.filter(comprador=user.persona_profile)
-        return Orden.objects.none()
+        # Solicitado: Mostrar el historial de todos los usuarios sin filtrar
+        return Orden.objects.all()
 
     def perform_create(self, serializer):
         user = self.request.user
@@ -105,7 +99,7 @@ class OrdenViewSet(viewsets.ModelViewSet):
         orden.total_iva = total_iva
         orden.total_comision = total_comision
         orden.total_final = total_final
-        orden.estado = 'PENDIENTE' # ¡Oficialmente salió del carrito!
+        orden.estado = 'PAGADA' # El mock aprobó el pago ANTES de llegar aquí
         orden.save()
 
         # 7. Crear el registro de Pago (Auditoría)
