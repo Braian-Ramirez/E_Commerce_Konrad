@@ -131,6 +131,21 @@ class OrdenViewSet(viewsets.ModelViewSet):
             referencia_transaccion=f"K-PAY-{orden.id}-{int(Decimal(subtotal))}"
         )
 
+        # 8. Notificar a cada vendedor involucrado
+        try:
+            from notifications.services import enviar_notificacion_venta_vendedor
+            vendedores_dict = {}
+            for detalle in detalles:
+                v_persona = detalle.producto.vendedor.persona
+                if v_persona not in vendedores_dict:
+                    vendedores_dict[v_persona] = []
+                vendedores_dict[v_persona].append(detalle)
+                
+            for v_persona, det_agrupados in vendedores_dict.items():
+                enviar_notificacion_venta_vendedor(v_persona, orden, det_agrupados)
+        except Exception as e:
+            print("[EMAIL] Error al enviar notificación de venta a vendedores:", e)
+
         return Response({
             'mensaje': 'Checkout matemático exitoso', 
             'subtotal': subtotal,

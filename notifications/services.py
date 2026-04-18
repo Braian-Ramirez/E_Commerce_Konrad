@@ -3,6 +3,7 @@ import time
 from django.core.mail import send_mail
 from django.conf import settings
 from django.template.loader import render_to_string
+from django.utils.timezone import localtime
 from .models import CorreoEnviado
 from vendors.models import Persona
 
@@ -149,3 +150,37 @@ def crear_notificacion(persona, tipo, mensaje):
         tipo=tipo,
         mensaje=mensaje
     )
+
+def enviar_notificacion_venta_vendedor(vendedor_persona, orden, detalles_vendedor):
+    """
+    Notifica a un vendedor sobre los productos que vendió en una nueva orden pagada.
+    """
+    asunto = f'🎉 ¡Nueva Venta Realizada! Orden #{orden.id} - Comercial Konrad'
+    
+    fecha_str = localtime(orden.fecha).strftime("%d/%m/%Y %H:%M")
+    nombre_comprador = orden.comprador.nombre if orden.comprador else 'Usuario Konrad'
+    
+    productos_texto = ""
+    for d in detalles_vendedor:
+        productos_texto += f"- {d.producto.nombre} x {d.cantidad}\n"
+    
+    direccion = orden.comprador.direccion if orden.tipo_entrega == 'DOMICILIO' else 'Recogida en sede Konrad'
+    if not direccion:
+        direccion = "No especificada por el comprador"
+        
+    metodo = 'Entrega a domicilio' if orden.tipo_entrega == 'DOMICILIO' else 'Recoger en punto'
+    
+    context = {
+        'nombre_vendedor': vendedor_persona.nombre,
+        'orden_id': orden.id,
+        'nombre_comprador': nombre_comprador,
+        'fecha': fecha_str,
+        'productos_texto': productos_texto.strip(),
+        'metodo_entrega': metodo,
+        'direccion_envio': direccion
+    }
+    
+    mensaje = render_to_string('notifications/emails/venta_vendedor.txt', context)
+
+    _registrar_auditoria_correo(vendedor_persona, asunto, mensaje)
+    _enviar_safe(asunto, mensaje, vendedor_persona.email)
