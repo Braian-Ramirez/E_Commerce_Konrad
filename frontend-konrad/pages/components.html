@@ -16,17 +16,13 @@
             <div style="padding:5px 0;">
                 <h4 class="product-title" style="margin-top:8px;font-weight:700;color:white;font-size:1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{nombre}</h4>
                 <div style="color:#fbbf24;font-size:0.85rem;margin:3px 0;">★★★★★ <span style="color:#64748b;font-size:0.75rem;">(12)</span></div>
-                <div class="product-price" style="margin-bottom:12px;color:white;font-weight:800;font-size:1.1rem;">${precio} <span style="font-size:0.7rem;color:#64748b;">COP</span></div>
+                <div class="product-price" style="margin-bottom:12px;color:white;font-weight:800;font-size:1.1rem;">{precio} <span style="font-size:0.7rem;color:#64748b;">COP</span></div>
             </div>
 
-            <div class="qty-selector" style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:12px;background:rgba(255,255,255,0.05);padding:6px;border-radius:12px;">
-                <button onclick="changeQty('{p_id}',-1)" style="background:transparent;border:none;color:white;font-size:1.2rem;cursor:pointer;">−</button>
-                <span id="qty-{p_id}" data-stock="{stock}" style="font-weight:800;color:white;">1</span>
-                <button onclick="changeQty('{p_id}',1)" style="background:transparent;border:none;color:white;font-size:1.2rem;cursor:pointer;">+</button>
-            </div>
+            {qty_selector_html}
 
             <div style="display:flex;gap:8px;">
-                <button class="add-cart-btn" id="addBtn-{p_id}" onclick="addToCart('{p_id}')" style="flex:3;font-weight:800;cursor:pointer;">🛒 Añadir</button>
+                {add_btn_html}
                 <button onclick="openProductDetail(window.productDataCache['{p_id}'])" style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:white;border-radius:10px;cursor:pointer;">🔎</button>
             </div>
         </div>
@@ -78,13 +74,10 @@
                     <span style="color:#64748b;font-size:0.8rem;">Vendedor verificado por Comercial Konrad</span>
                 </div>
 
-                <p style="font-size:2.2rem;font-weight:900;color:white;margin-bottom:10px;text-shadow:0 0 20px rgba(99,102,241,0.3);">${precioTexto} <span style="font-size:0.9rem;color:#64748b;font-weight:400;">COP</span></p>
+                <p style="font-size:2.2rem;font-weight:900;color:white;margin-bottom:10px;text-shadow:0 0 20px rgba(99,102,241,0.3);">{precioTexto} <span style="font-size:0.9rem;color:#64748b;font-weight:400;">COP</span></p>
 
                 <!-- STOCK -->
-                <div style="display:inline-flex;align-items:center;gap:8px;margin-bottom:14px;padding:6px 14px;border-radius:30px;background:{stock_bg};border:1px solid {stock_border};">
-                    <div style="width:7px;height:7px;border-radius:50%;background:{stock_dot};"></div>
-                    <span style="font-size:0.8rem;font-weight:700;color:{stock_color};">{stock_label}</span>
-                </div>
+                {stock_badge_html}
                 
                 <div style="padding:14px;background:rgba(255,255,255,0.02);border-radius:12px;margin-bottom:16px;border:1px solid rgba(255,255,255,0.05);line-height:1.6;max-height:90px;overflow-y:auto;">
                     <p style="color:#cbd5e1;font-size:0.92rem;margin:0;">{desc}</p>
@@ -102,7 +95,7 @@
                 </div>
 
                 <div style="display:flex;gap:12px;margin-bottom:10px;">
-                    <button class="cta-primary" onclick="addToCart('{p_id}'); document.getElementById('productDetailModal').style.display='none';" style="flex:2;padding:16px;font-size:1.1rem;font-weight:800;">🛒 Añadir al Carrito</button>
+                    {modal_add_btn_html}
                     {btn_fav_modal}
                 </div>
                 

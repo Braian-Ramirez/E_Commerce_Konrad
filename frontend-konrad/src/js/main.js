@@ -252,6 +252,18 @@ function renderGrid(containerId, products, showFav = false) {
         const tplElem = document.getElementById('tpl-product-card');
         if (tplElem) {
             const isAgotado = (p.cantidad || 0) <= 0;
+            
+            const qtySelectorHtml = isAgotado ? '' : `
+            <div class="qty-selector" style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:12px;background:rgba(255,255,255,0.05);padding:6px;border-radius:12px;">
+                <button onclick="changeQty('${p_id}',-1)" style="background:transparent;border:none;color:white;font-size:1.2rem;cursor:pointer;">−</button>
+                <span id="qty-${p_id}" data-stock="${p.cantidad || 0}" style="font-weight:800;color:white;">1</span>
+                <button onclick="changeQty('${p_id}',1)" style="background:transparent;border:none;color:white;font-size:1.2rem;cursor:pointer;">+</button>
+            </div>`;
+
+            const addBtnHtml = isAgotado ? 
+                `<button class="add-cart-btn disabled" disabled style="flex:3;font-weight:800;cursor:not-allowed;background:#4b5563;filter:grayscale(1);">Agotado</button>` :
+                `<button class="add-cart-btn" id="addBtn-${p_id}" onclick="addToCart('${p_id}')" style="flex:3;font-weight:800;cursor:pointer;">🛒 Añadir</button>`;
+
             let htmlStr = tplElem.innerHTML
                 .replaceAll('{p_id}', p_id)
                 .replaceAll('{nombre}', p.nombre)
@@ -262,14 +274,9 @@ function renderGrid(containerId, products, showFav = false) {
                     <button id="fav-${p_id}" onclick="handleFav('${p_id}')" class="btn-fav ${favOn ? 'active' : ''}">
                         ${favOn ? '❤️' : '🤍'}
                     </button>
-                ` : '');
-                
-            if (isAgotado) {
-                // Inyectar un overlay de agotado o deshabilitar elementos
-                htmlStr = htmlStr.replace('class="add-cart-btn"', 'class="add-cart-btn disabled" disabled style="background:#4b5563;cursor:not-allowed;filter:grayscale(1);"')
-                                 .replace('🛒 Añadir', 'Agotado')
-                                 .replace('class="qty-selector"', 'class="qty-selector" style="display:none;"');
-            }
+                ` : '')
+                .replaceAll('{qty_selector_html}', qtySelectorHtml)
+                .replaceAll('{add_btn_html}', addBtnHtml);
 
             return htmlStr;
         }
@@ -598,6 +605,17 @@ window.openProductDetail = (p) => {
         const token = localStorage.getItem("access_token");
         const favOn = isFav(p.id);
 
+        const stockBadgeHtml = `
+            <div style="display:inline-flex;align-items:center;gap:8px;margin-bottom:14px;padding:6px 14px;border-radius:30px;background:${stockBg};border:1px solid ${stockBorder};">
+                <div style="width:7px;height:7px;border-radius:50%;background:${stockDot};"></div>
+                <span style="font-size:0.8rem;font-weight:700;color:${stockColor};">${stockLabel}</span>
+            </div>
+        `;
+
+        const modalAddBtnHtml = isAgotado ? 
+            `<button class="cta-primary disabled" disabled style="flex:2;padding:16px;font-size:1.1rem;font-weight:800;background:#4b5563;cursor:not-allowed;filter:grayscale(1);">Producto Agotado</button>` :
+            `<button class="cta-primary" id="modalAddBtn-${p.id}" onclick="addToCart('${p.id}'); document.getElementById('productDetailModal').style.display='none';" style="flex:2;padding:16px;font-size:1.1rem;font-weight:800;">🛒 Añadir al Carrito</button>`;
+
         let finalModalHtml = tplElem.innerHTML
             .replaceAll('{main_img}', (mainImg.startsWith('http') || mainImg.startsWith('/')) ? `<img src="${mainImg}" onerror="this.src='https://placehold.co/400x400/0c0f18/white?text=Imagen'" class="img-contain">` : mainImg)
             .replaceAll('{qsHtml}', qsHtml)
@@ -608,21 +626,14 @@ window.openProductDetail = (p) => {
             .replaceAll('{nombre}', p.nombre)
             .replaceAll('{precioTexto}', pText)
             .replaceAll('{desc}', p.descripcion.split('||IMG:')[0] || 'Calidad Konrad premium seleccionada.')
-            .replaceAll('{stock_label}', stockLabel)
-            .replaceAll('{stock_dot}', stockDot)
-            .replaceAll('{stock_color}', stockColor)
-            .replaceAll('{stock_bg}', stockBg)
-            .replaceAll('{stock_border}', stockBorder)
+            .replaceAll('{stock_badge_html}', stockBadgeHtml)
+            .replaceAll('{modal_add_btn_html}', modalAddBtnHtml)
             .replaceAll('{btn_fav_modal}', token ? `
                 <button id="modal-fav-${p.id}" onclick="handleFav('${p.id}')" style="flex:0.5;padding:16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:white;border-radius:15px;cursor:pointer;font-size:1.2rem;transition:all 0.3s ease;">
                     ${favOn ? '❤️' : '🤍'}
                 </button>
             ` : '');
 
-        if (isAgotado) {
-            finalModalHtml = finalModalHtml.replace('class="cta-primary"', 'class="cta-primary disabled" disabled style="background:#4b5563;cursor:not-allowed;filter:grayscale(1);"')
-                                           .replace('🛒 Añadir al Carrito', 'Producto Agotado');
-        }
         c.innerHTML = finalModalHtml;
     } else {
         c.innerHTML = "<p>Error: Plantillas no cargadas correctamente.</p>";
