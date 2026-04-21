@@ -186,7 +186,50 @@ class ComentarioProductoViewSet(viewsets.ModelViewSet):
                 from rest_framework.exceptions import ValidationError
                 raise ValidationError("Ya has calificado este producto para esta compra.")
 
-        serializer.save(comprador=persona)
+        comentario_obj = serializer.save(comprador=persona)
+
+        # ── Sincronización de reputación del vendedor ───────────────────────
+        from django.db.models import Avg, Count
+        from django.core.mail import send_mail
+        from django.conf import settings
+
+        vendedor = comentario_obj.producto.vendedor
+
+        # Recalcular promedio
+        promedio = ComentarioProducto.objects.filter(
+            producto__vendedor=vendedor
+        ).aggregate(Avg('calificacion'))['calificacion__avg']
+        vendedor.calificacion_promedio = promedio or 0
+
+        # ── Trigger 1: Promedio por debajo de 5.0 ───────────────────────────
+        PROMEDIO_MINIMO = 5.0
+        if (promedio or 0) < PROMEDIO_MINIMO and vendedor.estado_suscripcion != 'CANCELADA':
+            vendedor.estado_suscripcion = 'CANCELADA'
+            from notifications.services import enviar_correo_promedio_bajo_vendedor
+            enviar_correo_promedio_bajo_vendedor(
+                persona=vendedor.persona,
+                promedio=promedio or 0
+            )
+
+        # Contar strikes (calificaciones < 3)
+        strikes = ComentarioProducto.objects.filter(
+            producto__vendedor=vendedor,
+            calificacion__lt=3,
+            calificacion__gt=0
+        ).count()
+
+        # Si llega a 10 strikes → cancelar suscripción y notificar por el servicio de notificaciones
+        MAX_STRIKES = 10
+        if strikes >= MAX_STRIKES and vendedor.estado_suscripcion != 'CANCELADA':
+            vendedor.estado_suscripcion = 'CANCELADA'
+            from notifications.services import enviar_correo_cancelacion_vendedor
+            enviar_correo_cancelacion_vendedor(
+                persona=vendedor.persona,
+                strikes=strikes,
+                max_strikes=MAX_STRIKES
+            )
+
+        vendedor.save()
 
 # Vista pregunta producto
 class PreguntaProductoViewSet(viewsets.ModelViewSet):

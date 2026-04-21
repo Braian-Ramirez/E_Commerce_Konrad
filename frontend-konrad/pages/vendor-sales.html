@@ -16,7 +16,7 @@
         <!-- Header superior -->
         <header class="top-nav">
             <div class="logo">
-                Comercial <span style="color: var(--neo-orange);">Konrad</span>
+                🛍️Comercial<span style="color: var(--neo-orange);">Konrad</span>
             </div>
             <div class="user-info">
                 <span><b>Mis Ventas</b></span>
@@ -29,14 +29,14 @@
                 <div class="sidebar-group">
                     <span class="group-title">NAVEGACIÓN</span>
                     <nav>
-                        <button class="nav-btn" onclick="window.location.href='/pages/vendor-dashboard.html'">
-                            <span class="icon">🏠</span> Inicio
-                        </button>
                         <button class="nav-btn active">
                             <span class="icon">🛍️</span> Mis Ventas
                         </button>
                         <button class="nav-btn" onclick="window.location.href='/pages/vendor-products.html'">
                             <span class="icon">📦</span> Mis Productos
+                        </button>
+                        <button class="nav-btn" onclick="window.location.href='/pages/vendor-ratings.html'">
+                            <span class="icon">⭐</span> Mis Calificaciones
                         </button>
                     </nav>
                 </div>
@@ -82,6 +82,13 @@
                         </tbody>
                     </table>
                 </div>
+
+                <!-- Controles de Paginación -->
+                <div class="pagination-container">
+                    <button id="prev-page" class="pag-btn" disabled>Anterior</button>
+                    <span id="page-info">Página 1 de 1</span>
+                    <button id="next-page" class="pag-btn">Siguiente</button>
+                </div>
             </main>
         </div>
     </div>
@@ -94,4 +101,5 @@
         }
     </script>
 </body>
+
 </html>

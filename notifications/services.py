@@ -198,3 +198,60 @@ def enviar_notificacion_venta_vendedor(vendedor_persona, orden, detalles_vendedo
         'COMPRA',
         f'Has vendido {total_articulos} productos consulta tu historial de ventas.'
     )
+
+
+def enviar_correo_cancelacion_vendedor(persona, strikes, max_strikes):
+    """
+    Notifica al vendedor que su cuenta ha sido cancelada por acumular
+    el máximo de calificaciones negativas permitidas. Registra auditoría.
+    """
+    import time as _time
+    fecha_cancelacion = _time.strftime("%d/%m/%Y %H:%M:%S")
+
+    asunto = '⚠️ Cuenta de Vendedor Cancelada – Comercial Konrad'
+    context = {
+        'nombre': f"{persona.nombre} {persona.apellido}",
+        'strikes': strikes,
+        'max_strikes': max_strikes,
+        'fecha_cancelacion': fecha_cancelacion,
+    }
+    mensaje = render_to_string('notifications/emails/cancelacion_vendedor.txt', context)
+    _registrar_auditoria_correo(persona, asunto, mensaje)
+
+    # Crear notificación interna en el panel del vendedor
+    crear_notificacion(
+        persona,
+        'ADVERTENCIA',
+        f'Tu cuenta ha sido cancelada por acumular {max_strikes} calificaciones negativas.'
+    )
+
+    _enviar_safe(asunto, mensaje, persona.email)
+
+
+def enviar_correo_promedio_bajo_vendedor(persona, promedio):
+    """
+    Notifica al vendedor que su cuenta ha sido cancelada porque su promedio
+    de calificaciones cayó por debajo del mínimo permitido (5.0 / 10).
+    Registra auditoría y crea notificación interna.
+    """
+    import time as _time
+    fecha_cancelacion = _time.strftime("%d/%m/%Y %H:%M:%S")
+
+    asunto = '⭐ Cuenta de Vendedor Cancelada por Promedio Bajo – Comercial Konrad'
+    context = {
+        'nombre': f"{persona.nombre} {persona.apellido}",
+        'promedio': f"{promedio:.1f}",
+        'fecha_cancelacion': fecha_cancelacion,
+    }
+    mensaje = render_to_string('notifications/emails/promedio_bajo_vendedor.txt', context)
+    _registrar_auditoria_correo(persona, asunto, mensaje)
+
+    # Notificación interna visible en el panel del vendedor
+    crear_notificacion(
+        persona,
+        'ADVERTENCIA',
+        f'Tu cuenta ha sido cancelada porque tu promedio de calificaciones ({promedio:.1f}/10) '
+        f'cayó por debajo del mínimo requerido (5.0/10).'
+    )
+
+    _enviar_safe(asunto, mensaje, persona.email)
