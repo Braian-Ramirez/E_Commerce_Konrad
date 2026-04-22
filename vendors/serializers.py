@@ -128,6 +128,11 @@ class SolicitudVendedorRegistrationSerializer(serializers.ModelSerializer):
                 defaults=persona_data
             )
 
+            # --- PREVENCIÓN DE DUPLICADOS ---
+            # Si esta persona ya tiene una solicitud PENDIENTE, no dejamos crear otra.
+            if Solicitud.objects.filter(persona=persona, estado='PENDIENTE').exists():
+                raise serializers.ValidationError({"error": "Ya tienes una solicitud de registro en estado PENDIENTE. Por favor, espera a que el Director Comercial la revise."})
+
             # 2. Crear la Solicitud inicialmente con número temporal
             solicitud = Solicitud.objects.create(
                 persona=persona,
@@ -155,17 +160,23 @@ class SolicitudVendedorRegistrationSerializer(serializers.ModelSerializer):
                 )
 
             # 5. Notificación automática del sistema para el Director Comercial
-            # Buscamos al Director Comercial en la base de datos (administrador del sistema)
-            director = Persona.objects.filter(user__is_staff=True).first()
+            # 5. Notificación automática del sistema para los Directores Comerciales
+            directores = Persona.objects.filter(user__is_staff=True)
             
-            # Si no hay un staff asignado como Persona, devolvemos a la persona original como fallback
-            notificar_a = director if director else persona
-
-            Notificacion.objects.create(
-                persona=notificar_a,
-                tipo='SOLICITUD',
-                mensaje=f"🔔 Nueva solicitud de registro: {persona.nombre} {persona.apellido}. Radicado: {solicitud.numero_solicitud}. Pendiente por revisar."
-            )
+            if directores.exists():
+                for director in directores:
+                    Notificacion.objects.create(
+                        persona=director,
+                        tipo='SOLICITUD',
+                        mensaje=f"🔔 Nueva solicitud de registro: {persona.nombre} {persona.apellido}. Radicado: {solicitud.numero_solicitud}. Pendiente por revisar."
+                    )
+            else:
+                # Fallback si no hay administradores creados como Persona
+                Notificacion.objects.create(
+                    persona=persona,
+                    tipo='SOLICITUD',
+                    mensaje=f"🔔 Nueva solicitud de registro: {persona.nombre} {persona.apellido}. Radicado: {solicitud.numero_solicitud}. Pendiente por revisar."
+                )
 
             return solicitud
 

@@ -34,10 +34,16 @@ class GestionSolicitudesViewSet(viewsets.ModelViewSet):
     def cambiar_estado(self, request, pk=None):
         solicitud = self.get_object()
         nuevo_estado = request.data.get('estado')
+        observaciones = request.data.get('observaciones', '')
         
         if nuevo_estado in ['APROBADA', 'RECHAZADA', 'PENDIENTE', 'DEVUELTA']:
             solicitud.estado = nuevo_estado
             solicitud.save()
+
+            if observaciones:
+                credit_data, created = ConsultaCrediticia_Local.objects.get_or_create(solicitud=solicitud)
+                credit_data.observaciones = observaciones
+                credit_data.save()
 
             if nuevo_estado == 'APROBADA':
                 # Crear User de Django si aún no existe

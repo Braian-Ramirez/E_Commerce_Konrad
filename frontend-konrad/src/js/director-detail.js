@@ -51,6 +51,16 @@ document.addEventListener('DOMContentLoaded', () => {
             if (sol.estado === 'RECHAZADA') estadoEl.style.color = '#ef4444';  // Rojo Intenso
             if (sol.estado === 'DEVUELTA') estadoEl.style.color = '#f97316';   // Naranja Vibrante
             
+            // Mostrar observaciones si existe un rechazo/devolución
+            if ((sol.estado === 'RECHAZADA' || sol.estado === 'DEVUELTA') && sol.credit_data && sol.credit_data.observaciones) {
+                const obsGroup = document.getElementById('observaciones-group');
+                const obsValue = document.getElementById('v_observaciones');
+                if (obsGroup && obsValue) {
+                    obsValue.textContent = sol.credit_data.observaciones;
+                    obsGroup.style.display = 'flex';
+                }
+            }
+            
             // Si ya no está PENDIENTE, deshabilitar funcionalidad de riesgo
             if (sol.estado !== 'PENDIENTE') {
                 ['btnDatacredito', 'btnCifin', 'btnPolicia'].forEach(id => {

@@ -69,6 +69,30 @@ document.addEventListener("DOMContentLoaded", async () => {
     setupSearch();
     setupFilters();
     injectFavoritesSection();
+
+    // 2. Auto-abrir producto si viene en la URL (?productId=123) - SOLO PARA DIRECTOR
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('productId') || urlParams.get('productid');
+    const userRole = (localStorage.getItem('rol') || '').toUpperCase();
+
+    if (productId && userRole === 'DIRECTOR_COMERCIAL') {
+        // Esperamos un momento a que fetchRealProducts llene el cache o lo pedimos directo
+        setTimeout(async () => {
+            if (window.productDataCache && window.productDataCache[productId]) {
+                window.openProductDetail(window.productDataCache[productId]);
+            } else {
+                try {
+                    const res = await fetch(`${API_PRODUCTS}${productId}/`);
+                    if (res.ok) {
+                        const p = await res.json();
+                        window.productDataCache = window.productDataCache || {};
+                        window.productDataCache[productId] = p;
+                        window.openProductDetail(p);
+                    }
+                } catch(e) {}
+            }
+        }, 800);
+    }
 });
 
 async function syncCartWithBackend() {
@@ -612,9 +636,13 @@ window.openProductDetail = (p) => {
             </div>
         `;
 
-        const modalAddBtnHtml = isAgotado ? 
-            `<button class="cta-primary disabled" disabled style="flex:2;padding:16px;font-size:1.1rem;font-weight:800;background:#4b5563;cursor:not-allowed;filter:grayscale(1);">Producto Agotado</button>` :
+        const sessionRole = (localStorage.getItem('rol') || '').toUpperCase();
+        const isDirector = sessionRole === 'DIRECTOR_COMERCIAL' || sessionRole === 'ADMIN';
+
+        const modalAddBtnHtml = (isAgotado || isDirector) ? 
+            `<button class="cta-primary disabled" disabled style="flex:2;padding:16px;font-size:1.1rem;font-weight:800;background:#4b5563;cursor:not-allowed;filter:grayscale(1);">${isDirector ? 'Vista de Director (Solo Consulta)' : 'Producto Agotado'}</button>` :
             `<button class="cta-primary" id="modalAddBtn-${p.id}" onclick="addToCart('${p.id}'); document.getElementById('productDetailModal').style.display='none';" style="flex:2;padding:16px;font-size:1.1rem;font-weight:800;">🛒 Añadir al Carrito</button>`;
+
 
         let finalModalHtml = tplElem.innerHTML
             .replaceAll('{main_img}', (mainImg.startsWith('http') || mainImg.startsWith('/')) ? `<img src="${mainImg}" onerror="this.src='https://placehold.co/400x400/0c0f18/white?text=Imagen'" class="img-contain">` : mainImg)
@@ -628,7 +656,7 @@ window.openProductDetail = (p) => {
             .replaceAll('{desc}', p.descripcion.split('||IMG:')[0] || 'Calidad Konrad premium seleccionada.')
             .replaceAll('{stock_badge_html}', stockBadgeHtml)
             .replaceAll('{modal_add_btn_html}', modalAddBtnHtml)
-            .replaceAll('{btn_fav_modal}', token ? `
+            .replaceAll('{btn_fav_modal}', (token && !isDirector) ? `
                 <button id="modal-fav-${p.id}" onclick="handleFav('${p.id}')" style="flex:0.5;padding:16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:white;border-radius:15px;cursor:pointer;font-size:1.2rem;transition:all 0.3s ease;">
                     ${favOn ? '❤️' : '🤍'}
                 </button>
@@ -651,6 +679,15 @@ window.openProductDetail = (p) => {
         }
     };
     m.style.display = 'flex';
+
+    // REGISTRAR VISITA EN EL BACKEND (BAM - KPI)
+    try {
+        fetch('http://127.0.0.1:8000/api/v1/bam/registrar-visita/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ producto_id: p.id, origen: 'catalogo_web' })
+        }).catch(err => console.error("Error silencioso al registrar visita:", err));
+    } catch (e) {}
 };
 
 window.submitUserQuestion = async (productId) => {
