@@ -1,6 +1,21 @@
-const API_PRODUCTS = 'http://127.0.0.1:8000/api/v1/products/productos/';
-const API_ORDERS = 'http://127.0.0.1:8000/api/v1/orders/ordenes/';
-const API_DETALLES = 'http://127.0.0.1:8000/api/v1/orders/detalles/';
+export const API_BASE_URL = 'http://127.0.0.1:8000/api/v1';
+const API_PRODUCTS = `${API_BASE_URL}/products/productos/`;
+const API_ORDERS = `${API_BASE_URL}/orders/ordenes/`;
+const API_DETALLES = `${API_BASE_URL}/orders/detalles/`;
+
+export function getAuthHeaders() {
+    const token = localStorage.getItem('access_token');
+    return {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+    };
+}
+
+export function handleLogout() {
+    localStorage.clear();
+    window.location.href = '/pages/login.html';
+}
+
 const token = localStorage.getItem("access_token");
 
 // ─── UTILIDADES DE SESIÓN ────────────────────────────────────────────────────
@@ -690,12 +705,7 @@ window.submitUserQuestion = async (productId) => {
 };
 
 // ─── SESIÓN & LOGOUT ──────────────────────────────────────────────────────────
-window.handleLogout = () => {
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
-    localStorage.removeItem("user_data");
-    window.location.href = '/pages/login.html';
-};
+window.handleLogout = handleLogout;
 
 function renderAuthUI() {
     const authLinks = document.getElementById('authLinks');

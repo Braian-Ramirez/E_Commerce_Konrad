@@ -1,0 +1,42 @@
+Estimado/a {{ nombre }},
+
+Lamentamos informarle que su cuenta de vendedor en Comercial Konrad ha sido CANCELADA.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⭐  NOTIFICACIÓN OFICIAL – PROMEDIO BAJO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+De acuerdo con los reglamentos de nuestra plataforma, su cuenta ha sido
+suspendida de forma automática al registrar un promedio de calificaciones
+por debajo del mínimo permitido.
+
+📊 Resumen:
+   • Promedio de calificaciones actual: {{ promedio }} / 10
+   • Mínimo requerido por reglamento: 5.0 / 10
+   • Fecha de cancelación: {{ fecha_cancelacion }}
+   • Estado de cuenta: CANCELADA
+
+Nuestro sistema evalúa continuamente la reputación de los vendedores con
+el fin de garantizar una experiencia de compra de calidad a todos los
+usuarios de Comercial Konrad.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💬 ¿DESEA APELAR ESTA DECISIÓN?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Si considera que esta cancelación es un error o desea presentar una
+apelación formal, puede hacerlo respondiendo este correo con:
+
+  1. Su número de identificación
+  2. El motivo de su apelación
+  3. Evidencia de soporte (si aplica)
+
+Nuestro equipo revisará su caso en un plazo máximo de 5 días hábiles.
+
+Atentamente,
+Equipo de Comercial Konrad
+comercialkonrad1@gmail.com
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Este mensaje fue generado automáticamente por el sistema de calidad.
+Por favor, no ignore este aviso.

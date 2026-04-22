@@ -2,6 +2,9 @@
 
 const API_BASE = 'http://localhost:8000/api/v1';
 let indicePrincipalSeleccionado = 0;
+let allProducts = [];
+let currentPage = 1;
+const itemsPerPage = 6;
 let productoEdicionId = null; // Guardará el ID si estamos editando
 
 // ──────────────────────────────────────────
@@ -9,6 +12,12 @@ let productoEdicionId = null; // Guardará el ID si estamos editando
 // ──────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
     cargarMisProductos();
+    
+    // Vincular botones de paginación
+    const prevBtn = document.getElementById('prev-page');
+    const nextBtn = document.getElementById('next-page');
+    if (prevBtn) prevBtn.addEventListener('click', () => changePage(-1));
+    if (nextBtn) nextBtn.addEventListener('click', () => changePage(1));
 });
 
 // ──────────────────────────────────────────
@@ -44,16 +53,16 @@ async function cargarMisProductos() {
             return;
         }
 
-        const productos = await response.json();
+        allProducts = await response.json();
         btnAdd.style.display = 'inline-flex';
 
-        if (productos.length === 0) {
+        if (allProducts.length === 0) {
             mostrarSolo(empty);
             subtitle.textContent = 'Aún no has publicado productos';
+            document.getElementById('pagination-controls').style.display = 'none';
         } else {
             mostrarSolo(grid);
-            renderProductCards(productos);
-            subtitle.textContent = `${productos.length} producto${productos.length !== 1 ? 's' : ''} publicado${productos.length !== 1 ? 's' : ''}`;
+            renderProductsPage();
         }
 
     } catch (err) {
@@ -75,11 +84,31 @@ function mostrarSolo(elVisible) {
 // ──────────────────────────────────────────
 // RENDER DE TARJETAS
 // ──────────────────────────────────────────
-function renderProductCards(productos) {
+function renderProductsPage() {
     const grid = document.getElementById('products-grid');
+    const prevBtn = document.getElementById('prev-page');
+    const nextBtn = document.getElementById('next-page');
+    const pageInfo = document.getElementById('page-info');
+    const pagControls = document.getElementById('pagination-controls');
+    const subtitle = document.getElementById('products-count-text');
+
+    if (!allProducts || allProducts.length === 0) {
+        grid.innerHTML = '';
+        pagControls.style.display = 'none';
+        return;
+    }
+
+    const totalPages = Math.ceil(allProducts.length / itemsPerPage);
+    if (currentPage > totalPages) currentPage = totalPages;
+
+    pagControls.style.display = 'flex';
     grid.innerHTML = '';
 
-    productos.forEach(prod => {
+    const start = (currentPage - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    const pageItems = allProducts.slice(start, end);
+
+    pageItems.forEach(prod => {
         const imagenUrl = prod.imagenes?.find(i => i.es_principal)?.imagen
             || prod.imagenes?.[0]?.imagen
             || null;
@@ -99,7 +128,6 @@ function renderProductCards(productos) {
         card.id          = `product-card-${prod.id}`;
         card.style.cursor = 'pointer';
         card.onclick     = (e) => {
-            // Evitar abrir detalle si se hizo clic en los botones de acción
             if (!e.target.closest('.product-card-actions')) {
                 verDetalleProducto(prod.id);
             }
@@ -120,6 +148,17 @@ function renderProductCards(productos) {
         `;
         grid.appendChild(card);
     });
+
+    // Actualizar controles
+    subtitle.textContent = `${allProducts.length} producto${allProducts.length !== 1 ? 's' : ''} publicado${allProducts.length !== 1 ? 's' : ''}`;
+    pageInfo.textContent = `Página ${currentPage} de ${totalPages}`;
+    prevBtn.disabled = currentPage === 1;
+    nextBtn.disabled = currentPage === totalPages;
+}
+
+function changePage(delta) {
+    currentPage += delta;
+    renderProductsPage();
 }
 
 // ──────────────────────────────────────────

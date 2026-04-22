@@ -85,12 +85,56 @@ class VendedorViewSet(viewsets.ModelViewSet):
         user = request.user
         if hasattr(user, 'persona_profile') and hasattr(user.persona_profile, 'vendedor_profile'):
             vendedor = user.persona_profile.vendedor_profile
+            from products.models import ComentarioProducto
+            strikes = ComentarioProducto.objects.filter(
+                producto__vendedor=vendedor,
+                calificacion__lt=3,
+                calificacion__gt=0
+            ).count()
+            # Incluimos el nombre del vendedor para la UI
             return Response({
+                "nombre": f"{vendedor.persona.nombre} {vendedor.persona.apellido}",
                 "estado_suscripcion": vendedor.estado_suscripcion,
                 "fecha_vencimiento": vendedor.fecha_vencimiento,
-                "calificacion": vendedor.calificacion_promedio
+                "calificacion": vendedor.calificacion_promedio,
+                "strikes": strikes,
+                "max_strikes": 10
             })
         return Response({"estado_suscripcion": "INACTIVA"}, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['get'], url_path='mis-calificaciones', permission_classes=[IsAuthenticated])
+    def mis_calificaciones(self, request):
+        """Obtiene el historial de reseñas de productos para el panel del vendedor."""
+        user = request.user
+        if not hasattr(user, 'persona_profile') or not hasattr(user.persona_profile, 'vendedor_profile'):
+            return Response({"error": "Sin perfil de vendedor."}, status=status.HTTP_403_FORBIDDEN)
+        
+        vendedor = user.persona_profile.vendedor_profile
+        from products.models import ComentarioProducto
+        
+        # Filtramos estrictamente RELACIONES DE VENTA con CALIFICACIÓN (reseñas)
+        comentarios = ComentarioProducto.objects.filter(
+            producto__vendedor=vendedor,
+            calificacion__gt=0
+        ).select_related('producto', 'orden', 'comprador').order_by('-fecha')
+        
+        data = []
+        for c in comentarios:
+            # Obtener imagen principal del producto
+            img = c.producto.imagenes.filter(es_principal=True).first() or c.producto.imagenes.first()
+            img_url = request.build_absolute_uri(img.imagen.url) if img else None
+            
+            data.append({
+                "id": c.id,
+                "producto_nombre": c.producto.nombre,
+                "producto_imagen": img_url,
+                "comprador_nombre": f"{c.comprador.nombre} {c.comprador.apellido}" if c.comprador else "Comprador Desconocido",
+                "calificacion": c.calificacion,
+                "comentario": c.comentario,
+                "fecha": c.fecha.strftime("%d/%m/%Y")
+            })
+            
+        return Response(data)
 
 # Vista Solicitud (SÓLO RUTAS PÚBLICAS Y BÁSICAS DE VENDEDORES)
 class SolicitudViewSet(viewsets.GenericViewSet):
