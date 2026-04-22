@@ -291,7 +291,9 @@ function renderGrid(containerId, products, showFav = false) {
                     </button>
                 ` : '')
                 .replaceAll('{qty_selector_html}', qtySelectorHtml)
-                .replaceAll('{add_btn_html}', addBtnHtml);
+                .replaceAll('{add_btn_html}', addBtnHtml)
+                .replaceAll('{product_rating}', parseFloat(p.producto_reputacion || 0).toFixed(1))
+                .replaceAll('{product_sales}', new Intl.NumberFormat('es-CO').format(p.ventas_totales || 0));
 
             return htmlStr;
         }
@@ -643,6 +645,8 @@ window.openProductDetail = (p) => {
             .replaceAll('{desc}', p.descripcion.split('||IMG:')[0] || 'Calidad Konrad premium seleccionada.')
             .replaceAll('{stock_badge_html}', stockBadgeHtml)
             .replaceAll('{modal_add_btn_html}', modalAddBtnHtml)
+            .replaceAll('{product_rating}', parseFloat(p.producto_reputacion || 0).toFixed(1))
+            .replaceAll('{product_sales}', new Intl.NumberFormat('es-CO').format(p.ventas_totales || 0))
             .replaceAll('{btn_fav_modal}', token ? `
                 <button id="modal-fav-${p.id}" onclick="handleFav('${p.id}')" style="flex:0.5;padding:16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:white;border-radius:15px;cursor:pointer;font-size:1.2rem;transition:all 0.3s ease;">
                     ${favOn ? '❤️' : '🤍'}
