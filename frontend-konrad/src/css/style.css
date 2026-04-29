@@ -1,3 +1,5 @@
+@import url('./components.css');
+
 :root {
   --primary: #6366f1;
   /* Indigo moderno */

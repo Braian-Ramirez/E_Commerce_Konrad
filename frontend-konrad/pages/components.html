@@ -3,103 +3,102 @@
 
     <!-- PLANTILLA: TARJETA DE PRODUCTO -->
     <template id="tpl-product-card">
-        <div class="product-card glass-effect" id="card-{p_id}" style="position:relative;animation: fadeIn 0.4s ease-out;">
+        <div class="product-card glass-effect" id="card-{p_id}">
             {fav_btn}
-            <div class="product-image" style="position:relative; cursor:pointer; background: #0c0f18; display:flex; align-items:center; justify-content:center; border-radius:15px; overflow:hidden; border:1px solid rgba(255,255,255,0.03);">
-                <button onclick="event.stopPropagation(); flipCardImg('{p_id}', -1)" style="position:absolute;left:5px;z-index:20;background:rgba(0,0,0,0.5);border:none;color:white;width:30px;height:30px;border-radius:50%;cursor:pointer;">‹</button>
-                <div id="card-img-container-{p_id}" onclick="openProductDetail(window.productDataCache['{p_id}'])" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
+            <div class="product-image-container">
+                <button onclick="event.stopPropagation(); flipCardImg('{p_id}', -1)" class="product-nav-btn left">‹</button>
+                <div id="card-img-container-{p_id}" onclick="openProductDetail(window.productDataCache['{p_id}'])" class="product-img-wrapper">
                     {img_content}
                 </div>
-                <button onclick="event.stopPropagation(); flipCardImg('{p_id}', 1)" style="position:absolute;right:5px;z-index:20;background:rgba(0,0,0,0.5);border:none;color:white;width:30px;height:30px;border-radius:50%;cursor:pointer;">›</button>
+                <button onclick="event.stopPropagation(); flipCardImg('{p_id}', 1)" class="product-nav-btn right">›</button>
             </div>
 
-            <div style="padding:5px 0;">
-                <h4 class="product-title" style="margin-top:8px;font-weight:700;color:white;font-size:1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{nombre}</h4>
-                <div style="color:#fbbf24;font-size:0.85rem;margin:3px 0;">★★★★★ <span style="color:#64748b;font-size:0.75rem;">(12)</span></div>
-                <div class="product-price" style="margin-bottom:12px;color:white;font-weight:800;font-size:1.1rem;">{precio} <span style="font-size:0.7rem;color:#64748b;">COP</span></div>
+            <div class="product-info">
+                <h4 class="product-title">{nombre}</h4>
+                <div class="product-rating">⭐ {product_rating} <span class="product-rating-count">({product_sales} ventas)</span></div>
+                <div class="product-price">{precio} <span class="product-price-currency">COP</span></div>
             </div>
 
             {qty_selector_html}
 
-            <div style="display:flex;gap:8px;">
+            <div class="product-actions">
                 {add_btn_html}
-                <button onclick="openProductDetail(window.productDataCache['{p_id}'])" style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:white;border-radius:10px;cursor:pointer;">🔎</button>
+                <button onclick="openProductDetail(window.productDataCache['{p_id}'])" class="btn-search-detail">🔎</button>
             </div>
         </div>
     </template>
 
     <!-- PLANTILLA: DETALLE DE PRODUCTO (MODAL) -->
     <template id="tpl-product-detail">
-        <div style="display:grid;grid-template-columns:1fr 1.1fr;gap:28px;padding:5px;">
+        <div class="product-detail-grid">
             <!-- COLUMNA IZQUIERDA: Imagen -->
             <div>
-                <div style="position:relative;width:100%;height:260px;background:#0c0f18;border-radius:20px;overflow:hidden;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.05);">
-                    <button onclick="moveGallery(-1)" style="position:absolute;left:10px;z-index:20;background:rgba(0,0,0,0.6);border:none;color:white;width:36px;height:36px;border-radius:50%;cursor:pointer;">‹</button>
-                    <div id="detailMainImageContainer" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:6rem;">
+                <div class="detail-img-container">
+                    <button onclick="moveGallery(-1)" class="detail-nav-btn left">‹</button>
+                    <div id="detailMainImageContainer" class="detail-main-img-wrapper">
                         {main_img}
                     </div>
-                    <button onclick="moveGallery(1)" style="position:absolute;right:10px;z-index:20;background:rgba(0,0,0,0.6);border:none;color:white;width:36px;height:36px;border-radius:50%;cursor:pointer;">›</button>
+                    <button onclick="moveGallery(1)" class="detail-nav-btn right">›</button>
                 </div>
 
                 <!-- PREGUNTAS (debajo de imagen, compactas) -->
-                <div style="margin-top:16px;padding:14px;background:rgba(255,255,255,0.02);border-radius:16px;border:1px solid rgba(59,130,246,0.1);">
-                    <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
-                        <div style="width:6px;height:6px;border-radius:50%;background:#3b82f6;box-shadow:0 0 6px #3b82f6;"></div>
-                        <p style="color:white;font-size:0.75rem;font-weight:800;text-transform:uppercase;margin:0;">Preguntas al Vendedor</p>
+                <div class="questions-section">
+                    <div class="section-header">
+                        <div class="section-dot blue"></div>
+                        <p class="section-title-sm">Preguntas al Vendedor</p>
                     </div>
-                    <div id="questionsContainer" style="max-height:100px;overflow-y:auto;margin-bottom:8px;">
+                    <div id="questionsContainer" class="questions-list">
                         {qsHtml}
                     </div>
-                    <div style="display:flex;gap:8px;">
-                        <textarea id="newQuestionTxt" placeholder="Haz una pregunta..." 
-                            style="flex:1;height:36px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:white;outline:none;resize:none;font-size:0.8rem;border-radius:8px;padding:6px;font-family:inherit;"></textarea>
-                        <button onclick="submitUserQuestion('{p_id}')" class="cta-primary" style="padding:0 14px;font-size:0.75rem;background:#3b82f6;border-radius:8px;white-space:nowrap;">Enviar</button>
+                    <div class="question-input-wrapper">
+                        <textarea id="newQuestionTxt" placeholder="Haz una pregunta..." class="question-textarea"></textarea>
+                        <button onclick="submitUserQuestion('{p_id}')" class="cta-primary btn-send-question">Enviar</button>
                     </div>
                 </div>
             </div>
 
             <!-- COLUMNA DERECHA -->
-            <div style="display:flex;flex-direction:column;justify-content:flex-start;">
-                <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;background:rgba(139,92,246,0.05);padding:8px 14px;border-radius:12px;border:1px solid rgba(139,92,246,0.1);width:fit-content;">
-                    <div style="width:30px;height:30px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;">👤</div>
+            <div class="detail-right-col">
+                <div class="seller-badge-container">
+                    <div class="seller-icon">👤</div>
                     <div>
-                        <p style="color:#94a3b8;font-size:0.6rem;margin:0;font-weight:800;letter-spacing:1px;text-transform:uppercase;">Vendedor Oficial</p>
-                        <p style="color:white;font-size:0.9rem;font-weight:700;margin:0;"><a href="/pages/seller-profile.html?vendor_id={sellerId}" style="color:white;text-decoration:none;border-bottom:1px dashed rgba(255,255,255,0.4);">{sellerName} &rarr;</a></p>
+                        <p class="seller-title-sm">Vendedor Oficial</p>
+                        <p class="seller-link-wrapper"><a href="/pages/seller-profile.html?vendor_id={sellerId}" class="seller-link">{sellerName} &rarr;</a></p>
                     </div>
                 </div>
 
-                <h2 style="font-size:1.8rem;font-weight:900;color:white;margin-bottom:6px;letter-spacing:-0.5px;">{nombre}</h2>
-                <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
-                    <span style="color:#fbbf24;font-size:1rem;">★★★★★</span>
-                    <span style="color:#64748b;font-size:0.8rem;">Vendedor verificado por Comercial Konrad</span>
+                <h2 class="detail-title">{nombre}</h2>
+                <div class="detail-rating-container">
+                    <span class="detail-rating-stars">⭐ {product_rating}</span>
+                    <span class="detail-rating-text">({product_sales} veces comprado) • Vendedor verificado</span>
                 </div>
 
-                <p style="font-size:2.2rem;font-weight:900;color:white;margin-bottom:10px;text-shadow:0 0 20px rgba(99,102,241,0.3);">{precioTexto} <span style="font-size:0.9rem;color:#64748b;font-weight:400;">COP</span></p>
+                <p class="detail-price">{precioTexto} <span class="detail-price-currency">COP</span></p>
 
                 <!-- STOCK -->
                 {stock_badge_html}
                 
-                <div style="padding:14px;background:rgba(255,255,255,0.02);border-radius:12px;margin-bottom:16px;border:1px solid rgba(255,255,255,0.05);line-height:1.6;max-height:90px;overflow-y:auto;">
-                    <p style="color:#cbd5e1;font-size:0.92rem;margin:0;">{desc}</p>
+                <div class="detail-desc-box">
+                    <p class="detail-desc-text">{desc}</p>
                 </div>
 
                 <!-- RESEÑAS (compactas en columna derecha) -->
-                <div style="padding:12px;background:rgba(255,255,255,0.01);border-radius:14px;border:1px solid rgba(251,191,36,0.1);margin-bottom:16px;">
-                    <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
-                        <div style="width:6px;height:6px;border-radius:50%;background:#fbbf24;box-shadow:0 0 6px #fbbf24;"></div>
-                        <p style="color:white;font-size:0.75rem;font-weight:800;text-transform:uppercase;margin:0;">Reseñas</p>
+                <div class="reviews-section">
+                    <div class="section-header">
+                        <div class="section-dot yellow"></div>
+                        <p class="section-title-sm">Reseñas</p>
                     </div>
-                    <div id="reviewsContainer" style="max-height:100px;overflow-y:auto;">
+                    <div id="reviewsContainer" class="reviews-list">
                         {reviewsHtml}
                     </div>
                 </div>
 
-                <div style="display:flex;gap:12px;margin-bottom:10px;">
+                <div class="detail-actions">
                     {modal_add_btn_html}
                     {btn_fav_modal}
                 </div>
                 
-                <p style="font-size:0.75rem;color:#64748b;display:flex;align-items:center;gap:8px;">📦 Envío prioritario Konrad • 🛡️ Garantía Premium • 💳 SSL</p>
+                <p class="detail-footer-info">📦 Envío prioritario Konrad • 🛡️ Garantía Premium • 💳 SSL</p>
             </div>
         </div>
     </template>

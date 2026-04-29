@@ -63,7 +63,20 @@ class ProductoSerializer(serializers.ModelSerializer):
     preguntas = PreguntaProductoSerializer(many=True, read_only=True)
     categoria_nombre = serializers.ReadOnlyField(source='categoria.nombre')
     vendedor_nombre = serializers.ReadOnlyField(source='vendedor.persona.nombre')
+    vendedor_reputacion = serializers.ReadOnlyField(source='vendedor.calificacion_promedio')
+    vendedor_ventas = serializers.SerializerMethodField()
+    producto_reputacion = serializers.SerializerMethodField()
     imagen_principal = serializers.SerializerMethodField()
+
+    def get_producto_reputacion(self, obj):
+        from django.db.models import Avg
+        promedio = obj.comentarios.aggregate(promedio=Avg('calificacion'))['promedio']
+        return round(promedio, 1) if promedio is not None else 0.0
+
+    def get_vendedor_ventas(self, obj):
+        from django.db.models import Sum
+        total = obj.vendedor.productos.aggregate(total=Sum('ventas_totales'))['total']
+        return total or 0
 
     def get_imagen_principal(self, obj):
         img = obj.imagenes.filter(es_principal=True).first()
@@ -81,11 +94,11 @@ class ProductoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Producto
         fields = [
-            'id', 'vendedor', 'vendedor_nombre', 'categoria', 'categoria_nombre', 
+            'id', 'vendedor', 'vendedor_nombre', 'vendedor_reputacion', 'vendedor_ventas', 'categoria', 'categoria_nombre', 
             'categoria_aplica_iva', 'categoria_comision',
             'subcategoria', 'nombre', 'marca', 'descripcion', 'autenticidad',
             'color', 'tamano', 'peso', 'talla', 'condicion', 
-            'cantidad', 'valor', 'fecha_publicacion', 'imagenes', 'comentarios', 'preguntas', 'imagen_principal'
+            'cantidad', 'valor', 'ventas_totales', 'producto_reputacion', 'fecha_publicacion', 'imagenes', 'comentarios', 'preguntas', 'imagen_principal'
         ]
         extra_kwargs = {
             'vendedor': {'read_only': True}
