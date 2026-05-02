@@ -18,7 +18,7 @@
         <!-- Header superior -->
         <header class="top-nav">
             <div class="logo">
-                Comercial <span style="color: var(--neo-orange);">Konrad</span>
+                🛍️Comercial<span style="color: var(--neo-orange);">Konrad</span>
             </div>
             <div class="user-info">
                 <span><b>Mis Productos</b></span>
@@ -32,14 +32,14 @@
                 <div class="sidebar-group">
                     <span class="group-title">NAVEGACIÓN</span>
                     <nav>
-                        <button class="nav-btn" onclick="window.location.href='/pages/vendor-dashboard.html'">
-                            <span class="icon">🏠</span> Inicio
-                        </button>
                         <button class="nav-btn" onclick="window.location.href='/pages/vendor-sales.html'">
                             <span class="icon">🛍️</span> Mis Ventas
                         </button>
                         <button class="nav-btn" onclick="window.location.href='/pages/vendor-products.html'">
                             <span class="icon">📦</span> Mis Productos
+                        </button>
+                        <button class="nav-btn" onclick="window.location.href='/pages/vendor-ratings.html'">
+                            <span class="icon">⭐</span> Mis Calificaciones
                         </button>
                     </nav>
                 </div>
@@ -107,6 +107,13 @@
 
                     <!-- === ESTADO: Grid de productos === -->
                     <div id="products-grid" class="products-grid" style="display:none;"></div>
+
+                    <!-- Controles de Paginación -->
+                    <div id="pagination-controls" class="pagination-container" style="display:none;">
+                        <button id="prev-page" class="pag-btn" disabled>Anterior</button>
+                        <span id="page-info">Página 1 de 1</span>
+                        <button id="next-page" class="pag-btn">Siguiente</button>
+                    </div>
 
                 </section>
             </main>
@@ -283,7 +290,8 @@
                             <div class="spec-item"><strong>Tamaño:</strong> <span id="detail-tamano">-</span></div>
                             <div class="spec-item"><strong>Talla:</strong> <span id="detail-talla">-</span></div>
                             <div class="spec-item"><strong>Peso:</strong> <span id="detail-peso">-</span></div>
-                            <div class="spec-item"><strong>Autenticidad:</strong> <span id="detail-autenticidad">-</span></div>
+                            <div class="spec-item"><strong>Autenticidad:</strong> <span
+                                    id="detail-autenticidad">-</span></div>
                         </div>
                         <div class="detail-description">
                             <h3>Descripción</h3>

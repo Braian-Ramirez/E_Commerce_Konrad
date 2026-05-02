@@ -28,10 +28,26 @@ async function fetchVendorProducts(vId) {
         const filtered = all.filter(p => String(p.vendedor) === String(vId));
         
         if (filtered.length > 0) {
-            document.getElementById('vendorName').textContent = filtered[0].vendedor_nombre || 'Konrad Shop';
+            const firstP = filtered[0];
+            document.getElementById('vendorName').textContent = firstP.vendedor_nombre || 'Konrad Shop';
+            
+            // Actualizar Reputación y Ventas con datos reales
+            const repElem = document.getElementById('vendorReputation');
+            if(repElem) repElem.innerHTML = `⭐ ${parseFloat(firstP.vendedor_reputacion || 0).toFixed(1)} Reputación`;
+            
+            const salesElem = document.getElementById('vendorSales');
+            if(salesElem) {
+                const totalVentas = firstP.vendedor_ventas || 0;
+                salesElem.innerHTML = totalVentas > 0 ? `+${new Intl.NumberFormat('es-CO').format(totalVentas)} Ventas` : '0 Ventas';
+            }
+
             grid.innerHTML = filtered.map(p => renderCard(p)).join('');
         } else {
             grid.innerHTML = '<p style="color:#94a3b8; text-align:center; grid-column:1/-1;">Este vendedor aún no tiene productos públicos.</p>';
+            const repElem = document.getElementById('vendorReputation');
+            if(repElem) repElem.innerHTML = `⭐ N/A Reputación`;
+            const salesElem = document.getElementById('vendorSales');
+            if(salesElem) salesElem.innerHTML = '0 Ventas';
         }
     } catch (e) {
         grid.innerHTML = '<p style="color:#ef4444; text-align:center;">Error conectando con la base de datos.</p>';
@@ -100,7 +116,7 @@ window.openProductDetail = (p) => {
         </div>
         <div>
             <h2 style="font-size:2rem;color:white;margin-bottom:10px;">${p.nombre}</h2>
-            <div style="color:#fbbf24;margin-bottom:15px;">★★★★★ <span style="color:#64748b;font-size:0.85rem;">(Reputación del Vendedor: 4.9)</span></div>
+            <div style="color:#fbbf24;margin-bottom:15px;">★★★★★ <span style="color:#64748b;font-size:0.85rem;">(Reputación del Vendedor: ${parseFloat(p.vendedor_reputacion || 0).toFixed(1)})</span></div>
             <p style="font-size:2rem;font-weight:900;color:white;margin-bottom:10px;">$${pText} COP</p>
             ${(() => {
                 const s = p.cantidad || 0;

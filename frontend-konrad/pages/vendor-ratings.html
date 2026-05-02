@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Calificaciones - Konrad Commerce</title>
+    <link rel="stylesheet" href="../src/css/style.css">
+    <link rel="stylesheet" href="../src/css/vendor-dashboard.css">
+    <link rel="stylesheet" href="../src/css/vendor-ratings.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="dashboard-container">
+
+        <!-- Header superior -->
+        <header class="top-nav">
+            <div class="logo">
+                🛍️Comercial<span style="color: var(--neo-orange);">Konrad</span>
+            </div>
+            <div class="user-info">
+                <span><b>Mis Calificaciones</b></span>
+            </div>
+        </header>
+
+        <div class="layout-body">
+
+            <!-- Sidebar lateral -->
+            <aside class="sidebar">
+                <div class="sidebar-group">
+                    <span class="group-title">NAVEGACIÓN</span>
+                    <nav>
+                        <button class="nav-btn" onclick="window.location.href='/pages/vendor-sales.html'">
+                            <span class="icon">🛍️</span> Mis Ventas
+                        </button>
+                        <button class="nav-btn" onclick="window.location.href='/pages/vendor-products.html'">
+                            <span class="icon">📦</span> Mis Productos
+                        </button>
+                        <button class="nav-btn active" onclick="window.location.href='/pages/vendor-ratings.html'">
+                            <span class="icon">⭐</span> Mis Calificaciones
+                        </button>
+                    </nav>
+                </div>
+
+                <div class="sidebar-group">
+                    <span class="group-title">CONFIGURACIÓN</span>
+                    <nav>
+                        <button class="nav-btn" onclick="window.location.href='/pages/vendor-dashboard.html'">
+                            <span class="icon">💳</span> Mi Suscripción
+                        </button>
+                        <button class="nav-btn" onclick="window.location.href='/pages/vendor-profile.html'">
+                            <span class="icon">👤</span> Mi Perfil
+                        </button>
+                    </nav>
+                </div>
+
+                <div class="sidebar-footer">
+                    <button id="logout-btn" class="logout-btn">🚪 Cerrar Sesión</button>
+                </div>
+            </aside>
+
+            <!-- Contenido principal -->
+            <main class="content-area">
+                <div class="ratings-layout">
+                    <!-- Sección Izquierda: Resumen -->
+                    <section class="vendor-summary-card">
+                        <h2>Mi Reputación</h2>
+                        <div class="profile-photo-container">
+                            <div id="vendor-photo" class="profile-photo-circle">
+                                <!-- Imagen o Iniciales -->
+                                <span class="photo-placeholder">👤</span>
+                            </div>
+                        </div>
+                        <div class="average-rating-box">
+                            <span class="star-big">⭐</span>
+                            <div class="rating-value">
+                                <span id="avg-rating-number">0.0</span>
+                                <small>/ 10</small>
+                            </div>
+                            <p class="rating-label">Calificación Promedio</p>
+                        </div>
+
+                        <!-- Widget Contador de Strikes -->
+                        <div class="strikes-box" id="strikes-box">
+                            <div class="strikes-header">
+                                <span class="strikes-icon">⚠️</span>
+                                <span class="strikes-title">Calificaciones Negativas</span>
+                            </div>
+                            <div class="strikes-counter">
+                                <span id="strikes-count">0</span>
+                                <span class="strikes-max">/ 10</span>
+                            </div>
+                            <div class="strikes-bar-track">
+                                <div class="strikes-bar-fill" id="strikes-bar"></div>
+                            </div>
+                            <p class="strikes-label" id="strikes-label">Puntuaciones por debajo de 3</p>
+                        </div>
+                    </section>
+
+                    <!-- Sección Derecha: Historial -->
+                    <section class="ratings-history-card">
+                        <div class="card-header">
+                            <h2>Historial de Calificaciones</h2>
+                            <p class="subtitle">Lo que tus compradores opinan de tus productos</p>
+                        </div>
+
+                        <div class="ratings-table-container">
+                            <table class="premium-table">
+                                <thead>
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th>Comprador</th>
+                                        <th>Nota</th>
+                                        <th>Reseña del Comprador</th>
+                                        <th>Fecha</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ratings-table-body">
+                                    <!-- Se llena dinámicamente -->
+                                    <tr>
+                                        <td colspan="5" class="loading-td">Cargando historial...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Controles de Paginación -->
+                        <div class="pagination-container">
+                            <button id="prev-page" class="pag-btn" disabled>Anterior</button>
+                            <span id="page-info">Página 1 de 1</span>
+                            <button id="next-page" class="pag-btn">Siguiente</button>
+                        </div>
+                    </section>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script type="module" src="/src/js/vendor-notifications.js"></script>
+    <script type="module" src="/src/js/vendor-ratings.js"></script>
+    <script type="module" src="/src/js/main.js"></script>
+</body>
+
+</html>

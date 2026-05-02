@@ -40,7 +40,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
             if (r === 'DIRECTOR_COMERCIAL' || r === 'DIRECTOR' || r === 'ADMIN') {
                 window.location.href = 'director-dashboard.html';
             } else if (r === 'VENDEDOR') {
-                window.location.href = 'vendor-dashboard.html';
+                window.location.href = 'vendor-products.html';
             } else {
                 window.location.href = 'buyer-dashboard.html'; // Compradores van a su panel específico
             }

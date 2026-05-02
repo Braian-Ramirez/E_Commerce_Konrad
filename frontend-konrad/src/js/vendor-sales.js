@@ -1,3 +1,7 @@
+let allSales = [];
+let currentPage = 1;
+const itemsPerPage = 6;
+
 document.addEventListener('DOMContentLoaded', async () => {
     const token = localStorage.getItem('access_token');
     const userDataStr = localStorage.getItem('user_data');
@@ -6,6 +10,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.location.href = '/pages/login.html';
         return;
     }
+
+    // Vincular botones de paginación
+    const prevBtn = document.getElementById('prev-page');
+    const nextBtn = document.getElementById('next-page');
+    if (prevBtn) prevBtn.addEventListener('click', () => changePage(-1));
+    if (nextBtn) nextBtn.addEventListener('click', () => changePage(1));
 
     try {
         const response = await fetch('http://localhost:8000/api/v1/orders/detalles/mis_ventas/', {
@@ -19,29 +29,46 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        const ventas = await response.json();
-        renderSales(ventas);
+        allSales = await response.json();
+        
+        // Calcular total acumulado una sola vez
+        let totalAcumulado = 0;
+        allSales.forEach(v => {
+            totalAcumulado += v.cantidad * parseFloat(v.valor_unitario);
+        });
+        const totalEl = document.getElementById('total-ganancias');
+        if (totalEl) totalEl.textContent = `Total: $${Math.floor(totalAcumulado).toLocaleString('es-CO')}`;
+
+        renderSalesPage();
     } catch (err) {
         console.error('Network error', err);
     }
 });
 
-function renderSales(ventas) {
+function renderSalesPage() {
     const tbody = document.getElementById('sales-tbody');
-    const totalEl = document.getElementById('total-ganancias');
-    
-    if (!ventas || ventas.length === 0) {
+    const prevBtn = document.getElementById('prev-page');
+    const nextBtn = document.getElementById('next-page');
+    const pageInfo = document.getElementById('page-info');
+
+    if (!allSales || allSales.length === 0) {
         tbody.innerHTML = `<tr><td colspan="6" class="empty-sales">Aún no tienes ventas registradas.</td></tr>`;
+        if (pageInfo) pageInfo.textContent = "Página 0 de 0";
+        if (prevBtn) prevBtn.disabled = true;
+        if (nextBtn) nextBtn.disabled = true;
         return;
     }
 
-    let h = '';
-    let totalAcumulado = 0;
+    const totalPages = Math.ceil(allSales.length / itemsPerPage);
+    if (currentPage > totalPages) currentPage = totalPages;
 
-    ventas.forEach(v => {
+    const start = (currentPage - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    const pageItems = allSales.slice(start, end);
+
+    let h = '';
+    pageItems.forEach(v => {
         const totalFila = v.cantidad * parseFloat(v.valor_unitario);
-        totalAcumulado += totalFila;
-        
         const fechaObj = new Date(v.orden_fecha);
         const fechaStr = fechaObj.toLocaleString('es-CO', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
         
@@ -70,5 +97,14 @@ function renderSales(ventas) {
     });
 
     tbody.innerHTML = h;
-    totalEl.textContent = `Total: $${Math.floor(totalAcumulado).toLocaleString('es-CO')}`;
+
+    // Actualizar controles
+    if (pageInfo) pageInfo.textContent = `Página ${currentPage} de ${totalPages}`;
+    if (prevBtn) prevBtn.disabled = currentPage === 1;
+    if (nextBtn) nextBtn.disabled = currentPage === totalPages;
+}
+
+function changePage(delta) {
+    currentPage += delta;
+    renderSalesPage();
 }

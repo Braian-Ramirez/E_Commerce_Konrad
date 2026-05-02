@@ -41,13 +41,13 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         if hasattr(user, 'persona_profile') and user.persona_profile:
             persona = user.persona_profile
             # Verificación de roles basada en perfiles relacionados
+            # Priorizar Vendedor sobre Comprador si tiene ambos
             if hasattr(persona, 'director_profile'):
                 rol = 'DIRECTOR_COMERCIAL'
+            elif persona.solicitudes.filter(estado='APROBADA').exists() or hasattr(persona, 'vendedor_profile'):
+                rol = 'VENDEDOR'
             elif hasattr(persona, 'perfil_comprador'):
                 rol = 'COMPRADOR'
-            elif persona.solicitudes.filter(estado='APROBADA').exists() or hasattr(persona, 'vendedor_profile'):
-                # Si tiene una solicitud aprobada o ya tiene un perfil de vendedor
-                rol = 'VENDEDOR'
         
         # Si no encajó en nada pero es superuser base
         if not rol and user.is_superuser:
@@ -99,8 +99,8 @@ urlpatterns = [
     path('api/v1/buyers/', include('buyers.urls')), #urls de compradores
     path('api/v1/login/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'), #Ruta login customizada
     path('api/v1/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'), #Ruta refresh token
-    path('api/v1/bam/', include('bam.urls')), #urls de bam
-    path('api/v1/directors/', include('directors.urls')), #urls de directores
+    path('api/v1/directors/', include('directors.urls')),
+    path('api/v1/audit/', include('audit.urls')),
     
     # Conectamos nuestras URLs falsas:
     path('mocks/', include('external_mocks.urls')),
