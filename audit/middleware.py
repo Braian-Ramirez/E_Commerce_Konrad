@@ -1,4 +1,5 @@
 import threading
+from django.utils.functional import SimpleLazyObject
 
 _thread_locals = threading.local()
 
@@ -10,24 +11,30 @@ class AuditMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        # El usuario suele ser puesto por AuthenticationMiddleware antes que nosotros
+        # 1. Intentar obtener el usuario de la sesión estándar (Admin/Session)
         user = getattr(request, 'user', None)
         
-        # Para DRF y JWT, el usuario a veces no se ha cargado aún. 
-        # Intentamos forzar la carga si vemos un Header de Autorización.
-        if (not user or user.is_anonymous) and 'HTTP_AUTHORIZATION' in request.META:
-            from rest_framework_simplejwt.authentication import JWTAuthentication
-            try:
-                res = JWTAuthentication().authenticate(request)
-                if res:
-                    user = res[0]
-            except:
-                pass
+        # 2. Si es anónimo, intentar capturar el usuario desde el JWT (Frontend/API)
+        if not user or user.is_anonymous:
+            # En Django, los headers vienen en request.META con el prefijo HTTP_
+            header = request.META.get('HTTP_AUTHORIZATION')
+            if header:
+                from rest_framework_simplejwt.authentication import JWTAuthentication
+                try:
+                    # Creamos un objeto de autenticación manual
+                    auth_res = JWTAuthentication().authenticate(request)
+                    if auth_res:
+                        user = auth_res[0] # Usuario autenticado vía Token
+                except Exception:
+                    pass
 
+        # 3. Guardar en el hilo local para que esté disponible en signals y utilidades
         _thread_locals.user = user
         
         try:
-            return self.get_response(request)
+            response = self.get_response(request)
+            return response
         finally:
+            # Limpiar al finalizar la petición
             if hasattr(_thread_locals, 'user'):
-                _thread_locals.user = None # Mejor que del para evitar errores de atributo
+                _thread_locals.user = None

@@ -174,3 +174,40 @@ EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 CORS_ALLOW_ALL_ORIGINS = True
+
+# CONFIGURACIÓN DE LOGGING PARA CAPTURAR ERRORES EN LA BASE DE DATOS
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'db_log': {
+            'level': 'ERROR',
+            'class': 'audit.handlers.DBLogHandler',
+        },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        # Captura errores de Django (vistas, base de datos, etc)
+        'django': {
+            'handlers': ['db_log', 'console'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+        # Captura errores de nuestras propias apps
+        'audit': {
+            'handlers': ['db_log', 'console'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+    },
+}

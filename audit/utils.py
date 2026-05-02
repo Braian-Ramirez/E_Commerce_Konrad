@@ -1,41 +1,13 @@
-from .models import RegistroAuditoria
-from .middleware import get_current_user
+from .models import RegistroAuditoria, LogError
 import json
 from django.core.serializers.json import DjangoJSONEncoder
+from .logic import obtener_identidad_usuario
 
 def registrar_evento_auditoria(instancia, accion, severidad='INFO', detalles=None):
     """
     Función utilitaria para registrar un evento en la tabla de auditoría.
     """
-    usuario = get_current_user()
-    
-    usuario_str = "Sistema/Anónimo"
-    if usuario and not usuario.is_anonymous:
-        # Intentar obtener información extendida del perfil Persona
-        try:
-            if hasattr(usuario, 'persona_profile'):
-                persona = usuario.persona_profile
-                nombre_completo = f"{persona.nombre} {persona.apellido}"
-                
-                # Identificar el rol basado en los perfiles hijos o estatus de Django
-                rol = "Usuario"
-                if usuario.is_superuser:
-                    rol = "Superusuario"
-                elif usuario.is_staff:
-                    rol = "Staff"
-                elif hasattr(persona, 'vendedor_profile'):
-                    rol = "Vendedor"
-                elif hasattr(persona, 'perfil_comprador'):
-                    rol = "Comprador"
-                elif hasattr(persona, 'director_profile'):
-                    rol = "Director Comercial"
-                
-                usuario_str = f"{nombre_completo} ({rol})"
-            else:
-                rol = "Admin/Sistema" if usuario.is_staff or usuario.is_superuser else "Usuario"
-                usuario_str = f"{usuario.username} ({rol})"
-        except Exception:
-            usuario_str = f"{usuario.username} (Error en perfil)"
+    usuario_str = obtener_identidad_usuario()
     
     # Intentar obtener el ID de la instancia
     try:
@@ -59,4 +31,17 @@ def registrar_evento_auditoria(instancia, accion, severidad='INFO', detalles=Non
         nivel_severidad=severidad,
         usuario_responsable=usuario_str,
         detalles_json=detalles_json
+    )
+
+def registrar_error_tecnico(modulo, mensaje, stacktrace=None):
+    """
+    Registra un error técnico en el Log de Errores.
+    """
+    usuario_str = obtener_identidad_usuario()
+
+    LogError.objects.create(
+        modulo=modulo,
+        mensaje_error=mensaje,
+        stacktrace=stacktrace,
+        usuario_afectado=usuario_str
     )
