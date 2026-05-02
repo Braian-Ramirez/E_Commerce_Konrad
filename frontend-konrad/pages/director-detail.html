@@ -18,7 +18,7 @@
         <nav class="nav-menu">
             <a href="director-dashboard.html" class="nav-item active">💼 Solicitudes Pendientes</a>
             <a href="director-historial.html" class="nav-item">📜 Historial Solicitudes</a>
-            <a href="#" class="nav-item">📊 Dashboard BAM</a>
+            <a href="director-bam.html" class="nav-item">📊 Dashboard BAM</a>
             <a href="#" class="nav-item">👤 Mi Perfil</a>
         </nav>
         <div style="margin-top: auto;">
@@ -89,6 +89,11 @@
                 <div class="field-group">
                     <div class="field-label">Estado Actual:</div>
                     <div id="v_estado" class="field-value field-value-strong">...</div>
+                </div>
+
+                <div class="field-group" id="observaciones-group" style="display: none; flex-direction: column;">
+                    <div class="field-label" style="margin-bottom: 6px; color: #f87171;">Motivo de la Decisión:</div>
+                    <div id="v_observaciones" class="field-value" style="background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.2); padding: 10px; border-radius: 8px; font-style: italic; white-space: pre-wrap;">...</div>
                 </div>
 
                 <div class="doc-actions-section">

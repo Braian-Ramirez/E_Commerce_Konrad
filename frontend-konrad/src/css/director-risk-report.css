@@ -169,3 +169,32 @@
     background: linear-gradient(135deg, #ef4444, #dc2626) !important;
     box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2) !important;
 }
+
+/* =========================================
+   RESPONSIVIDAD (MÓVILES Y TABLETAS)
+   ========================================= */
+@media (max-width: 900px) {
+    .risk-score-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+    .report-header-section {
+        border-radius: 12px !important;
+        border-left: none;
+        border-bottom: 4px solid #22c55e;
+    }
+}
+
+@media (max-width: 600px) {
+    .risk-report-container {
+        padding: 10px !important;
+    }
+    .risk-score-grid {
+        grid-template-columns: 1fr !important;
+    }
+    .decision-row {
+        flex-direction: column !important;
+    }
+    .btn-decision {
+        width: 100% !important;
+    }
+}

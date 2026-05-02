@@ -56,7 +56,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.querySelectorAll('.fecha_consulta_cifin').forEach(el => el.textContent = d.fecha_consulta ? new Date(d.fecha_consulta).toLocaleString() : '---');
 
                 if (d.observaciones) {
-                    document.getElementById('observaciones_riesgo').textContent = d.observaciones;
+                    const motivoEl = document.getElementById('motivo_decision');
+                    if (motivoEl) motivoEl.value = d.observaciones;
                 }
             }
 
@@ -86,6 +87,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         btn.title = "Esta solicitud ya tiene una decisión tomada.";
                     }
                 });
+                const motivoEl = document.getElementById('motivo_decision');
+                if (motivoEl) {
+                    motivoEl.readOnly = true;
+                    motivoEl.style.opacity = '0.8';
+                }
             }
 
         })
@@ -100,6 +106,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const btn = document.getElementById('btnAprobar');
         if (btn && btn.disabled) return;
 
+        // Leer campos adicionales del formulario
+        const motivoEl = document.getElementById('motivo_decision');
+        const motivo = motivoEl ? motivoEl.value.trim() : '';
+
+        // Validar motivo requerido para RECHAZAR o DEVOLVER
+        if ((nuevoEstado === 'RECHAZADA' || nuevoEstado === 'DEVUELTA') && !motivo) {
+            if (motivoEl) {
+                motivoEl.style.borderColor = '#ef4444';
+                motivoEl.style.boxShadow = '0 0 0 2px rgba(239,68,68,0.3)';
+                motivoEl.focus();
+            }
+            alert('⚠️ Debe ingresar el motivo de la decisión antes de continuar.');
+            return;
+        }
+
         try {
             const res = await fetch(`http://127.0.0.1:8000/api/v1/directors/solicitudes/${solId}/cambiar-estado/`, {
                 method: 'PATCH',
@@ -107,7 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ estado: nuevoEstado })
+                body: JSON.stringify({ estado: nuevoEstado, observaciones: motivo })
             });
 
             if (res.ok) {
