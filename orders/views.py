@@ -1,6 +1,10 @@
+# pyrefly: ignore [missing-import]
 from rest_framework import viewsets
+# pyrefly: ignore [missing-import]
 from rest_framework.exceptions import PermissionDenied  
+# pyrefly: ignore [missing-import]
 from rest_framework.decorators import action
+# pyrefly: ignore [missing-import]
 from rest_framework.response import Response
 from .models import Orden, DetalleOrden, CalificacionProducto
 from products.models import CostoDomicilio
@@ -90,18 +94,26 @@ class OrdenViewSet(viewsets.ModelViewSet):
             # El comprador hereda los datos de Persona (donde está su ciudad)
             ciudad_comprador = orden.comprador.ciudad
             
-            # Magia del ORM de Django para buscar entre Rangos
+            # Buscamos el rango donde cae el peso_total para esa ciudad
             tarifa = CostoDomicilio.objects.filter(
-                ciudad__iexact=ciudad_comprador, # Busca la ciudad sin importar mayúsculas
-                peso_min__lte=peso_total,        # El minimo debe ser menor/igual a nuestro peso
-                peso_max__gte=peso_total         # El maximo debe ser mayor/igual a nuestro peso
+                ciudad__iexact=ciudad_comprador,
+                peso_min__lte=peso_total,
+                peso_max__gte=peso_total
             ).first()
             
             if tarifa:
                 costo_envio = tarifa.costo
             else:
-                # Tarifa "castigo" por defecto (Alineado a la vista estática del Frontend de 12.000)
-                costo_envio = Decimal('12000.00') 
+                # Si no hay un rango exacto, buscamos la tarifa base más alta de esa ciudad para calcular excedentes
+                tarifa_base = CostoDomicilio.objects.filter(ciudad__iexact=ciudad_comprador).order_by('-peso_max').first()
+                if tarifa_base:
+                    # Si el peso supera el máximo configurado, cobramos base + kilo extra
+                    excedente = max(0, peso_total - tarifa_base.peso_max)
+                    # Convertimos excedente a Decimal para la operación matemática
+                    costo_envio = tarifa_base.costo + (Decimal(str(excedente)) * tarifa_base.costo_kilo_extra)
+                else:
+                    # Tarifa plana si no hay configuración para la ciudad (Alineado al Frontend)
+                    costo_envio = Decimal('12000.00') 
 
         # 6. Actualizamos los totales y terminamos
         # IMPORTANT: 'subtotal' ya incluye IVA, por lo que NO se debe sumar total_iva al final para no cobrar doble.

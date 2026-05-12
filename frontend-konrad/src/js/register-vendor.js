@@ -1,3 +1,22 @@
+document.addEventListener('DOMContentLoaded', async () => {
+    const el = document.getElementById('ciudad');
+    if (!el) return;
+    try {
+        const res = await fetch('http://localhost:8000/api/v1/products/costos-envio/ciudades_disponibles/');
+        if (res.ok) {
+            const ciudades = await res.json();
+            el.innerHTML = '<option value="">— Selecciona tu Ciudad —</option>';
+            ciudades.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c;
+                opt.textContent = c;
+                el.appendChild(opt);
+            });
+            el.innerHTML += '<option value="Otros">Otras Ciudades</option>';
+        }
+    } catch (e) { console.error("Error cargando ciudades:", e); }
+});
+
 document.getElementById('vendorRegisterForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 

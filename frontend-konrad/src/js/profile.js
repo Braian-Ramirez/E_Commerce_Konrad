@@ -3,13 +3,34 @@ const token = localStorage.getItem("access_token");
 
 if (!token) window.location.href = "/pages/login.html";
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+    await cargarCiudades(); // Primero cargamos las opciones
     cargarDatos();
     setupForm();
-    setupSecurity(); // CONECTADO Botón de seguridad
+    setupSecurity();
     setupAvatar();
     updateBadge();
 });
+
+async function cargarCiudades() {
+    const el = document.getElementById('ciudad');
+    if (!el) return;
+    try {
+        const res = await fetch('http://localhost:8000/api/v1/products/costos-envio/ciudades_disponibles/');
+        if (res.ok) {
+            const ciudades = await res.json();
+            el.innerHTML = '<option value="">— Selecciona tu Ciudad —</option>';
+            ciudades.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c;
+                opt.textContent = c;
+                el.appendChild(opt);
+            });
+            // Opción extra por si no está en la lista
+            el.innerHTML += '<option value="Otros">Otras Ciudades</option>';
+        }
+    } catch (e) { console.error("Error ciudades:", e); }
+}
 
 // FUNCIÓN DE CIERRE DE SESIÓN SELECTIVA (NO BORRA CARRITO NI FAVORITOS)
 window.handleLogout = () => {
