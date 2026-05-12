@@ -113,14 +113,16 @@ class ComentarioProducto(models.Model):
         unique_together = [['producto', 'orden', 'comprador']]
 
 # Tabla de Costos de Envío
+# [ESTRUCTURA PARA PATRÓN STRATEGY]
 class CostoDomicilio(models.Model):
-    ciudad = models.CharField(max_length=100)
-    peso_min = models.DecimalField(max_digits=10, decimal_places=2, help_text="En kg")
-    peso_max = models.DecimalField(max_digits=10, decimal_places=2, help_text="En kg")
-    costo = models.DecimalField(max_digits=12, decimal_places=2)
+    ciudad = models.CharField(max_length=100, help_text="Nombre de la ciudad (ej: BOGOTA)")
+    peso_min = models.DecimalField(max_digits=10, decimal_places=2, help_text="Peso mínimo en kg")
+    peso_max = models.DecimalField(max_digits=10, decimal_places=2, help_text="Peso máximo en kg")
+    costo = models.DecimalField(max_digits=12, decimal_places=2, help_text="Precio base para este rango")
+    costo_kilo_extra = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, help_text="Costo adicional por cada kg que exceda el peso_max")
 
     def __str__(self):
-        return f"Envío a {self.ciudad} ({self.peso_min}-{self.peso_max}kg)"
+        return f"{self.ciudad}: {self.peso_min}kg - {self.peso_max}kg -> ${self.costo}"
 
     class Meta:
         verbose_name = "Costo de Domicilio"

@@ -6,6 +6,7 @@ const token = localStorage.getItem("access_token");
 let allMyMedios = [];
 let cartDetails = [];            // ← declaración global (era implícita → ReferenceError en módulos)
 let selectedPaymentType = 'TARJETA'; // ← estado del botón de pago activo
+let lastShippingCost = 0;           // ← Guardar el último envío calculado
 
 
 window.logout = () => {
@@ -49,6 +50,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     updateBadge();
     await loadCart();
     await loadPaymentMethods();
+    await loadShippingCities(); // ← Cargar ciudades desde la tabla de fletes
     setupDetailModal();
     setupPaymentModal();
     setupDeliveryToggle();
@@ -56,6 +58,32 @@ document.addEventListener("DOMContentLoaded", async () => {
     setupCheckout();
     injectPaymentModal();
 });
+
+async function loadShippingCities() {
+    const citySelect = document.getElementById('shipCity');
+    if (!citySelect) return;
+
+    try {
+        const res = await fetch('http://localhost:8000/api/v1/products/costos-envio/ciudades_disponibles/');
+        if (res.ok) {
+            const ciudades = await res.json();
+            // Limpiar y cargar
+            citySelect.innerHTML = '<option value="">— Selecciona Ciudad —</option>';
+            ciudades.forEach(ciudad => {
+                const opt = document.createElement('option');
+                opt.value = ciudad;
+                opt.textContent = ciudad;
+                citySelect.appendChild(opt);
+            });
+            citySelect.innerHTML += '<option value="Otros">Otras Ciudades (Tarifa Plana)</option>';
+            
+            // Escuchar cambios para recalcular envío
+            citySelect.addEventListener('change', () => recalculateShipping());
+        }
+    } catch (e) {
+        console.error("Error al cargar ciudades:", e);
+    }
+}
 
 async function syncCartWithBackend() {
     if (!token) return;
@@ -146,7 +174,8 @@ async function loadCart() {
             producto: p.id, 
             cantidad: qty, 
             valor_unitario: pr,
-            aplica_iva: p.categoria_aplica_iva !== false, // Por defecto true si no viene
+            peso_unitario: parseFloat(p.peso || 0.5), // Guardamos el peso (default 0.5kg)
+            aplica_iva: p.categoria_aplica_iva !== false, 
             comision: parseFloat(p.categoria_comision || 5.0) / 100
         });
 
@@ -186,12 +215,67 @@ async function loadCart() {
             </div>
         </div>`;
     });
-    updateSummary(sum);
+    // Ahora llamamos a recalculateShipping para que considere pesos y ciudad
+    recalculateShipping();
 }
 
-function updateSummary(sum) {
-    const delivery = document.getElementById('deliveryType')?.value || 'RECOGER';
-    const env = sum > 0 ? (delivery === 'DOMICILIO' ? 12000 : 0) : 0;
+async function recalculateShipping() {
+    const delivery = document.getElementById('deliveryType')?.value;
+    const city = document.getElementById('shipCity')?.value;
+    const shippingDisplay = document.getElementById("shippingVal");
+    
+    if (delivery !== 'DOMICILIO') {
+        updateSummary(0);
+        return;
+    }
+
+    if (!city) {
+        if (shippingDisplay) shippingDisplay.textContent = 'Selecciona Ciudad';
+        updateSummary(0);
+        return;
+    }
+
+    if (city === 'Otros') {
+        updateSummary(25000);
+        return;
+    }
+
+    if (shippingDisplay) shippingDisplay.textContent = 'Calculando...';
+
+    // Calcular peso total
+    const totalWeight = cartDetails.reduce((sum, item) => sum + (parseFloat(item.peso_unitario || 0) * item.cantidad), 0);
+    console.log(`[ENVIO] Ciudad: ${city}, Peso Total: ${totalWeight}kg`);
+
+    try {
+        const res = await fetch('http://localhost:8000/api/v1/products/costos-envio/calcular_costo/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ciudad: city, peso_total: totalWeight })
+        });
+        
+        if (res.ok) {
+            const data = await res.json();
+            console.log("[ENVIO] Respuesta exitosa:", data);
+            updateSummary(data.costo_envio);
+        } else {
+            const errData = await res.json();
+            console.error("[ENVIO] Error del servidor:", errData);
+            if (shippingDisplay) shippingDisplay.textContent = 'Zona no tarifada';
+            updateSummary(0); 
+        }
+    } catch (e) {
+        console.error("[ENVIO] Error de conexión:", e);
+        updateSummary(0);
+    }
+}
+
+function updateSummary(shippingCost = null) {
+    if (shippingCost !== null) {
+        lastShippingCost = shippingCost;
+    }
+    
+    const sub = cartDetails.reduce((a, d) => a + (d.valor_unitario * d.cantidad), 0);
+    const env = lastShippingCost;
     
     let i = 0;
     let c = 0;
@@ -206,11 +290,11 @@ function updateSummary(sum) {
 
     const fmt = (n) => '$' + new Intl.NumberFormat('es-CO').format(Math.round(n));
 
-    document.getElementById("subtotalVal").textContent = fmt(sum);
+    document.getElementById("subtotalVal").textContent = fmt(sub);
     document.getElementById("commissionVal").textContent = fmt(c);
     document.getElementById("ivaVal").textContent = fmt(i);
     document.getElementById("shippingVal").textContent = env > 0 ? fmt(env) : 'GRATIS';
-    document.getElementById("totalVal").textContent = fmt(sum + c + env);
+    document.getElementById("totalVal").textContent = fmt(sub + c + env);
 }
 
 function setupDeliveryToggle() {
@@ -222,9 +306,9 @@ function setupDeliveryToggle() {
         const isDom = sel.value === 'DOMICILIO';
         if (addr) addr.style.display = isDom ? 'grid' : 'none';
         if (branch) branch.style.display = isDom ? 'none' : 'block';
-        // Recalcular envío CORRECTAMENTE (Precio * Cantidad)
-        const sub = cartDetails.reduce((a, d) => a + (d.valor_unitario * d.cantidad), 0);
-        updateSummary(sub);
+        
+        // Disparar el recálculo (si es recoger, pondrá 0; si es domicilio, llamará al backend)
+        recalculateShipping();
     };
     sel.addEventListener('change', toggle);
     toggle();
@@ -713,7 +797,8 @@ window.pagoExitoso = async (backendOrdenId) => {
                     com += lineTotal * d.comision;
                 });
                 
-                const env = document.getElementById('deliveryType')?.value === 'DOMICILIO' ? 12000 : 0;
+                const envText = document.getElementById("shippingVal")?.textContent || '0';
+                const env = parseInt(envText.replace(/[^0-9]/g, '')) || 0;
 
                 // Determinar el nombre del medio para el mock
                 const medioSel = document.getElementById('paymentSelector');

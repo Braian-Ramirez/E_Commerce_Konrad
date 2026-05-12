@@ -1,12 +1,19 @@
+# pyrefly: ignore [missing-import]
 from rest_framework import viewsets, status
+# pyrefly: ignore [missing-import]
 from rest_framework.response import Response
+# pyrefly: ignore [missing-import]
 from rest_framework.decorators import action
+# pyrefly: ignore [missing-import]
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+# pyrefly: ignore [missing-import]
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly, AllowAny
 from .models import Categoria, Producto, ImagenProducto, CostoDomicilio, ComentarioProducto, Subcategoria, PreguntaProducto
 from .serializers import CategoriaSerializer, ProductoSerializer, CostoDomicilioSerializer, ComentarioProductoSerializer, SubcategoriaSerializer, PreguntaProductoSerializer
 from ecommerce_konrad.permissions import IsVendorOwnerOrReadOnly, IsProductVendor
 from django.utils import timezone
+# pyrefly: ignore [missing-import]
+from rest_framework.exceptions import ValidationError
 
 # Vista categoria
 class CategoriaViewSet(viewsets.ModelViewSet):
@@ -166,6 +173,64 @@ class CostoDomicilioViewSet(viewsets.ModelViewSet):
     queryset = CostoDomicilio.objects.all()
     serializer_class = CostoDomicilioSerializer
 
+    @action(detail=False, methods=['get'], permission_classes=[AllowAny])
+    def ciudades_disponibles(self, request):
+        """Devuelve un listado de ciudades únicas que tienen tarifas de envío configuradas."""
+        ciudades = CostoDomicilio.objects.values_list('ciudad', flat=True).distinct().order_by('ciudad')
+        return Response(ciudades)
+
+    @action(detail=False, methods=['post'], permission_classes=[AllowAny])
+    def calcular_costo(self, request):
+        """Calcula el costo de envío basado en ciudad y peso total."""
+        ciudad = request.data.get('ciudad')
+        try:
+            peso_total = float(request.data.get('peso_total', 0))
+        except (ValueError, TypeError):
+            peso_total = 0
+
+        if not ciudad:
+            return Response({"error": "Debe especificar una ciudad."}, status=400)
+
+        # Limpieza básica de la ciudad enviada
+        ciudad_clean = ciudad.strip().lower()
+
+        # Buscar todas las tarifas para esa ciudad (insensible a mayúsculas/minúsculas)
+        tarifas = CostoDomicilio.objects.filter(ciudad__iexact=ciudad_clean).order_by('peso_min')
+
+        # Si no hay match exacto, intentamos una búsqueda por aproximación
+        if not tarifas.exists():
+            tarifas = CostoDomicilio.objects.filter(ciudad__icontains=ciudad_clean).order_by('peso_min')
+
+        if not tarifas.exists():
+            return Response({"error": f"No hay tarifas configuradas para {ciudad}."}, status=404)
+
+        # 1. Intentar encontrar el rango exacto
+        tarifa = tarifas.filter(peso_min__lte=peso_total, peso_max__gte=peso_total).first()
+
+        # 2. Si no hay rango exacto pero el peso es menor al mínimo de la primera tarifa
+        if not tarifa and peso_total < tarifas.first().peso_min:
+            tarifa = tarifas.first()
+
+        # 3. Si el peso es mayor al máximo de todas las tarifas, tomamos la última
+        if not tarifa:
+            tarifa = tarifas.last()
+
+        costo_base = float(tarifa.costo)
+        costo_final = costo_base
+
+        # Cálculo de excedente si aplica
+        if peso_total > tarifa.peso_max:
+            exceso = peso_total - float(tarifa.peso_max)
+            costo_final += float(exceso * float(tarifa.costo_kilo_extra))
+
+        return Response({
+            "ciudad": ciudad,
+            "peso_total": peso_total,
+            "costo_envio": costo_final,
+            "tarifa_aplicada": f"{tarifa.peso_min}kg - {tarifa.peso_max}kg",
+            "precio_base": float(tarifa.costo)
+        })
+
 # Vista comentario producto
 class ComentarioProductoViewSet(viewsets.ModelViewSet):
     queryset = ComentarioProducto.objects.all()
@@ -183,7 +248,7 @@ class ComentarioProductoViewSet(viewsets.ModelViewSet):
         # Evitar duplicados por compra (si se proporciona orden)
         if orden_id:
             if ComentarioProducto.objects.filter(comprador=persona, producto_id=producto_id, orden_id=orden_id).exists():
-                from rest_framework.exceptions import ValidationError
+                
                 raise ValidationError("Ya has calificado este producto para esta compra.")
 
         comentario_obj = serializer.save(comprador=persona)
