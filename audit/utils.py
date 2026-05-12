@@ -2,14 +2,15 @@ from .models import RegistroAuditoria, LogError
 import json
 from django.core.serializers.json import DjangoJSONEncoder
 from .logic import obtener_identidad_usuario
+from ecommerce_konrad.messaging import kafka_service
+from .middleware import _thread_locals
 
 def registrar_evento_auditoria(instancia, accion, severidad='INFO', detalles=None):
     """
-    Función utilitaria para registrar un evento en la tabla de auditoría.
+    Registra un evento detallado enviándolo a Kafka y marcando la petición como auditada.
     """
     usuario_str = obtener_identidad_usuario()
     
-    # Intentar obtener el ID de la instancia
     try:
         id_entidad = instancia.pk
     except AttributeError:
@@ -24,24 +25,28 @@ def registrar_evento_auditoria(instancia, accion, severidad='INFO', detalles=Non
         except:
             detalles_json = {"error": "No se pudo serializar los detalles"}
 
-    RegistroAuditoria.objects.create(
-        entidad_afectada=entidad,
-        id_entidad=id_entidad,
-        accion=accion,
-        nivel_severidad=severidad,
-        usuario_responsable=usuario_str,
-        detalles_json=detalles_json
-    )
+    # --- LA MAGIA ---
+    # Marcamos que esta petición YA tiene un log detallado
+    _thread_locals.audit_completa = True
+
+    # Enviar a Kafka
+    kafka_service.publish_event('audit-logs', {
+        "entidad": entidad,
+        "id_entidad": id_entidad,
+        "accion": accion,
+        "severidad": severidad,
+        "username": usuario_str,
+        "detalles": detalles_json
+    })
 
 def registrar_error_tecnico(modulo, mensaje, stacktrace=None):
-    """
-    Registra un error técnico en el Log de Errores.
-    """
     usuario_str = obtener_identidad_usuario()
-
-    LogError.objects.create(
-        modulo=modulo,
-        mensaje_error=mensaje,
-        stacktrace=stacktrace,
-        usuario_afectado=usuario_str
-    )
+    
+    kafka_service.publish_event('audit-logs', {
+        "entidad": "LOG_ERROR",
+        "modulo": modulo,
+        "accion": mensaje,
+        "severidad": 'ERROR',
+        "username": usuario_str,
+        "stacktrace": stacktrace
+    })

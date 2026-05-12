@@ -1,5 +1,8 @@
 import threading
 from django.utils.functional import SimpleLazyObject
+# pyrefly: ignore [missing-import]
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from ecommerce_konrad.messaging import kafka_service
 
 _thread_locals = threading.local()
 
@@ -11,30 +14,49 @@ class AuditMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        # 1. Intentar obtener el usuario de la sesión estándar (Admin/Session)
+        # 1. Identificar al usuario
         user = getattr(request, 'user', None)
-        
-        # 2. Si es anónimo, intentar capturar el usuario desde el JWT (Frontend/API)
         if not user or user.is_anonymous:
-            # En Django, los headers vienen en request.META con el prefijo HTTP_
             header = request.META.get('HTTP_AUTHORIZATION')
             if header:
-                from rest_framework_simplejwt.authentication import JWTAuthentication
                 try:
-                    # Creamos un objeto de autenticación manual
                     auth_res = JWTAuthentication().authenticate(request)
                     if auth_res:
-                        user = auth_res[0] # Usuario autenticado vía Token
+                        user = auth_res[0]
                 except Exception:
                     pass
 
-        # 3. Guardar en el hilo local para que esté disponible en signals y utilidades
         _thread_locals.user = user
         
+        audit_data = {
+            "user_id": user.id if user and user.is_authenticated else None,
+            "username": user.username if user and user.is_authenticated else "Anónimo",
+            "path": request.path,
+            "method": request.method,
+            "ip": request.META.get('REMOTE_ADDR', '127.0.0.1'),
+        }
+
         try:
             response = self.get_response(request)
+            
+            # 2. FILTRADO INTELIGENTE
+            metodos_auditables = ['POST', 'PUT', 'PATCH', 'DELETE']
+            rutas_ignoradas = ['/admin/', '/api/audit/']
+            es_ruta_ignorada = any(request.path.startswith(ruta) for ruta in rutas_ignoradas)
+            
+            # --- LA MAGIA ---
+            # Si la función utilitaria ya registró el evento, saltamos este paso
+            ha_sido_auditado = getattr(_thread_locals, 'audit_completa', False)
+
+            if request.method in metodos_auditables and not es_ruta_ignorada and not ha_sido_auditado:
+                audit_data["status_code"] = response.status_code
+                kafka_service.publish_event('audit-logs', audit_data)
+            
             return response
+            
         finally:
-            # Limpiar al finalizar la petición
+            # LIMPIAR SIEMPRE AMBAS BANDERAS
+            if hasattr(_thread_locals, 'audit_completa'):
+                del _thread_locals.audit_completa
             if hasattr(_thread_locals, 'user'):
-                _thread_locals.user = None
+                del _thread_locals.user

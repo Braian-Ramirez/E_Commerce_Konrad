@@ -1,4 +1,5 @@
 import json
+# pyrefly: ignore [missing-import]
 from confluent_kafka import Producer
 import socket
 
