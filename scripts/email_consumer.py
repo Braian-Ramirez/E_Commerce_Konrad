@@ -2,6 +2,7 @@ import json
 import os
 import sys
 import django
+# pyrefly: ignore [missing-import]
 from confluent_kafka import Consumer, KafkaError
 
 # Configurar Django para poder usar send_mail
