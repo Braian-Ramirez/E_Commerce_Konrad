@@ -7,6 +7,7 @@ from django.utils.timezone import localtime
 from .models import CorreoEnviado
 from vendors.models import Persona
 from .models import Notificacion
+from ecommerce_konrad.messaging import kafka_service
 
 def _registrar_auditoria_correo(persona, asunto, cuerpo):
     """
@@ -27,15 +28,27 @@ def _registrar_auditoria_correo(persona, asunto, cuerpo):
     return timestamp_hash
 
 
+#def _enviar_safe(asunto, mensaje, destinatario):
+ #   """
+  #  Envío seguro: si el SMTP falla, NO interrumpe el flujo HTTP principal.
+   # El registro de auditoría ya fue guardado antes de llamar a esta función.
+    #"""
+    #try:
+     #   send_mail(asunto, mensaje, settings.DEFAULT_FROM_EMAIL, [destinatario])
+    #except Exception as e:
+        #print(f"[NOTIFICACIONES] Error al enviar correo a {destinatario}: {e}")
+
 def _enviar_safe(asunto, mensaje, destinatario):
     """
-    Envío seguro: si el SMTP falla, NO interrumpe el flujo HTTP principal.
-    El registro de auditoría ya fue guardado antes de llamar a esta función.
+    En lugar de enviar el correo directamente, enviamos los datos a Kafka.
     """
-    try:
-        send_mail(asunto, mensaje, settings.DEFAULT_FROM_EMAIL, [destinatario])
-    except Exception as e:
-        print(f"[NOTIFICACIONES] Error al enviar correo a {destinatario}: {e}")
+    event_data = {
+        "asunto": asunto,
+        "mensaje": mensaje,
+        "destinatario": destinatario
+    }
+    # Publicamos en el topic 'notificaciones-email'
+    kafka_service.publish_event('notificaciones-email', event_data)
 
 
 def enviar_correo_bienvenida_vendedor(persona, password):
