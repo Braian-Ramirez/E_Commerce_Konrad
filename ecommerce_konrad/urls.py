@@ -82,6 +82,14 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
                 pass
                 
         data['user'] = user_data
+
+        # RNF Auditoría: Informar al middleware quién es el usuario que acaba de loguearse
+        try:
+            from audit.middleware import _thread_locals
+            _thread_locals.user = user
+        except ImportError:
+            pass
+
         return data
 
 class CustomTokenObtainPairView(TokenObtainPairView):

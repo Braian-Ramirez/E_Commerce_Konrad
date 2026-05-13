@@ -177,8 +177,8 @@ def enviar_notificacion_venta_vendedor(vendedor_persona, orden, detalles_vendedo
     for d in detalles_vendedor:
         productos_texto += f"- {d.producto.nombre} x {d.cantidad}\n"
     
-    direccion_base = orden.comprador.direccion if orden.comprador else ""
-    ciudad_base = orden.comprador.ciudad if orden.comprador else ""
+    direccion_base = orden.direccion_envio if orden.direccion_envio else (orden.comprador.direccion if orden.comprador else "")
+    ciudad_base = orden.ciudad_envio if orden.ciudad_envio else (orden.comprador.ciudad if orden.comprador else "")
     
     if orden.tipo_entrega == 'DOMICILIO':
         direccion = f"{direccion_base}, {ciudad_base}".strip(', ')

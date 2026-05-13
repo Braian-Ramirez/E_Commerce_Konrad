@@ -15,8 +15,9 @@ from audit.models import RegistroAuditoria
 def start_audit_consumer():
     # Configuración del consumidor
     conf = {
-        'bootstrap.servers': 'localhost:9092',
-        'group.id': 'audit-group-v5', # ID de grupo nuevo para procesar todo
+        # RNF #7: Computación distribuida — los 3 brokers del clúster
+        'bootstrap.servers': 'localhost:9092,localhost:9093,localhost:9094',
+        'group.id': 'audit-group-v5',
         'auto.offset.reset': 'earliest'
     }
 
@@ -30,14 +31,23 @@ def start_audit_consumer():
             msg = consumer.poll(1.0)
             if msg is None: 
                 continue
+
+            if msg.error():
+                # RNF #7: Ignorar errores de "Topic no disponible" mientras el clúster arranca
+                # El consumidor se reconectará solo cuando el topic sea creado por kafka-setup
+                continue
             
             val = msg.value()
-            if not val: 
+            if not val:
                 continue
-                
+
+            # Defensa extra: ignorar mensajes con payload vacío o en blanco
+            decoded = val.decode('utf-8').strip()
+            if not decoded:
+                continue
+
             try:
-                # Decodificar el JSON enviado por el productor
-                data = json.loads(val.decode('utf-8'))
+                data = json.loads(decoded)
                 
                 # --- MAPEO INTELIGENTE ---
                 # Prioriza datos específicos (de vistas) sobre genéricos (del middleware)
@@ -65,6 +75,7 @@ def start_audit_consumer():
 
             except Exception as e:
                 print(f"[KAFKA] Error procesando mensaje: {e}")
+                print(f"[KAFKA] Payload malformado: '{decoded}'")
                 continue
 
     except KeyboardInterrupt:

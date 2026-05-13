@@ -15,7 +15,8 @@ from django.conf import settings
 
 def start_consumer():
     conf = {
-        'bootstrap.servers': 'localhost:9092',
+        # RNF #7: Computación distribuida — los 3 brokers del clúster
+        'bootstrap.servers': 'localhost:9092,localhost:9093,localhost:9094',
         'group.id': 'email-workers',
         'auto.offset.reset': 'earliest'
     }
@@ -34,8 +35,20 @@ def start_consumer():
                 continue
 
             # Procesar el mensaje
-            data = json.loads(msg.value().decode('utf-8'))
-            print(f"Recibido evento para: {data['destinatario']}")
+            val = msg.value()
+            if not val:
+                continue
+
+            decoded = val.decode('utf-8').strip()
+            if not decoded:
+                continue
+
+            try:
+                data = json.loads(decoded)
+                print(f"Recibido evento para: {data['destinatario']}")
+            except (json.JSONDecodeError, KeyError) as e:
+                print(f"[KAFKA] Error decodificando mensaje: {e}")
+                continue
 
             # Realizar el envío REAL del correo
             try:

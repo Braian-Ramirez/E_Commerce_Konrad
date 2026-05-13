@@ -23,6 +23,10 @@ class Orden(models.Model):
     tipo_entrega = models.CharField(max_length=20, choices=TIPO_ENTREGA_CHOICES, default='RECOGER')
     costo_envio = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     
+    # RNF: Datos de envío (pueden ser distintos al perfil del usuario)
+    ciudad_envio = models.CharField(max_length=100, blank=True, null=True)
+    direccion_envio = models.CharField(max_length=255, blank=True, null=True)
+    
     # Datos auditoria 
     total_iva = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
     total_comision = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)

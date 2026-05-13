@@ -1,3 +1,4 @@
+# pyrefly: ignore [missing-import]
 from rest_framework import serializers
 from .models import Orden, DetalleOrden, CalificacionProducto
 from payments.serializers import PagoOrdenSerializer
@@ -69,7 +70,7 @@ class OrdenSerializer(serializers.ModelSerializer):
         model = Orden
         fields = [
             'id', 'comprador', 'comprador_nombre', 'fecha', 'estado', 
-            'tipo_entrega', 'costo_envio', 'total_iva', 
+            'tipo_entrega', 'ciudad_envio', 'direccion_envio', 'costo_envio', 'total_iva', 
             'total_comision', 'total_final', 'detalles', 'pagos'
         ]
         # comprador se inyecta desde perform_create; no es necesario en el body del request
