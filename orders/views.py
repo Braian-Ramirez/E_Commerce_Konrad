@@ -91,8 +91,8 @@ class OrdenViewSet(viewsets.ModelViewSet):
         # Seleccionamos dinámicamente el cálculo del envío basándonos 
         # en la estrategia elegida por el comprador (DOMICILIO vs RECOGER).
         if orden.tipo_entrega == 'DOMICILIO':
-            # El comprador hereda los datos de Persona (donde está su ciudad)
-            ciudad_comprador = orden.comprador.ciudad
+            # RNF: Priorizar la ciudad elegida en el carrito para el cálculo del envío
+            ciudad_comprador = orden.ciudad_envio if orden.ciudad_envio else (orden.comprador.ciudad if orden.comprador else "")
             
             # Buscamos el rango donde cae el peso_total para esa ciudad
             tarifa = CostoDomicilio.objects.filter(

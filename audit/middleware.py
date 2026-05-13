@@ -49,6 +49,19 @@ class AuditMiddleware:
             ha_sido_auditado = getattr(_thread_locals, 'audit_completa', False)
 
             if request.method in metodos_auditables and not es_ruta_ignorada and not ha_sido_auditado:
+                # REFRESH: Si el usuario era anónimo pero la petición lo autenticó (como en el Login)
+                # o si el middleware de DRF ya procesó el token.
+                if audit_data["username"] == "Anónimo":
+                    # Intentar obtener el usuario de thread_locals (actualizado por el serializer de login)
+                    updated_user = getattr(_thread_locals, 'user', None)
+                    if not updated_user or updated_user.is_anonymous:
+                        # Fallback a request.user por si acaso
+                        updated_user = getattr(request, 'user', None)
+                        
+                    if updated_user and updated_user.is_authenticated:
+                        audit_data["user_id"] = updated_user.id
+                        audit_data["username"] = updated_user.username
+
                 audit_data["status_code"] = response.status_code
                 kafka_service.publish_event('audit-logs', audit_data)
             

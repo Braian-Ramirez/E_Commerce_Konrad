@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 import os 
 from pathlib import Path
+# pyrefly: ignore [missing-import]
 from decouple import config
 from datetime import timedelta
 
@@ -31,7 +32,28 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
+
+# ============================================================
+# RNF SEGURIDAD #2: Toda comunicación asegurada con HTTPS
+# ============================================================
+# En producción (DEBUG=False), Django redirige todo tráfico HTTP → HTTPS
+# y activa cabeceras de seguridad estándar.
+if not DEBUG:
+    # Redirige automáticamente cualquier petición HTTP a HTTPS
+    SECURE_SSL_REDIRECT = True
+    # Indica al navegador que solo use HTTPS durante 1 año
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    # Las cookies de sesión y CSRF solo se envían por HTTPS
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    # Protección contra contenido mixto (HTTP dentro de HTTPS)
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+else:
+    # En desarrollo local se permite HTTP para facilitar el trabajo
+    SECURE_SSL_REDIRECT = False
 
 
 # Application definition
@@ -102,25 +124,36 @@ DATABASES = {
         'PASSWORD': config('DB_PASSWORD'),
         'HOST': config('DB_HOST', default='localhost'),
         'PORT': config('DB_PORT', default='5432'),
+        # RNF Seguridad #2: conexión cifrada con la BD en producción
+        'OPTIONS': {
+            'sslmode': config('DB_SSL_MODE', default='prefer'),
+        },
     }
 }
 
 
-# Password validation
+# Password validation — RNF Seguridad #3
+# La contraseña debe tener mínimo 8 caracteres con al menos
+# una mayúscula, una minúscula y un número.
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
+        # RNF #3: Validador personalizado (mayúscula + minúscula + número + 8 chars)
+        'NAME': 'ecommerce_konrad.validators.RNFPasswordValidator',
+    },
+    {
+        # No puede ser similar al nombre de usuario o email
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
     },
     {
+        # Mínimo 8 caracteres (refuerza el RNF #3)
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {'min_length': 8},
     },
     {
+        # No puede ser una contraseña común (ej: "password123")
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
 
@@ -173,7 +206,15 @@ EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
-CORS_ALLOW_ALL_ORIGINS = True
+# RNF Seguridad #2: restringir orígenes CORS — en producción usar dominio real
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True  # Solo en desarrollo
+else:
+    CORS_ALLOW_ALL_ORIGINS = False
+    CORS_ALLOWED_ORIGINS = config(
+        'CORS_ALLOWED_ORIGINS',
+        default='http://localhost:3000'
+    ).split(',')
 
 # CONFIGURACIÓN DE LOGGING PARA CAPTURAR ERRORES EN LA BASE DE DATOS
 LOGGING = {
@@ -210,4 +251,4 @@ LOGGING = {
             'propagate': True,
         },
     },
-}
+}

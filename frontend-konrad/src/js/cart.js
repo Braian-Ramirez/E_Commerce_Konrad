@@ -616,12 +616,18 @@ window.procesarPagoFinal = async (type, modalOutCardNum = null, modalOutRefConsi
     let ordenId = null;
     try {
         const delivery = document.getElementById('deliveryType')?.value || 'RECOGER';
-        console.log("[CHECKOUT] Creando orden para:", userData.email, "| Entrega:", delivery);
+        const city = document.getElementById('shipCity')?.value || '';
+        const addr = document.getElementById('shipAddress')?.value || '';
+        console.log("[CHECKOUT] Creando orden para:", userData.email, "| Entrega:", delivery, "| Ciudad:", city);
 
         const resO = await fetch(API_ORDERS, {
             method: "POST", signal: AbortSignal.timeout(4000),
             headers: { "Content-Type": "application/json", "Authorization": `Bearer ${currentToken}` },
-            body: JSON.stringify({ tipo_entrega: delivery })
+            body: JSON.stringify({ 
+                tipo_entrega: delivery,
+                ciudad_envio: city,
+                direccion_envio: addr
+            })
         });
 
         console.log("[CHECKOUT] POST /ordenes/ →", resO.status);
