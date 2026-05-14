@@ -1,0 +1,14 @@
+Hola {{ nombre }},
+
+Te informamos que tu suscripción a Comercial Konrad ha vencido el día de hoy.
+
+Debido a esto, el estado de tu cuenta ha pasado a "En Mora". Para evitar la suspensión de tus servicios y la visibilidad de tus productos, te recordamos que cuentas con un plazo máximo de 30 días calendario para realizar el pago correspondiente.
+
+Si el pago no se registra dentro de este periodo de gracia, tu suscripción será cancelada definitivamente.
+
+Puedes realizar tu pago desde el panel de vendedor en la sección de suscripciones.
+
+Si ya realizaste el pago, por favor ignora este mensaje mientras se procesa la transacción.
+
+Atentamente,
+El equipo de Comercial Konrad
