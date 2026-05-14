@@ -29,12 +29,19 @@ class KpiProductoMasVendidoView(APIView):
     Solo lectura (CQRS: Query).
     """
     def get(self, request):
-        dias = int(request.query_params.get('dias', 30))
-        hace_un_mes = timezone.now() - timedelta(days=dias)
+        fecha_desde = request.query_params.get('fecha_desde')
+        fecha_hasta = request.query_params.get('fecha_hasta')
+        
+        if fecha_desde and fecha_hasta:
+            filtros = {'orden__fecha__date__range': [fecha_desde, fecha_hasta]}
+        else:
+            dias = int(request.query_params.get('dias') or 30)
+            fecha_inicio = timezone.now() - timedelta(days=dias)
+            filtros = {'orden__fecha__gte': fecha_inicio}
 
         producto = (
             DetalleOrden.objects
-            .filter(orden__fecha__gte=hace_un_mes, orden__estado='PAGADA')
+            .filter(orden__estado='PAGADA', **filtros)
             .values('producto__nombre')
             .annotate(unidades_vendidas=Count('producto'))
             .order_by('-unidades_vendidas')
@@ -47,7 +54,7 @@ class KpiProductoMasVendidoView(APIView):
         return Response({
             "kpi": "Producto más vendido (último mes)",
             "producto": producto['producto__nombre'],
-            "unidades_vendidas": producto['total_vendido']
+            "unidades_vendidas": producto['unidades_vendidas']
         })
 
 # Vista KPI categoría más consultada
@@ -56,12 +63,19 @@ class KpiCategoriaMasConsultadaView(APIView):
     KPI 2: Categoría con más consultas en la última semana.
     """
     def get(self, request):
-        dias = int(request.query_params.get('dias', 7))
-        fecha_inicio = timezone.now() - timedelta(days=dias)
+        fecha_desde = request.query_params.get('fecha_desde')
+        fecha_hasta = request.query_params.get('fecha_hasta')
+        
+        if fecha_desde and fecha_hasta:
+            filtros = {'fecha_visita__date__range': [fecha_desde, fecha_hasta]}
+        else:
+            dias = int(request.query_params.get('dias') or 7)
+            fecha_inicio = timezone.now() - timedelta(days=dias)
+            filtros = {'fecha_visita__gte': fecha_inicio}
         
         categorias = (
             LogVisitaProducto.objects
-            .filter(fecha_visita__gte=fecha_inicio)
+            .filter(**filtros)
             .values('producto__categoria__nombre')
             .annotate(total_visitas=Count('id'))
             .order_by('-total_visitas')
@@ -85,7 +99,15 @@ class KpiSuscripcionesPorSemestreView(APIView):
     Solo lectura (CQRS: Query).
     """
     def get(self, request):
-        suscripciones = Suscripcion.objects.values('tipo').annotate(
+        fecha_desde = request.query_params.get('fecha_desde')
+        fecha_hasta = request.query_params.get('fecha_hasta')
+        
+        if fecha_desde and fecha_hasta:
+            filtros = {'fecha_inicio__range': [fecha_desde, fecha_hasta]}
+        else:
+            filtros = {}
+            
+        suscripciones = Suscripcion.objects.filter(**filtros).values('tipo').annotate(
             total=Count('id')
         ).order_by('-total')
 
@@ -100,12 +122,19 @@ class KpiProductosTendenciaView(APIView):
     KPI 4: Top 5 productos más consultados para detección de tendencias.
     """
     def get(self, request):
-        dias = int(request.query_params.get('dias', 7))
-        fecha_inicio = timezone.now() - timedelta(days=dias)
+        fecha_desde = request.query_params.get('fecha_desde')
+        fecha_hasta = request.query_params.get('fecha_hasta')
+        
+        if fecha_desde and fecha_hasta:
+            filtros = {'fecha_visita__date__range': [fecha_desde, fecha_hasta]}
+        else:
+            dias = int(request.query_params.get('dias') or 7)
+            fecha_inicio = timezone.now() - timedelta(days=dias)
+            filtros = {'fecha_visita__gte': fecha_inicio}
         
         productos = (
             LogVisitaProducto.objects
-            .filter(fecha_visita__gte=fecha_inicio)
+            .filter(**filtros)
             .values('producto', 'producto__nombre', 'producto__categoria__nombre')
             .annotate(total_visitas=Count('id'))
             .order_by('-total_visitas')[:5]  # <-- Solo el Top 5
@@ -127,7 +156,7 @@ class KpiVendedorEstrellaView(APIView):
         if fecha_desde and fecha_hasta:
             filtros = {'orden__fecha__date__range': [fecha_desde, fecha_hasta]}
         else:
-            dias = int(request.query_params.get('dias', 30))
+            dias = int(request.query_params.get('dias') or 30)
             fecha_inicio = timezone.now() - timedelta(days=dias)
             filtros = {'orden__fecha__gte': fecha_inicio}
 
@@ -161,7 +190,7 @@ class KpiTicketPromedioView(APIView):
         if fecha_desde and fecha_hasta:
             filtros = {'orden__fecha__date__range': [fecha_desde, fecha_hasta]}
         else:
-            dias = int(request.query_params.get('dias', 30))
+            dias = int(request.query_params.get('dias') or 30)
             fecha_inicio = timezone.now() - timedelta(days=dias)
             filtros = {'orden__fecha__gte': fecha_inicio}
             
@@ -186,7 +215,9 @@ class KpiConversionComercialView(APIView):
         if fecha_desde and fecha_hasta:
             filtros = {'fecha_creacion__date__range': [fecha_desde, fecha_hasta]}
         else:
-            filtros = {}
+            dias = int(request.query_params.get('dias') or 30)
+            fecha_inicio = timezone.now() - timedelta(days=dias)
+            filtros = {'fecha_creacion__gte': fecha_inicio}
 
         total = Solicitud.objects.filter(**filtros).count()
         aprobadas = Solicitud.objects.filter(estado='APROBADA', **filtros).count()
@@ -212,7 +243,7 @@ class KpiIngresosTotalesView(APIView):
             f_orden = {'fecha__date__range': [fecha_desde, fecha_hasta]}
             f_suscrip = {'fecha_inicio__range': [fecha_desde, fecha_hasta]}
         else:
-            dias = int(request.query_params.get('dias', 30))
+            dias = int(request.query_params.get('dias') or 30)
             fecha_inicio = timezone.now() - timedelta(days=dias)
             f_detalle = {'orden__fecha__gte': fecha_inicio}
             f_orden = {'fecha__gte': fecha_inicio}

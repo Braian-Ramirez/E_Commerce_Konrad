@@ -13,15 +13,40 @@
 <body>
 
     <aside class="sidebar">
-        <div class="sidebar-title">Comercial<span style="color: #22c55e;">Konrad</span></div>
+        <div class="sidebar-brand">
+            🛍️Comercial<span class="brand-accent">Konrad</span>
+        </div>
+
+        <div class="sidebar-section-label">PANEL PRINCIPAL</div>
         <nav class="nav-menu">
-            <a href="director-dashboard.html" class="nav-item">💼 Solicitudes Pendientes</a>
-            <a href="director-historial.html" class="nav-item active">📜 Historial Solicitudes</a>
-            <a href="director-bam.html" class="nav-item">📊 Dashboard BAM</a>
-            <a href="#" class="nav-item">👤 Mi Perfil</a>
+            <a href="director-dashboard.html" class="sidebar-item" id="nav-solicitudes">
+                <span class="nav-icon">💼</span>
+                <span>Solicitudes Pendientes</span>
+            </a>
+            <a href="director-historial.html" class="sidebar-item active" id="nav-historial">
+                <span class="nav-icon">📜</span>
+                <span>Historial de Solicitudes</span>
+            </a>
         </nav>
-        <div style="margin-top: auto;">
-            <button onclick="handleLogout()" class="nav-item" style="background:none; border:none; color: #ef4444; width: 100%; text-align: left; cursor: pointer; font-family: inherit;">
+
+        <div class="sidebar-section-label" style="margin-top:24px;">ANALÍTICA</div>
+        <nav class="nav-menu">
+            <a href="director-bam.html" class="sidebar-item" id="nav-bam">
+                <span class="nav-icon">📊</span>
+                <span>Dashboard BAM</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-section-label" style="margin-top:24px;">CUENTA</div>
+        <nav class="nav-menu">
+            <a href="director-profile.html" class="sidebar-item" id="nav-perfil">
+                <span class="nav-icon">👤</span>
+                <span>Mi Perfil</span>
+            </a>
+        </nav>
+
+        <div style="margin-top: auto; padding-top: 20px;">
+            <button onclick="handleLogout()" class="btn-logout">
                 🚪 Cerrar Sesión
             </button>
         </div>
@@ -30,18 +55,22 @@
     <main class="main-layout">
         <header class="header-top">
             <h2 style="font-weight: 800; margin: 0;">HISTORIAL DE SOLICITUDES</h2>
-            
+
             <div style="display: flex; align-items: center; gap: 20px;">
                 <!-- CAMPANA DE NOTIFICACIONES -->
                 <div class="notification-container" style="position: relative;">
-                    <button id="btnNotificaciones" class="bell-btn" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; position: relative;">
+                    <button id="btnNotificaciones" class="bell-btn"
+                        style="background: none; border: none; font-size: 1.5rem; cursor: pointer; position: relative;">
                         🔔
-                        <span id="notifCount" class="badge-count" style="display: none; position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; font-size: 0.6rem; padding: 2px 6px; border-radius: 10px; border: 2px solid #0c0a09; font-weight: 800;">0</span>
+                        <span id="notifCount" class="badge-count"
+                            style="display: none; position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; font-size: 0.6rem; padding: 2px 6px; border-radius: 10px; border: 2px solid #0c0a09; font-weight: 800;">0</span>
                     </button>
-                    
+
                     <!-- DROPDOWN DE NOTIFICACIONES -->
-                    <div id="notifDropdown" class="notif-dropdown" style="display: none; position: absolute; top: 40px; right: 0; width: 320px; background: #141210; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; z-index: 1000; box-shadow: 0 10px 25px rgba(0,0,0,0.5); overflow: hidden;">
-                        <div style="padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); font-weight: 800; font-size: 0.9rem; display: flex; justify-content: space-between;">
+                    <div id="notifDropdown" class="notif-dropdown"
+                        style="display: none; position: absolute; top: 40px; right: 0; width: 320px; background: #141210; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; z-index: 1000; box-shadow: 0 10px 25px rgba(0,0,0,0.5); overflow: hidden;">
+                        <div
+                            style="padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); font-weight: 800; font-size: 0.9rem; display: flex; justify-content: space-between;">
                             <span>Notificaciones</span>
                         </div>
                         <div id="notifList" style="max-height: 350px; overflow-y: auto;">
