@@ -112,6 +112,7 @@ urlpatterns = [
     path('api/v1/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'), #Ruta refresh token
     path('api/v1/directors/', include('directors.urls')),
     path('api/v1/audit/', include('audit.urls')),
+    path('api/v1/bam/', include('bam.urls')),
     
     # Conectamos nuestras URLs falsas:
     path('mocks/', include('external_mocks.urls')),
