@@ -1,4 +1,3 @@
-version: '3.9'
 
 # RNF #7: Computación Distribuida
 # Clúster Kafka con 3 brokers + ZooKeeper.

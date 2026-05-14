@@ -268,3 +268,72 @@ def enviar_correo_promedio_bajo_vendedor(persona, promedio):
     )
 
     _enviar_safe(asunto, mensaje, persona.email)
+
+def enviar_notificacion_vencimiento_suscripcion(vendedor_persona, fecha_vencimiento):
+    """
+    Notifica al vendedor que su suscripción vencerá en una semana.
+    Registra auditoría y crea notificación interna.
+    """
+    asunto = '⚠️ Aviso: Tu suscripción a Comercial Konrad vence pronto'
+    
+    context = {
+        'nombre': vendedor_persona.nombre,
+        'fecha_vencimiento': fecha_vencimiento.strftime("%d/%m/%Y"),
+    }
+    
+    mensaje = render_to_string('notifications/emails/vencimiento_suscripcion.txt', context)
+    
+    _registrar_auditoria_correo(vendedor_persona, asunto, mensaje)
+    
+    # Crear notificación interna
+    crear_notificacion(
+        vendedor_persona,
+        'SISTEMA',
+        f'Tu suscripción vence el {fecha_vencimiento.strftime("%d/%m/%Y")}. ¡Recuerda renovar para seguir vendiendo!'
+    )
+    
+    _enviar_safe(asunto, mensaje, vendedor_persona.email)
+
+def enviar_notificacion_suscripcion_en_mora(vendedor_persona):
+    """
+    Notifica al vendedor que su suscripción ha vencido y está en mora.
+    """
+    asunto = '⚠️ Importante: Tu suscripción ha vencido - Comercial Konrad'
+    
+    context = {
+        'nombre': vendedor_persona.nombre,
+    }
+    
+    mensaje = render_to_string('notifications/emails/suscripcion_en_mora.txt', context)
+    
+    _registrar_auditoria_correo(vendedor_persona, asunto, mensaje)
+    
+    crear_notificacion(
+        vendedor_persona,
+        'SISTEMA',
+        'Tu suscripción ha vencido. Tienes 30 días para regularizar tu pago antes de la cancelación definitiva.'
+    )
+    
+    _enviar_safe(asunto, mensaje, vendedor_persona.email)
+
+def enviar_notificacion_suscripcion_cancelada(vendedor_persona):
+    """
+    Notifica al vendedor que su suscripción ha sido cancelada por falta de pago.
+    """
+    asunto = '🚫 Cuenta Cancelada: Suscripción Vencida - Comercial Konrad'
+    
+    context = {
+        'nombre': vendedor_persona.nombre,
+    }
+    
+    mensaje = render_to_string('notifications/emails/suscripcion_cancelada.txt', context)
+    
+    _registrar_auditoria_correo(vendedor_persona, asunto, mensaje)
+    
+    crear_notificacion(
+        vendedor_persona,
+        'SISTEMA',
+        'Tu suscripción ha sido cancelada definitivamente por falta de pago.'
+    )
+    
+    _enviar_safe(asunto, mensaje, vendedor_persona.email)

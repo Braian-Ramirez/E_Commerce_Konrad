@@ -1,0 +1,12 @@
+Hola {{ nombre }},
+
+Lamentamos informarte que tu suscripción a Comercial Konrad ha sido cancelada definitivamente debido a que el periodo de gracia de 30 días para el pago ha expirado.
+
+A partir de este momento, tus productos ya no serán visibles en la plataforma y el acceso a las funciones de vendedor ha sido restringido.
+
+Si deseas volver a vender con nosotros, deberás iniciar un nuevo proceso de activación de cuenta o contactar con nuestro equipo de soporte.
+
+Gracias por el tiempo que compartiste con nosotros.
+
+Atentamente,
+El equipo de Comercial Konrad

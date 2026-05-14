@@ -1,0 +1,14 @@
+Hola {{ nombre }},
+
+Esperamos que estés teniendo un excelente día en Comercial Konrad.
+
+Te escribimos para recordarte que tu suscripción a nuestra plataforma está próxima a vencer el día {{ fecha_vencimiento }}.
+
+Para evitar interrupciones en la visibilidad de tus productos y seguir disfrutando de todas las ventajas de vender con nosotros, te invitamos a realizar la renovación de tu plan desde tu panel de vendedor.
+
+Si ya realizaste el proceso de renovación, por favor ignora este mensaje.
+
+¡Gracias por ser parte de nuestra comunidad!
+
+Atentamente,
+El equipo de Comercial Konrad
